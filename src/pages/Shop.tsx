@@ -1,0 +1,206 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { Layout } from '../components/Layout';
+import { useCart } from '../context/CartContext';
+import { Search, Filter, ArrowRight } from 'lucide-react';
+import { Reveal } from '../components/Reveal';
+import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
+import { fetchProducts, fetchCategories, Product, Category } from '../services/productService';
+
+export default function Shop() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { addToCart } = useCart();
+  const [isLoading, setIsLoading] = useState(true);
+
+  const categoryFilter = searchParams.get('category') || '';
+  const searchQuery = searchParams.get('search') || '';
+  const sortOption = searchParams.get('sort') || '';
+
+  useEffect(() => {
+    // Fetch categories
+    fetchCategories().then(data => setCategories(data));
+  }, []);
+
+  useEffect(() => {
+    // Fetch products with filters
+    setIsLoading(true);
+    fetchProducts(categoryFilter, searchQuery, sortOption)
+      .then(data => {
+        setProducts(data);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoading(false);
+      });
+  }, [categoryFilter, searchQuery, sortOption]);
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const query = formData.get('search') as string;
+    setSearchParams(prev => {
+      prev.set('search', query);
+      return prev;
+    });
+  };
+
+  const handleCategoryChange = (slug: string) => {
+    setSearchParams(prev => {
+      if (slug) prev.set('category', slug);
+      else prev.delete('category');
+      return prev;
+    });
+  };
+
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSearchParams(prev => {
+      prev.set('sort', e.target.value);
+      return prev;
+    });
+  };
+
+  return (
+    <Layout>
+      <div className="flex flex-col md:flex-row gap-8">
+        {/* Sidebar Filters */}
+        <aside className="w-full md:w-64 flex-shrink-0">
+          <Reveal width="100%">
+            <div className="glass-panel p-6 rounded-xl sticky top-24">
+              <div className="flex items-center gap-2 mb-4 text-white font-bold">
+                <Filter className="h-5 w-5 text-electric-blue" />
+                <h2>Filters</h2>
+              </div>
+              
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Categories</h3>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="category" 
+                      checked={categoryFilter === ''}
+                      onChange={() => handleCategoryChange('')}
+                      className="text-electric-blue focus:ring-electric-blue bg-white/5 border-white/10"
+                    />
+                    <span className={categoryFilter === '' ? 'font-medium text-white' : 'text-slate-400'}>All Products</span>
+                  </label>
+                  {categories.map(cat => (
+                    <label key={cat.id} className="flex items-center space-x-2 cursor-pointer">
+                      <input 
+                        type="radio" 
+                        name="category" 
+                        checked={categoryFilter === cat.slug}
+                        onChange={() => handleCategoryChange(cat.slug)}
+                        className="text-electric-blue focus:ring-electric-blue bg-white/5 border-white/10"
+                      />
+                      <span className={categoryFilter === cat.slug ? 'font-medium text-white' : 'text-slate-400'}>{cat.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </aside>
+
+        {/* Main Content */}
+        <div className="flex-grow">
+          <Reveal width="100%" delay={0.2}>
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
+              <form onSubmit={handleSearch} className="relative w-full sm:w-96">
+                <input 
+                  type="text" 
+                  name="search" 
+                  defaultValue={searchQuery}
+                  placeholder="Search products..." 
+                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent placeholder-slate-500"
+                />
+                <Search className="absolute left-3 top-2.5 h-5 w-5 text-slate-500" />
+              </form>
+              
+              <select 
+                value={sortOption} 
+                onChange={handleSortChange}
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-electric-blue"
+              >
+                <option value="">Newest Arrivals</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+              </select>
+            </div>
+
+            {/* Product Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map(i => (
+                  <div key={i} className="glass-card h-96 rounded-xl animate-pulse"></div>
+                ))}
+              </div>
+            ) : products.length > 0 ? (
+              <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.08}>
+                {products.map(product => (
+                  <StaggerItem key={product.id}>
+                    <div 
+                      className="glass-card rounded-xl overflow-hidden flex flex-col h-full group"
+                    >
+                      <Link to={`/product/${product.slug}`} className="block relative h-48 bg-white/5 overflow-hidden">
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                          <span className="btn-glow transform scale-90 group-hover:scale-100 transition-transform">View Details</span>
+                        </div>
+                      </Link>
+                      <div className="p-4 flex flex-col flex-grow">
+                        <div className="text-xs text-electric-blue font-semibold mb-1 uppercase tracking-wide">{product.category_name}</div>
+                        <Link to={`/product/${product.slug}`} className="text-lg font-bold text-white mb-2 hover:text-electric-blue line-clamp-2 transition-colors">
+                          {product.name}
+                        </Link>
+                        <p className="text-slate-400 text-sm mb-4 line-clamp-2 flex-grow">{product.description}</p>
+                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+                          <span className="text-xl font-bold text-white">₹{product.price.toFixed(2)}</span>
+                          <Link 
+                            to={`/product/${product.slug}`}
+                            className="text-sm text-electric-blue hover:text-blue-400 font-medium flex items-center group-hover:translate-x-1 transition-transform"
+                          >
+                            Buy Now <ArrowRight className="ml-1 w-4 h-4" />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
+            ) : (
+              <Reveal duration={0.4}>
+                <div className="text-center py-20 glass-panel rounded-2xl">
+                  <div className="bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+                    <Search className="text-slate-500 h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">No products found</h3>
+                  <p className="text-slate-400 max-w-md mx-auto">
+                    We couldn't find any products matching your search. Try adjusting your filters or search term.
+                  </p>
+                  <button 
+                    onClick={() => {
+                      setSearchParams({});
+                    }}
+                    className="mt-6 text-electric-blue hover:text-blue-400 font-medium"
+                  >
+                    Clear all filters
+                  </button>
+                </div>
+              </Reveal>
+            )}
+          </Reveal>
+        </div>
+      </div>
+    </Layout>
+  );
+}
