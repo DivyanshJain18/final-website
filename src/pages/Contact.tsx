@@ -322,11 +322,10 @@ export default function Contact() {
                     </div>
 
                     <div>
-                      <label htmlFor="message" className="block text-sm font-medium text-slate-300 mb-1">Message</label>
+                      <label htmlFor="message" className="block text-sm font-medium text-slate-300 mb-1">Message (Optional)</label>
                       <textarea
                         id="message"
                         name="message"
-                        required
                         rows={5}
                         value={formData.message}
                         onChange={handleChange}

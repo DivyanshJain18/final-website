@@ -18,6 +18,7 @@ export default function ProductDetails() {
   const [quantity, setQuantity] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (slug) {
@@ -37,7 +38,14 @@ export default function ProductDetails() {
     e.preventDefault();
     if (!product) return;
 
+    // Validate that at least one of email or phone is provided
+    if (!clientEmail.trim() && !clientPhone.trim()) {
+      setError('Please provide either an email address or a phone number so we can reach you.');
+      return;
+    }
+
     setIsSubmitting(true);
+    setError('');
     try {
       await submitInquiry({
         productId: product.id,
@@ -50,9 +58,14 @@ export default function ProductDetails() {
       });
 
       setSubmitted(true);
-    } catch (error) {
-      console.error(error);
-      alert('Failed to submit inquiry. Please try again.');
+      setClientName('');
+      setClientEmail('');
+      setClientPhone('');
+      setMessage('');
+      setQuantity(1);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to submit inquiry. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -157,6 +170,12 @@ export default function ProductDetails() {
                   </p>
 
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    {error && (
+                      <div className="bg-red-900/20 text-red-400 p-4 rounded-lg text-sm border border-red-800">
+                        {error}
+                      </div>
+                    )}
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-slate-300 mb-1">Full Name *</label>
@@ -170,10 +189,9 @@ export default function ProductDetails() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-slate-300 mb-1">Email Address *</label>
+                        <label className="block text-sm font-medium text-slate-300 mb-1">Email Address</label>
                         <input
                           type="email"
-                          required
                           value={clientEmail}
                           onChange={(e) => setClientEmail(e.target.value)}
                           className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-electric-blue placeholder-slate-500"
@@ -206,7 +224,7 @@ export default function ProductDetails() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-slate-300 mb-1">Additional Message</label>
+                      <label className="block text-sm font-medium text-slate-300 mb-1">Additional Message (Optional)</label>
                       <textarea
                         rows={3}
                         value={message}
