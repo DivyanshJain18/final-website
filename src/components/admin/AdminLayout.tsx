@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { LayoutDashboard, Package, FolderTree, ShoppingCart, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, FolderTree, Layers, ShoppingCart, LogOut, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 const AdminLayout: React.FC = () => {
@@ -28,6 +28,7 @@ const AdminLayout: React.FC = () => {
     { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/admin/products', icon: Package, label: 'Products' },
     { path: '/admin/categories', icon: FolderTree, label: 'Categories' },
+    { path: '/admin/subcategories', icon: Layers, label: 'Subcategories' },
     { path: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
   ];
 

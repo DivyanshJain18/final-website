@@ -10,9 +10,11 @@ export interface Product {
   price: number;
   stock: number;
   category_id: string;
+  subcategory_id?: string;
   image_url: string;
   created_at?: string;
   category_name?: string;
+  subcategory_name?: string;
 }
 
 export interface Category {
@@ -22,7 +24,15 @@ export interface Category {
   description: string;
 }
 
-export const fetchProducts = async (categorySlug?: string, search?: string, sort?: string) => {
+export interface Subcategory {
+  id?: string;
+  name: string;
+  slug: string;
+  description: string;
+  category_id: string;
+}
+
+export const fetchProducts = async (categorySlug?: string, subcategorySlug?: string, search?: string, sort?: string) => {
   let q = collection(db, 'products');
   const queryConstraints: any[] = [];
 
@@ -33,6 +43,18 @@ export const fetchProducts = async (categorySlug?: string, search?: string, sort
     if (!catSnap.empty) {
       const catId = catSnap.docs[0].id;
       queryConstraints.push(where('category_id', '==', catId));
+    } else {
+      return [];
+    }
+  }
+
+  if (subcategorySlug) {
+    // We need to get the subcategory ID first
+    const subcatQuery = query(collection(db, 'subcategories'), where('slug', '==', subcategorySlug));
+    const subcatSnap = await getDocs(subcatQuery);
+    if (!subcatSnap.empty) {
+      const subcatId = subcatSnap.docs[0].id;
+      queryConstraints.push(where('subcategory_id', '==', subcatId));
     } else {
       return [];
     }
@@ -70,7 +92,18 @@ export const fetchProducts = async (categorySlug?: string, search?: string, sort
     return acc;
   }, {} as Record<string, string>);
 
-  return products.map(p => ({ ...p, category_name: categories[p.category_id] || 'Unknown' }));
+  // Fetch subcategory names
+  const subcatSnapshot = await getDocs(collection(db, 'subcategories'));
+  const subcategories = subcatSnapshot.docs.reduce((acc, doc) => {
+    acc[doc.id] = doc.data().name;
+    return acc;
+  }, {} as Record<string, string>);
+
+  return products.map(p => ({ 
+    ...p, 
+    category_name: categories[p.category_id] || 'Unknown',
+    subcategory_name: p.subcategory_id ? subcategories[p.subcategory_id] || 'Unknown' : undefined
+  }));
 };
 
 export const fetchProductBySlug = async (slug: string) => {
@@ -86,6 +119,13 @@ export const fetchProductBySlug = async (slug: string) => {
       product.category_name = catDoc.data().name;
     }
   }
+
+  if (product.subcategory_id) {
+    const subcatDoc = await getDoc(doc(db, 'subcategories', product.subcategory_id));
+    if (subcatDoc.exists()) {
+      product.subcategory_name = subcatDoc.data().name;
+    }
+  }
   
   return product;
 };
@@ -93,6 +133,11 @@ export const fetchProductBySlug = async (slug: string) => {
 export const fetchCategories = async () => {
   const snapshot = await getDocs(collection(db, 'categories'));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+};
+
+export const fetchSubcategories = async () => {
+  const snapshot = await getDocs(collection(db, 'subcategories'));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subcategory));
 };
 
 export const addProduct = async (product: Product) => {
@@ -133,6 +178,22 @@ export const updateCategory = async (id: string, updates: Partial<Category>) => 
 
 export const deleteCategory = async (id: string) => {
   const docRef = doc(db, 'categories', id);
+  await deleteDoc(docRef);
+};
+
+export const addSubcategory = async (subcategory: Subcategory) => {
+  const docRef = await addDoc(collection(db, 'subcategories'), subcategory);
+  return { id: docRef.id, ...subcategory };
+};
+
+export const updateSubcategory = async (id: string, updates: Partial<Subcategory>) => {
+  const docRef = doc(db, 'subcategories', id);
+  await updateDoc(docRef, updates);
+  return { id, ...updates };
+};
+
+export const deleteSubcategory = async (id: string) => {
+  const docRef = doc(db, 'subcategories', id);
   await deleteDoc(docRef);
 };
 

@@ -5,28 +5,33 @@ import { useCart } from '../context/CartContext';
 import { Search, Filter, ArrowRight } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
-import { fetchProducts, fetchCategories, Product, Category } from '../services/productService';
+import { fetchProducts, fetchCategories, fetchSubcategories, Product, Category, Subcategory } from '../services/productService';
 
 export default function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
   const [isLoading, setIsLoading] = useState(true);
 
   const categoryFilter = searchParams.get('category') || '';
+  const subcategoryFilter = searchParams.get('subcategory') || '';
   const searchQuery = searchParams.get('search') || '';
   const sortOption = searchParams.get('sort') || '';
 
   useEffect(() => {
-    // Fetch categories
-    fetchCategories().then(data => setCategories(data));
+    // Fetch categories and subcategories
+    Promise.all([fetchCategories(), fetchSubcategories()]).then(([cats, subcats]) => {
+      setCategories(cats);
+      setSubcategories(subcats);
+    });
   }, []);
 
   useEffect(() => {
     // Fetch products with filters
     setIsLoading(true);
-    fetchProducts(categoryFilter, searchQuery, sortOption)
+    fetchProducts(categoryFilter, subcategoryFilter, searchQuery, sortOption)
       .then(data => {
         setProducts(data);
         setIsLoading(false);
@@ -49,8 +54,20 @@ export default function Shop() {
 
   const handleCategoryChange = (slug: string) => {
     setSearchParams(prev => {
-      if (slug) prev.set('category', slug);
-      else prev.delete('category');
+      if (slug) {
+        prev.set('category', slug);
+      } else {
+        prev.delete('category');
+      }
+      prev.delete('subcategory'); // Reset subcategory when category changes
+      return prev;
+    });
+  };
+
+  const handleSubcategoryChange = (slug: string) => {
+    setSearchParams(prev => {
+      if (slug) prev.set('subcategory', slug);
+      else prev.delete('subcategory');
       return prev;
     });
   };
@@ -88,16 +105,46 @@ export default function Shop() {
                     <span className={categoryFilter === '' ? 'font-medium text-white' : 'text-slate-400'}>All Products</span>
                   </label>
                   {categories.map(cat => (
-                    <label key={cat.id} className="flex items-center space-x-2 cursor-pointer">
-                      <input 
-                        type="radio" 
-                        name="category" 
-                        checked={categoryFilter === cat.slug}
-                        onChange={() => handleCategoryChange(cat.slug)}
-                        className="text-electric-blue focus:ring-electric-blue bg-white/5 border-white/10"
-                      />
-                      <span className={categoryFilter === cat.slug ? 'font-medium text-white' : 'text-slate-400'}>{cat.name}</span>
-                    </label>
+                    <div key={cat.id} className="space-y-1">
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input 
+                          type="radio" 
+                          name="category" 
+                          checked={categoryFilter === cat.slug}
+                          onChange={() => handleCategoryChange(cat.slug)}
+                          className="text-electric-blue focus:ring-electric-blue bg-white/5 border-white/10"
+                        />
+                        <span className={categoryFilter === cat.slug ? 'font-medium text-white' : 'text-slate-400'}>{cat.name}</span>
+                      </label>
+                      
+                      {/* Subcategories */}
+                      {categoryFilter === cat.slug && subcategories.filter(sub => sub.category_id === cat.id).length > 0 && (
+                        <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input 
+                              type="radio" 
+                              name="subcategory" 
+                              checked={subcategoryFilter === ''}
+                              onChange={() => handleSubcategoryChange('')}
+                              className="text-purple-500 focus:ring-purple-500 bg-white/5 border-white/10"
+                            />
+                            <span className={subcategoryFilter === '' ? 'font-medium text-white text-sm' : 'text-slate-400 text-sm'}>All in {cat.name}</span>
+                          </label>
+                          {subcategories.filter(sub => sub.category_id === cat.id).map(subcat => (
+                            <label key={subcat.id} className="flex items-center space-x-2 cursor-pointer">
+                              <input 
+                                type="radio" 
+                                name="subcategory" 
+                                checked={subcategoryFilter === subcat.slug}
+                                onChange={() => handleSubcategoryChange(subcat.slug)}
+                                className="text-purple-500 focus:ring-purple-500 bg-white/5 border-white/10"
+                              />
+                              <span className={subcategoryFilter === subcat.slug ? 'font-medium text-white text-sm' : 'text-slate-400 text-sm'}>{subcat.name}</span>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               </div>
@@ -158,7 +205,15 @@ export default function Shop() {
                         </div>
                       </Link>
                       <div className="p-4 flex flex-col flex-grow">
-                        <div className="text-xs text-electric-blue font-semibold mb-1 uppercase tracking-wide">{product.category_name}</div>
+                        <div className="text-xs font-semibold mb-1 uppercase tracking-wide flex flex-wrap gap-1">
+                          <span className="text-electric-blue">{product.category_name}</span>
+                          {product.subcategory_name && (
+                            <>
+                              <span className="text-slate-500">•</span>
+                              <span className="text-purple-400">{product.subcategory_name}</span>
+                            </>
+                          )}
+                        </div>
                         <Link to={`/product/${product.slug}`} className="text-lg font-bold text-white mb-2 hover:text-electric-blue line-clamp-2 transition-colors">
                           {product.name}
                         </Link>

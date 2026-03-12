@@ -19,6 +19,7 @@ import AdminLayout from './components/admin/AdminLayout';
 import AdminDashboard from './pages/admin/Dashboard';
 import AdminProducts from './pages/admin/Products';
 import AdminCategories from './pages/admin/Categories';
+import AdminSubcategories from './pages/admin/Subcategories';
 import AdminOrders from './pages/admin/Orders';
 
 // Placeholder components for now
@@ -72,6 +73,7 @@ export default function App() {
               <Route index element={<AdminDashboard />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="categories" element={<AdminCategories />} />
+              <Route path="subcategories" element={<AdminSubcategories />} />
               <Route path="orders" element={<AdminOrders />} />
             </Route>
           </Routes>

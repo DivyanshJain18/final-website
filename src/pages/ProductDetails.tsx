@@ -121,9 +121,16 @@ export default function ProductDetails() {
               </div>
               
               <div>
-                <span className="inline-block px-3 py-1 text-xs font-bold tracking-wider text-electric-blue uppercase bg-electric-blue/10 rounded-full mb-4 border border-electric-blue/20">
-                  {product.category_name}
-                </span>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="inline-block px-3 py-1 text-xs font-bold tracking-wider text-electric-blue uppercase bg-electric-blue/10 rounded-full border border-electric-blue/20">
+                    {product.category_name}
+                  </span>
+                  {product.subcategory_name && (
+                    <span className="inline-block px-3 py-1 text-xs font-bold tracking-wider text-purple-400 uppercase bg-purple-500/10 rounded-full border border-purple-500/20">
+                      {product.subcategory_name}
+                    </span>
+                  )}
+                </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{product.name}</h1>
                 <div className="flex items-center mb-6">
                   <span className="text-3xl font-bold text-white">₹{product.price.toFixed(2)}</span>

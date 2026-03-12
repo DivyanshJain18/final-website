@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { fetchCategories, fetchProducts, Category, Product } from '../services/productService';
+import { fetchCategories, fetchSubcategories, fetchProducts, Category, Subcategory, Product } from '../services/productService';
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -11,8 +11,10 @@ export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategoriesByCategory, setSubcategoriesByCategory] = useState<Record<string, Subcategory[]>>({});
   const [productsByCategory, setProductsByCategory] = useState<Record<string, Product[]>>({});
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [hoveredSubcategory, setHoveredSubcategory] = useState<string | null>(null);
   const navigate = useNavigate();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -32,14 +34,30 @@ export function Navbar() {
         setCategories([]);
       });
 
+    // Fetch Subcategories
+    fetchSubcategories()
+      .then(data => {
+        if (Array.isArray(data)) {
+          const grouped = data.reduce((acc: Record<string, Subcategory[]>, subcat: Subcategory) => {
+            const catId = subcat.category_id;
+            if (!acc[catId]) acc[catId] = [];
+            acc[catId].push(subcat);
+            return acc;
+          }, {});
+          setSubcategoriesByCategory(grouped);
+        }
+      })
+      .catch(err => console.error('Failed to fetch subcategories for menu', err));
+
     // Fetch Products for nested dropdowns
     fetchProducts()
       .then(data => {
         if (Array.isArray(data)) {
           const grouped = data.reduce((acc: Record<string, Product[]>, product: Product) => {
-            const catId = product.category_id;
-            if (!acc[catId]) acc[catId] = [];
-            acc[catId].push(product);
+            // Group by subcategory if exists, else by category
+            const key = product.subcategory_id ? `sub_${product.subcategory_id}` : `cat_${product.category_id}`;
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(product);
             return acc;
           }, {});
           setProductsByCategory(grouped);
@@ -118,16 +136,54 @@ export function Navbar() {
                               role="menuitem"
                             >
                               <span>{category.name}</span>
-                              {productsByCategory[category.id]?.length > 0 && (
+                              {subcategoriesByCategory[category.id]?.length > 0 || productsByCategory[`cat_${category.id}`]?.length > 0 ? (
                                 <ChevronRight className="h-4 w-4 text-slate-500" />
-                              )}
+                              ) : null}
                             </Link>
 
-                            {/* Nested Dropdown for Products */}
-                            {hoveredCategory === category.id && productsByCategory[category.id]?.length > 0 && (
+                            {/* Nested Dropdown for Subcategories or Products */}
+                            {hoveredCategory === category.id && (subcategoriesByCategory[category.id]?.length > 0 || productsByCategory[`cat_${category.id}`]?.length > 0) && (
                               <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1 overflow-hidden">
                                 <div className="py-1 max-h-96 overflow-y-auto">
-                                  {productsByCategory[category.id].map((product: any) => (
+                                  {/* Subcategories */}
+                                  {subcategoriesByCategory[category.id]?.map((subcat) => (
+                                    <div 
+                                      key={subcat.id}
+                                      className="relative group/subitem"
+                                      onMouseEnter={() => setHoveredSubcategory(subcat.id)}
+                                      onMouseLeave={() => setHoveredSubcategory(null)}
+                                    >
+                                      <Link
+                                        to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                                        className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                                      >
+                                        <span>{subcat.name}</span>
+                                        {productsByCategory[`sub_${subcat.id}`]?.length > 0 && (
+                                          <ChevronRight className="h-4 w-4 text-slate-500" />
+                                        )}
+                                      </Link>
+                                      
+                                      {/* Nested Dropdown for Products in Subcategory */}
+                                      {hoveredSubcategory === subcat.id && productsByCategory[`sub_${subcat.id}`]?.length > 0 && (
+                                        <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1 overflow-hidden">
+                                          <div className="py-1 max-h-96 overflow-y-auto">
+                                            {productsByCategory[`sub_${subcat.id}`].map((product: any) => (
+                                              <Link
+                                                key={product.id}
+                                                to={`/product/${product.slug}`}
+                                                className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white truncate transition-colors"
+                                              >
+                                                {product.name}
+                                              </Link>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                  
+                                  {/* Products directly under Category (no subcategory) */}
+                                  {productsByCategory[`cat_${category.id}`]?.map((product: any) => (
                                     <Link
                                       key={product.id}
                                       to={`/product/${product.slug}`}
@@ -193,13 +249,27 @@ export function Navbar() {
             <div className="pl-6 space-y-1 border-l border-white/10 ml-3">
               <Link to="/shop" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-sm transition-colors">All Products</Link>
               {categories.map((category) => (
-                <Link
-                  key={category.id}
-                  to={`/shop?category=${category.slug}`}
-                  className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-sm transition-colors"
-                >
-                  {category.name}
-                </Link>
+                <div key={category.id}>
+                  <Link
+                    to={`/shop?category=${category.slug}`}
+                    className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-sm transition-colors"
+                  >
+                    {category.name}
+                  </Link>
+                  {subcategoriesByCategory[category.id]?.length > 0 && (
+                    <div className="pl-4 space-y-1 border-l border-white/10 ml-3 mt-1">
+                      {subcategoriesByCategory[category.id].map(subcat => (
+                        <Link
+                          key={subcat.id}
+                          to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                          className="text-gray-400 hover:text-white block px-3 py-1.5 rounded-md text-sm transition-colors"
+                        >
+                          {subcat.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
 

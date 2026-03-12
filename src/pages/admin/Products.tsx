@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Edit, Trash2, Search, X, Check } from 'lucide-react';
-import { fetchProducts, fetchCategories, addProduct, updateProduct, deleteProduct, Product, Category } from '../../services/productService';
+import { fetchProducts, fetchCategories, fetchSubcategories, addProduct, updateProduct, deleteProduct, Product, Category, Subcategory } from '../../services/productService';
 
 const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,6 +18,7 @@ const AdminProducts: React.FC = () => {
     price: '',
     stock: '',
     category_id: '',
+    subcategory_id: '',
     image_url: ''
   });
 
@@ -27,9 +29,10 @@ const AdminProducts: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [prods, cats] = await Promise.all([fetchProducts(), fetchCategories()]);
+      const [prods, cats, subcats] = await Promise.all([fetchProducts(), fetchCategories(), fetchSubcategories()]);
       setProducts(prods);
       setCategories(cats);
+      setSubcategories(subcats);
     } catch (error) {
       console.error('Failed to load data:', error);
     } finally {
@@ -47,6 +50,7 @@ const AdminProducts: React.FC = () => {
         price: product.price.toString(),
         stock: product.stock.toString(),
         category_id: product.category_id.toString(),
+        subcategory_id: product.subcategory_id?.toString() || '',
         image_url: product.image_url || ''
       });
     } else {
@@ -58,6 +62,7 @@ const AdminProducts: React.FC = () => {
         price: '',
         stock: '',
         category_id: '',
+        subcategory_id: '',
         image_url: ''
       });
     }
@@ -74,6 +79,7 @@ const AdminProducts: React.FC = () => {
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         category_id: formData.category_id,
+        subcategory_id: formData.subcategory_id || undefined,
         image_url: formData.image_url
       };
 
@@ -169,6 +175,11 @@ const AdminProducts: React.FC = () => {
                       <span className="px-2 py-1 rounded-full bg-electric-blue/10 text-electric-blue text-xs border border-electric-blue/20">
                         {product.category_name}
                       </span>
+                      {product.subcategory_name && (
+                        <span className="ml-2 px-2 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs border border-purple-500/20">
+                          {product.subcategory_name}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-white">₹{product.price.toFixed(2)}</td>
                     <td className="px-6 py-4">
@@ -272,13 +283,30 @@ const AdminProducts: React.FC = () => {
                     <label className="text-sm font-medium text-slate-300">Category</label>
                     <select
                       value={formData.category_id}
-                      onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none appearance-none"
+                      onChange={(e) => setFormData({ ...formData, category_id: e.target.value, subcategory_id: '' })}
+                      className="w-full bg-zinc-800 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none appearance-none"
                       required
                     >
                       <option value="">Select Category</option>
                       {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Subcategory (Optional)</label>
+                    <select
+                      value={formData.subcategory_id}
+                      onChange={(e) => setFormData({ ...formData, subcategory_id: e.target.value })}
+                      className="w-full bg-zinc-800 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none appearance-none"
+                      disabled={!formData.category_id}
+                    >
+                      <option value="">Select Subcategory</option>
+                      {subcategories
+                        .filter(subcat => subcat.category_id === formData.category_id)
+                        .map((subcat) => (
+                        <option key={subcat.id} value={subcat.id}>{subcat.name}</option>
                       ))}
                     </select>
                   </div>
