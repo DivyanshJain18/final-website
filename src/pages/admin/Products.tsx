@@ -326,6 +326,7 @@ const AdminProducts: React.FC = () => {
                       <option value="Incl. GST (No Hidden Charges)">Incl. GST (No Hidden Charges)</option>
                       <option value="Excl. GST (Calculated at Checkout)">Excl. GST (Calculated at Checkout)</option>
                       <option value="Price inclusive of all taxes">Price inclusive of all taxes</option>
+                      <option value="GST & Shipping charges applicable.">GST & Shipping charges applicable.</option>
                     </select>
                   </div>
                   
