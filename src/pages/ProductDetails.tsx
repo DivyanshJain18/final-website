@@ -132,16 +132,33 @@ export default function ProductDetails() {
                   )}
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{product.name}</h1>
-                <div className="flex items-center mb-6">
-                  <span className="text-3xl font-bold text-white">₹{product.price.toFixed(2)}</span>
-                  {product.stock > 0 ? (
-                    <span className="ml-4 text-sm font-medium text-green-400 flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                      In Stock
-                    </span>
-                  ) : (
-                    <span className="ml-4 text-sm font-medium text-red-400">Out of Stock</span>
+                <div className="mb-6">
+                  {product.originalPrice && product.originalPrice > product.price && (
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-lg line-through text-slate-500">₹{product.originalPrice.toFixed(2)}</span>
+                      <span className="bg-green-500/20 text-green-400 text-xs font-bold px-2 py-1 rounded border border-green-500/20">
+                        SAVE RS. {(product.originalPrice - product.price).toFixed(2)}
+                      </span>
+                    </div>
                   )}
+                  <div className="flex items-end gap-2">
+                    <span className="text-4xl font-bold text-white">₹{product.price.toFixed(2)}</span>
+                    {product.unit && <span className="text-lg text-slate-400 mb-1">/ {product.unit}</span>}
+                  </div>
+                  {product.taxText && (
+                    <p className="text-sm text-slate-500 mt-2">{product.taxText}</p>
+                  )}
+                  
+                  <div className="mt-4 flex items-center">
+                    {product.stock > 0 ? (
+                      <span className="text-sm font-medium text-green-400 flex items-center">
+                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                        In Stock
+                      </span>
+                    ) : (
+                      <span className="text-sm font-medium text-red-400">Out of Stock</span>
+                    )}
+                  </div>
                 </div>
                 <p className="text-slate-300 text-lg leading-relaxed">
                   {product.description}

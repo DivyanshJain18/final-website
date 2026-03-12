@@ -218,14 +218,30 @@ export default function Shop() {
                           {product.name}
                         </Link>
                         <p className="text-slate-400 text-sm mb-4 line-clamp-2 flex-grow">{product.description}</p>
-                        <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
-                          <span className="text-xl font-bold text-white">₹{product.price.toFixed(2)}</span>
-                          <Link 
-                            to={`/product/${product.slug}`}
-                            className="text-sm text-electric-blue hover:text-blue-400 font-medium flex items-center group-hover:translate-x-1 transition-transform"
-                          >
-                            Buy Now <ArrowRight className="ml-1 w-4 h-4" />
-                          </Link>
+                        <div className="flex flex-col mt-auto pt-4 border-t border-white/10">
+                          {product.originalPrice && product.originalPrice > product.price && (
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm line-through text-slate-500">₹{product.originalPrice.toFixed(2)}</span>
+                              <span className="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded">
+                                SAVE RS. {(product.originalPrice - product.price).toFixed(2)}
+                              </span>
+                            </div>
+                          )}
+                          <div className="flex items-end justify-between">
+                            <div>
+                              <span className="text-xl font-bold text-white">₹{product.price.toFixed(2)}</span>
+                              {product.unit && <span className="text-xs text-slate-400 ml-1">/ {product.unit}</span>}
+                            </div>
+                            <Link 
+                              to={`/product/${product.slug}`}
+                              className="text-sm text-electric-blue hover:text-blue-400 font-medium flex items-center group-hover:translate-x-1 transition-transform"
+                            >
+                              Buy Now <ArrowRight className="ml-1 w-4 h-4" />
+                            </Link>
+                          </div>
+                          {product.taxText && (
+                            <p className="text-[10px] text-slate-500 mt-1">{product.taxText}</p>
+                          )}
                         </div>
                       </div>
                     </div>

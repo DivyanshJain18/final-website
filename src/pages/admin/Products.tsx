@@ -16,6 +16,9 @@ const AdminProducts: React.FC = () => {
     slug: '',
     description: '',
     price: '',
+    originalPrice: '',
+    unit: 'Piece',
+    taxText: 'Incl. GST (No Hidden Charges)',
     stock: '',
     category_id: '',
     subcategory_id: '',
@@ -48,6 +51,9 @@ const AdminProducts: React.FC = () => {
         slug: product.slug,
         description: product.description || '',
         price: product.price.toString(),
+        originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
+        unit: product.unit || 'Piece',
+        taxText: product.taxText || 'Incl. GST (No Hidden Charges)',
         stock: product.stock.toString(),
         category_id: product.category_id.toString(),
         subcategory_id: product.subcategory_id?.toString() || '',
@@ -60,6 +66,9 @@ const AdminProducts: React.FC = () => {
         slug: '',
         description: '',
         price: '',
+        originalPrice: '',
+        unit: 'Piece',
+        taxText: 'Incl. GST (No Hidden Charges)',
         stock: '',
         category_id: '',
         subcategory_id: '',
@@ -77,6 +86,9 @@ const AdminProducts: React.FC = () => {
         slug: formData.slug,
         description: formData.description,
         price: parseFloat(formData.price),
+        originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,
+        unit: formData.unit,
+        taxText: formData.taxText,
         stock: parseInt(formData.stock),
         category_id: formData.category_id,
         subcategory_id: formData.subcategory_id || undefined,
@@ -257,7 +269,18 @@ const AdminProducts: React.FC = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-300">Price (₹)</label>
+                    <label className="text-sm font-medium text-slate-300">Original Price (₹)</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.originalPrice}
+                      onChange={(e) => setFormData({ ...formData, originalPrice: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Sale Price (₹)</label>
                     <input
                       type="number"
                       step="0.01"
@@ -266,6 +289,44 @@ const AdminProducts: React.FC = () => {
                       className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Save Rs. (Calculated)</label>
+                    <input
+                      type="text"
+                      value={
+                        (parseFloat(formData.originalPrice) && parseFloat(formData.price) && parseFloat(formData.originalPrice) > parseFloat(formData.price))
+                          ? (parseFloat(formData.originalPrice) - parseFloat(formData.price)).toFixed(2)
+                          : '0.00'
+                      }
+                      className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-green-400 font-bold outline-none cursor-not-allowed"
+                      readOnly
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Unit (e.g., Set, Piece, Kit)</label>
+                    <input
+                      type="text"
+                      value={formData.unit}
+                      onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                      className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
+                      placeholder="Piece"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Tax Display Text</label>
+                    <select
+                      value={formData.taxText}
+                      onChange={(e) => setFormData({ ...formData, taxText: e.target.value })}
+                      className="w-full bg-zinc-800 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none appearance-none"
+                    >
+                      <option value="Incl. GST (No Hidden Charges)">Incl. GST (No Hidden Charges)</option>
+                      <option value="Excl. GST (Calculated at Checkout)">Excl. GST (Calculated at Checkout)</option>
+                      <option value="Price inclusive of all taxes">Price inclusive of all taxes</option>
+                    </select>
                   </div>
                   
                   <div className="space-y-2">
