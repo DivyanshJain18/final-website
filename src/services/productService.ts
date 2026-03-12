@@ -36,18 +36,6 @@ export const fetchProducts = async (categorySlug?: string, subcategorySlug?: str
   let q = collection(db, 'products');
   const queryConstraints: any[] = [];
 
-  if (categorySlug) {
-    // We need to get the category ID first
-    const catQuery = query(collection(db, 'categories'), where('slug', '==', categorySlug));
-    const catSnap = await getDocs(catQuery);
-    if (!catSnap.empty) {
-      const catId = catSnap.docs[0].id;
-      queryConstraints.push(where('category_id', '==', catId));
-    } else {
-      return [];
-    }
-  }
-
   if (subcategorySlug) {
     // We need to get the subcategory ID first
     const subcatQuery = query(collection(db, 'subcategories'), where('slug', '==', subcategorySlug));
@@ -55,6 +43,16 @@ export const fetchProducts = async (categorySlug?: string, subcategorySlug?: str
     if (!subcatSnap.empty) {
       const subcatId = subcatSnap.docs[0].id;
       queryConstraints.push(where('subcategory_id', '==', subcatId));
+    } else {
+      return [];
+    }
+  } else if (categorySlug) {
+    // We need to get the category ID first
+    const catQuery = query(collection(db, 'categories'), where('slug', '==', categorySlug));
+    const catSnap = await getDocs(catQuery);
+    if (!catSnap.empty) {
+      const catId = catSnap.docs[0].id;
+      queryConstraints.push(where('category_id', '==', catId));
     } else {
       return [];
     }

@@ -40,7 +40,7 @@ export default function Shop() {
         console.error(err);
         setIsLoading(false);
       });
-  }, [categoryFilter, searchQuery, sortOption]);
+  }, [categoryFilter, subcategoryFilter, searchQuery, sortOption]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

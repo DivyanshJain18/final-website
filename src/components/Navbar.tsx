@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { fetchCategories, fetchSubcategories, fetchProducts, Category, Subcategory, Product } from '../services/productService';
+import { fetchCategories, fetchSubcategories, Category, Subcategory } from '../services/productService';
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -12,9 +12,7 @@ export function Navbar() {
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategoriesByCategory, setSubcategoriesByCategory] = useState<Record<string, Subcategory[]>>({});
-  const [productsByCategory, setProductsByCategory] = useState<Record<string, Product[]>>({});
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
-  const [hoveredSubcategory, setHoveredSubcategory] = useState<string | null>(null);
   const navigate = useNavigate();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -48,22 +46,6 @@ export function Navbar() {
         }
       })
       .catch(err => console.error('Failed to fetch subcategories for menu', err));
-
-    // Fetch Products for nested dropdowns
-    fetchProducts()
-      .then(data => {
-        if (Array.isArray(data)) {
-          const grouped = data.reduce((acc: Record<string, Product[]>, product: Product) => {
-            // Group by subcategory if exists, else by category
-            const key = product.subcategory_id ? `sub_${product.subcategory_id}` : `cat_${product.category_id}`;
-            if (!acc[key]) acc[key] = [];
-            acc[key].push(product);
-            return acc;
-          }, {});
-          setProductsByCategory(grouped);
-        }
-      })
-      .catch(err => console.error('Failed to fetch products for menu', err));
   }, []);
 
   const handleLogout = async () => {
@@ -113,13 +95,14 @@ export function Navbar() {
                   
                   {isProductsOpen && (
                     <div
-                      className="absolute left-0 top-full mt-2 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 overflow-hidden"
+                      className="absolute left-0 top-full mt-2 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10"
                     >
                       <div className="py-1" role="menu" aria-orientation="vertical">
                         <Link 
                           to="/shop" 
                           className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white font-semibold border-b border-white/10 mb-1 transition-colors"
                           role="menuitem"
+                          onClick={() => setIsProductsOpen(false)}
                         >
                           All Products
                         </Link>
@@ -134,62 +117,29 @@ export function Navbar() {
                               to={`/shop?category=${category.slug}`}
                               className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
                               role="menuitem"
+                              onClick={() => setIsProductsOpen(false)}
                             >
                               <span>{category.name}</span>
-                              {subcategoriesByCategory[category.id]?.length > 0 || productsByCategory[`cat_${category.id}`]?.length > 0 ? (
+                              {subcategoriesByCategory[category.id]?.length > 0 ? (
                                 <ChevronRight className="h-4 w-4 text-slate-500" />
                               ) : null}
                             </Link>
 
-                            {/* Nested Dropdown for Subcategories or Products */}
-                            {hoveredCategory === category.id && (subcategoriesByCategory[category.id]?.length > 0 || productsByCategory[`cat_${category.id}`]?.length > 0) && (
-                              <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1 overflow-hidden">
+                            {/* Nested Dropdown for Subcategories */}
+                            {hoveredCategory === category.id && subcategoriesByCategory[category.id]?.length > 0 && (
+                              <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
                                 <div className="py-1 max-h-96 overflow-y-auto">
-                                  {/* Subcategories */}
                                   {subcategoriesByCategory[category.id]?.map((subcat) => (
-                                    <div 
-                                      key={subcat.id}
-                                      className="relative group/subitem"
-                                      onMouseEnter={() => setHoveredSubcategory(subcat.id)}
-                                      onMouseLeave={() => setHoveredSubcategory(null)}
-                                    >
-                                      <Link
-                                        to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
-                                        className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-                                      >
-                                        <span>{subcat.name}</span>
-                                        {productsByCategory[`sub_${subcat.id}`]?.length > 0 && (
-                                          <ChevronRight className="h-4 w-4 text-slate-500" />
-                                        )}
-                                      </Link>
-                                      
-                                      {/* Nested Dropdown for Products in Subcategory */}
-                                      {hoveredSubcategory === subcat.id && productsByCategory[`sub_${subcat.id}`]?.length > 0 && (
-                                        <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1 overflow-hidden">
-                                          <div className="py-1 max-h-96 overflow-y-auto">
-                                            {productsByCategory[`sub_${subcat.id}`].map((product: any) => (
-                                              <Link
-                                                key={product.id}
-                                                to={`/product/${product.slug}`}
-                                                className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white truncate transition-colors"
-                                              >
-                                                {product.name}
-                                              </Link>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                  
-                                  {/* Products directly under Category (no subcategory) */}
-                                  {productsByCategory[`cat_${category.id}`]?.map((product: any) => (
                                     <Link
-                                      key={product.id}
-                                      to={`/product/${product.slug}`}
-                                      className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white truncate transition-colors"
+                                      key={subcat.id}
+                                      to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                                      className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                                      onClick={() => {
+                                        setIsProductsOpen(false);
+                                        setHoveredCategory(null);
+                                      }}
                                     >
-                                      {product.name}
+                                      {subcat.name}
                                     </Link>
                                   ))}
                                 </div>
