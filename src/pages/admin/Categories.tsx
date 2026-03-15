@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Edit, Trash2, Search, X, Check } from 'lucide-react';
-import { fetchCategories, addCategory, updateCategory, deleteCategory, Category, fetchDepartments, Department } from '../../services/productService';
+import { fetchCategories, addCategory, updateCategory, deleteCategory, Category } from '../../services/productService';
 
 const AdminCategories: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,8 +12,7 @@ const AdminCategories: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
-    description: '',
-    department_id: ''
+    description: ''
   });
 
   useEffect(() => {
@@ -24,12 +22,8 @@ const AdminCategories: React.FC = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [catResponse, deptResponse] = await Promise.all([
-        fetchCategories(),
-        fetchDepartments()
-      ]);
+      const catResponse = await fetchCategories();
       setCategories(catResponse);
-      setDepartments(deptResponse);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -43,16 +37,14 @@ const AdminCategories: React.FC = () => {
       setFormData({
         name: category.name,
         slug: category.slug,
-        description: category.description || '',
-        department_id: category.department_id || ''
+        description: category.description || ''
       });
     } else {
       setCurrentCategory(null);
       setFormData({
         name: '',
         slug: '',
-        description: '',
-        department_id: ''
+        description: ''
       });
     }
     setIsModalOpen(true);
@@ -123,7 +115,6 @@ const AdminCategories: React.FC = () => {
             <thead className="bg-white/5 text-slate-200 uppercase font-medium">
               <tr>
                 <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Department</th>
                 <th className="px-6 py-4">Slug</th>
                 <th className="px-6 py-4">Description</th>
                 <th className="px-6 py-4 text-right">Actions</th>
@@ -142,9 +133,6 @@ const AdminCategories: React.FC = () => {
                 filteredCategories.map((category) => (
                   <tr key={category.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4 font-medium text-white">{category.name}</td>
-                    <td className="px-6 py-4 text-slate-400">
-                      {departments.find(d => d.id === category.department_id)?.name || 'None'}
-                    </td>
                     <td className="px-6 py-4 text-slate-500">{category.slug}</td>
                     <td className="px-6 py-4">{category.description}</td>
                     <td className="px-6 py-4 text-right space-x-2">
@@ -214,20 +202,6 @@ const AdminCategories: React.FC = () => {
                     className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
                     required
                   />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-300">Department</label>
-                  <select
-                    value={formData.department_id}
-                    onChange={(e) => setFormData({ ...formData, department_id: e.target.value })}
-                    className="w-full bg-zinc-800 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none appearance-none"
-                  >
-                    <option value="">Select Department (Optional)</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.id}>{dept.name}</option>
-                    ))}
-                  </select>
                 </div>
 
                 <div className="space-y-2">
