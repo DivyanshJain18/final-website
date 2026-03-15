@@ -145,7 +145,7 @@ export function Navbar() {
                             {/* Nested Dropdown for Subcategories */}
                             {hoveredCategory === category.id && subcategoriesByCategory[category.id]?.length > 0 && (
                               <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
-                                <div className="py-1 max-h-96 overflow-y-auto">
+                                <div className="py-1">
                                   {subcategoriesByCategory[category.id]?.map((subcat) => (
                                     <div 
                                       key={subcat.id}
@@ -171,7 +171,7 @@ export function Navbar() {
                                       {/* Nested Dropdown for Subsubcategories */}
                                       {hoveredSubcategory === subcat.id && subsubcategoriesBySubcategory[subcat.id]?.length > 0 && (
                                         <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
-                                          <div className="py-1 max-h-96 overflow-y-auto">
+                                          <div className="py-1">
                                             {subsubcategoriesBySubcategory[subcat.id]?.map((subsubcat) => (
                                               <Link
                                                 key={subsubcat.id}
