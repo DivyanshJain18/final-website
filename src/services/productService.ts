@@ -14,10 +14,12 @@ export interface Product {
   stock: number;
   category_id: string;
   subcategory_id?: string;
+  subsubcategory_id?: string;
   image_url: string;
   created_at?: string;
   category_name?: string;
   subcategory_name?: string;
+  subsubcategory_name?: string;
 }
 
 export interface Category {
@@ -35,11 +37,28 @@ export interface Subcategory {
   category_id: string;
 }
 
-export const fetchProducts = async (categorySlug?: string, subcategorySlug?: string, search?: string, sort?: string) => {
+export interface Subsubcategory {
+  id?: string;
+  name: string;
+  slug: string;
+  description: string;
+  subcategory_id: string;
+}
+
+export const fetchProducts = async (categorySlug?: string, subcategorySlug?: string, subsubcategorySlug?: string, search?: string, sort?: string) => {
   let q = collection(db, 'products');
   const queryConstraints: any[] = [];
 
-  if (subcategorySlug) {
+  if (subsubcategorySlug) {
+    const subsubcatQuery = query(collection(db, 'subsubcategories'), where('slug', '==', subsubcategorySlug));
+    const subsubcatSnap = await getDocs(subsubcatQuery);
+    if (!subsubcatSnap.empty) {
+      const subsubcatId = subsubcatSnap.docs[0].id;
+      queryConstraints.push(where('subsubcategory_id', '==', subsubcatId));
+    } else {
+      return [];
+    }
+  } else if (subcategorySlug) {
     // We need to get the subcategory ID first
     const subcatQuery = query(collection(db, 'subcategories'), where('slug', '==', subcategorySlug));
     const subcatSnap = await getDocs(subcatQuery);
@@ -100,10 +119,18 @@ export const fetchProducts = async (categorySlug?: string, subcategorySlug?: str
     return acc;
   }, {} as Record<string, string>);
 
+  // Fetch subsubcategory names
+  const subsubcatSnapshot = await getDocs(collection(db, 'subsubcategories'));
+  const subsubcategories = subsubcatSnapshot.docs.reduce((acc, doc) => {
+    acc[doc.id] = doc.data().name;
+    return acc;
+  }, {} as Record<string, string>);
+
   return products.map(p => ({ 
     ...p, 
     category_name: categories[p.category_id] || 'Unknown',
-    subcategory_name: p.subcategory_id ? subcategories[p.subcategory_id] || 'Unknown' : undefined
+    subcategory_name: p.subcategory_id ? subcategories[p.subcategory_id] || 'Unknown' : undefined,
+    subsubcategory_name: p.subsubcategory_id ? subsubcategories[p.subsubcategory_id] || 'Unknown' : undefined
   }));
 };
 
@@ -127,6 +154,13 @@ export const fetchProductBySlug = async (slug: string) => {
       product.subcategory_name = subcatDoc.data().name;
     }
   }
+
+  if (product.subsubcategory_id) {
+    const subsubcatDoc = await getDoc(doc(db, 'subsubcategories', product.subsubcategory_id));
+    if (subsubcatDoc.exists()) {
+      product.subsubcategory_name = subsubcatDoc.data().name;
+    }
+  }
   
   return product;
 };
@@ -139,6 +173,11 @@ export const fetchCategories = async () => {
 export const fetchSubcategories = async () => {
   const snapshot = await getDocs(collection(db, 'subcategories'));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subcategory));
+};
+
+export const fetchSubsubcategories = async () => {
+  const snapshot = await getDocs(collection(db, 'subsubcategories'));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subsubcategory));
 };
 
 export const addProduct = async (product: Product) => {
@@ -195,6 +234,22 @@ export const updateSubcategory = async (id: string, updates: Partial<Subcategory
 
 export const deleteSubcategory = async (id: string) => {
   const docRef = doc(db, 'subcategories', id);
+  await deleteDoc(docRef);
+};
+
+export const addSubsubcategory = async (subsubcategory: Subsubcategory) => {
+  const docRef = await addDoc(collection(db, 'subsubcategories'), subsubcategory);
+  return { id: docRef.id, ...subsubcategory };
+};
+
+export const updateSubsubcategory = async (id: string, updates: Partial<Subsubcategory>) => {
+  const docRef = doc(db, 'subsubcategories', id);
+  await updateDoc(docRef, updates);
+  return { id, ...updates };
+};
+
+export const deleteSubsubcategory = async (id: string) => {
+  const docRef = doc(db, 'subsubcategories', id);
   await deleteDoc(docRef);
 };
 

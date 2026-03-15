@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { fetchCategories, fetchSubcategories, Category, Subcategory } from '../services/productService';
+import { fetchCategories, fetchSubcategories, fetchSubsubcategories, Category, Subcategory, Subsubcategory } from '../services/productService';
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -12,7 +12,9 @@ export function Navbar() {
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategoriesByCategory, setSubcategoriesByCategory] = useState<Record<string, Subcategory[]>>({});
+  const [subsubcategoriesBySubcategory, setSubsubcategoriesBySubcategory] = useState<Record<string, Subsubcategory[]>>({});
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [hoveredSubcategory, setHoveredSubcategory] = useState<string | null>(null);
   const navigate = useNavigate();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -46,6 +48,21 @@ export function Navbar() {
         }
       })
       .catch(err => console.error('Failed to fetch subcategories for menu', err));
+
+    // Fetch Subsubcategories
+    fetchSubsubcategories()
+      .then(data => {
+        if (Array.isArray(data)) {
+          const grouped = data.reduce((acc: Record<string, Subsubcategory[]>, subsubcat: Subsubcategory) => {
+            const subcatId = subsubcat.subcategory_id;
+            if (!acc[subcatId]) acc[subcatId] = [];
+            acc[subcatId].push(subsubcat);
+            return acc;
+          }, {});
+          setSubsubcategoriesBySubcategory(grouped);
+        }
+      })
+      .catch(err => console.error('Failed to fetch subsubcategories for menu', err));
   }, []);
 
   const handleLogout = async () => {
@@ -130,17 +147,49 @@ export function Navbar() {
                               <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
                                 <div className="py-1 max-h-96 overflow-y-auto">
                                   {subcategoriesByCategory[category.id]?.map((subcat) => (
-                                    <Link
+                                    <div 
                                       key={subcat.id}
-                                      to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
-                                      className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-                                      onClick={() => {
-                                        setIsProductsOpen(false);
-                                        setHoveredCategory(null);
-                                      }}
+                                      className="relative group/subitem"
+                                      onMouseEnter={() => setHoveredSubcategory(subcat.id)}
+                                      onMouseLeave={() => setHoveredSubcategory(null)}
                                     >
-                                      {subcat.name}
-                                    </Link>
+                                      <Link
+                                        to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                                        className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                                        onClick={() => {
+                                          setIsProductsOpen(false);
+                                          setHoveredCategory(null);
+                                          setHoveredSubcategory(null);
+                                        }}
+                                      >
+                                        <span>{subcat.name}</span>
+                                        {subsubcategoriesBySubcategory[subcat.id]?.length > 0 ? (
+                                          <ChevronRight className="h-4 w-4 text-slate-500" />
+                                        ) : null}
+                                      </Link>
+
+                                      {/* Nested Dropdown for Subsubcategories */}
+                                      {hoveredSubcategory === subcat.id && subsubcategoriesBySubcategory[subcat.id]?.length > 0 && (
+                                        <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
+                                          <div className="py-1 max-h-96 overflow-y-auto">
+                                            {subsubcategoriesBySubcategory[subcat.id]?.map((subsubcat) => (
+                                              <Link
+                                                key={subsubcat.id}
+                                                to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
+                                                className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                                                onClick={() => {
+                                                  setIsProductsOpen(false);
+                                                  setHoveredCategory(null);
+                                                  setHoveredSubcategory(null);
+                                                }}
+                                              >
+                                                {subsubcat.name}
+                                              </Link>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
                                   ))}
                                 </div>
                               </div>
@@ -209,13 +258,27 @@ export function Navbar() {
                   {subcategoriesByCategory[category.id]?.length > 0 && (
                     <div className="pl-4 space-y-1 border-l border-white/10 ml-3 mt-1">
                       {subcategoriesByCategory[category.id].map(subcat => (
-                        <Link
-                          key={subcat.id}
-                          to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
-                          className="text-gray-400 hover:text-white block px-3 py-1.5 rounded-md text-sm transition-colors"
-                        >
-                          {subcat.name}
-                        </Link>
+                        <div key={subcat.id}>
+                          <Link
+                            to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                            className="text-gray-400 hover:text-white block px-3 py-1.5 rounded-md text-sm transition-colors"
+                          >
+                            {subcat.name}
+                          </Link>
+                          {subsubcategoriesBySubcategory[subcat.id]?.length > 0 && (
+                            <div className="pl-4 space-y-1 border-l border-white/10 ml-3 mt-1">
+                              {subsubcategoriesBySubcategory[subcat.id].map(subsubcat => (
+                                <Link
+                                  key={subsubcat.id}
+                                  to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
+                                  className="text-gray-500 hover:text-white block px-3 py-1.5 rounded-md text-xs transition-colors"
+                                >
+                                  {subsubcat.name}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </div>
                   )}

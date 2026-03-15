@@ -5,33 +5,36 @@ import { useCart } from '../context/CartContext';
 import { Search, Filter, ArrowRight } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
-import { fetchProducts, fetchCategories, fetchSubcategories, Product, Category, Subcategory } from '../services/productService';
+import { fetchProducts, fetchCategories, fetchSubcategories, fetchSubsubcategories, Product, Category, Subcategory, Subsubcategory } from '../services/productService';
 
 export default function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [subsubcategories, setSubsubcategories] = useState<Subsubcategory[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
   const [isLoading, setIsLoading] = useState(true);
 
   const categoryFilter = searchParams.get('category') || '';
   const subcategoryFilter = searchParams.get('subcategory') || '';
+  const subsubcategoryFilter = searchParams.get('subsubcategory') || '';
   const searchQuery = searchParams.get('search') || '';
   const sortOption = searchParams.get('sort') || '';
 
   useEffect(() => {
-    // Fetch categories and subcategories
-    Promise.all([fetchCategories(), fetchSubcategories()]).then(([cats, subcats]) => {
+    // Fetch categories, subcategories, and subsubcategories
+    Promise.all([fetchCategories(), fetchSubcategories(), fetchSubsubcategories()]).then(([cats, subcats, subsubcats]) => {
       setCategories(cats);
       setSubcategories(subcats);
+      setSubsubcategories(subsubcats);
     });
   }, []);
 
   useEffect(() => {
     // Fetch products with filters
     setIsLoading(true);
-    fetchProducts(categoryFilter, subcategoryFilter, searchQuery, sortOption)
+    fetchProducts(categoryFilter, subcategoryFilter, subsubcategoryFilter, searchQuery, sortOption)
       .then(data => {
         setProducts(data);
         setIsLoading(false);
@@ -60,6 +63,7 @@ export default function Shop() {
         prev.delete('category');
       }
       prev.delete('subcategory'); // Reset subcategory when category changes
+      prev.delete('subsubcategory'); // Reset subsubcategory when category changes
       return prev;
     });
   };
@@ -68,6 +72,15 @@ export default function Shop() {
     setSearchParams(prev => {
       if (slug) prev.set('subcategory', slug);
       else prev.delete('subcategory');
+      prev.delete('subsubcategory'); // Reset subsubcategory when subcategory changes
+      return prev;
+    });
+  };
+
+  const handleSubsubcategoryChange = (slug: string) => {
+    setSearchParams(prev => {
+      if (slug) prev.set('subsubcategory', slug);
+      else prev.delete('subsubcategory');
       return prev;
     });
   };
@@ -131,16 +144,46 @@ export default function Shop() {
                             <span className={subcategoryFilter === '' ? 'font-medium text-white text-sm' : 'text-slate-400 text-sm'}>All in {cat.name}</span>
                           </label>
                           {subcategories.filter(sub => sub.category_id === cat.id).map(subcat => (
-                            <label key={subcat.id} className="flex items-center space-x-2 cursor-pointer">
-                              <input 
-                                type="radio" 
-                                name="subcategory" 
-                                checked={subcategoryFilter === subcat.slug}
-                                onChange={() => handleSubcategoryChange(subcat.slug)}
-                                className="text-purple-500 focus:ring-purple-500 bg-white/5 border-white/10"
-                              />
-                              <span className={subcategoryFilter === subcat.slug ? 'font-medium text-white text-sm' : 'text-slate-400 text-sm'}>{subcat.name}</span>
-                            </label>
+                            <div key={subcat.id} className="space-y-1">
+                              <label className="flex items-center space-x-2 cursor-pointer">
+                                <input 
+                                  type="radio" 
+                                  name="subcategory" 
+                                  checked={subcategoryFilter === subcat.slug}
+                                  onChange={() => handleSubcategoryChange(subcat.slug)}
+                                  className="text-purple-500 focus:ring-purple-500 bg-white/5 border-white/10"
+                                />
+                                <span className={subcategoryFilter === subcat.slug ? 'font-medium text-white text-sm' : 'text-slate-400 text-sm'}>{subcat.name}</span>
+                              </label>
+
+                              {/* Subsubcategories */}
+                              {subcategoryFilter === subcat.slug && subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).length > 0 && (
+                                <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
+                                  <label className="flex items-center space-x-2 cursor-pointer">
+                                    <input 
+                                      type="radio" 
+                                      name="subsubcategory" 
+                                      checked={subsubcategoryFilter === ''}
+                                      onChange={() => handleSubsubcategoryChange('')}
+                                      className="text-pink-500 focus:ring-pink-500 bg-white/5 border-white/10"
+                                    />
+                                    <span className={subsubcategoryFilter === '' ? 'font-medium text-white text-xs' : 'text-slate-400 text-xs'}>All in {subcat.name}</span>
+                                  </label>
+                                  {subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).map(subsubcat => (
+                                    <label key={subsubcat.id} className="flex items-center space-x-2 cursor-pointer">
+                                      <input 
+                                        type="radio" 
+                                        name="subsubcategory" 
+                                        checked={subsubcategoryFilter === subsubcat.slug}
+                                        onChange={() => handleSubsubcategoryChange(subsubcat.slug)}
+                                        className="text-pink-500 focus:ring-pink-500 bg-white/5 border-white/10"
+                                      />
+                                      <span className={subsubcategoryFilter === subsubcat.slug ? 'font-medium text-white text-xs' : 'text-slate-400 text-xs'}>{subsubcat.name}</span>
+                                    </label>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           ))}
                         </div>
                       )}
@@ -211,6 +254,12 @@ export default function Shop() {
                             <>
                               <span className="text-slate-500">•</span>
                               <span className="text-purple-400">{product.subcategory_name}</span>
+                            </>
+                          )}
+                          {product.subsubcategory_name && (
+                            <>
+                              <span className="text-slate-500">•</span>
+                              <span className="text-pink-400">{product.subsubcategory_name}</span>
                             </>
                           )}
                         </div>

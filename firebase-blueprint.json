@@ -23,6 +23,30 @@
       },
       "required": ["name", "slug"]
     },
+    "Subcategory": {
+      "title": "Subcategory",
+      "description": "A product subcategory",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "category_id": { "type": "string" }
+      },
+      "required": ["name", "slug", "category_id"]
+    },
+    "Subsubcategory": {
+      "title": "Subsubcategory",
+      "description": "A product sub-subcategory",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "subcategory_id": { "type": "string" }
+      },
+      "required": ["name", "slug", "subcategory_id"]
+    },
     "Product": {
       "title": "Product",
       "description": "A product in the store",
@@ -34,7 +58,11 @@
         "price": { "type": "number" },
         "stock": { "type": "number" },
         "category_id": { "type": "string" },
+        "subcategory_id": { "type": "string" },
+        "subsubcategory_id": { "type": "string" },
         "category_name": { "type": "string" },
+        "subcategory_name": { "type": "string" },
+        "subsubcategory_name": { "type": "string" },
         "image_url": { "type": "string" },
         "created_at": { "type": "string", "format": "date-time" }
       },
@@ -94,6 +122,14 @@
     "/categories/{categoryId}": {
       "schema": { "$ref": "#/entities/Category" },
       "description": "Product categories"
+    },
+    "/subcategories/{subcategoryId}": {
+      "schema": { "$ref": "#/entities/Subcategory" },
+      "description": "Product subcategories"
+    },
+    "/subsubcategories/{subsubcategoryId}": {
+      "schema": { "$ref": "#/entities/Subsubcategory" },
+      "description": "Product sub-subcategories"
     },
     "/products/{productId}": {
       "schema": { "$ref": "#/entities/Product" },
