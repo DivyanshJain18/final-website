@@ -41,7 +41,7 @@ export function Layout({ children }: { children: ReactNode }) {
             <div className="flex flex-col items-center justify-center w-full">
               <h2 className="text-2xl font-bold text-white uppercase tracking-[0.2em] mb-8 text-center">Social</h2>
               <div className="flex flex-wrap justify-center gap-6 md:gap-8">
-                <a href="https://www.facebook.com/share/18EWMxUAeA/" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-blue-600 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]">
+                <a href="#" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-blue-600 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]">
                   <FaFacebook className="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" />
                 </a>
                 <a href="#" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-red-500 hover:to-purple-500 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(236,72,153,0.5)]">
@@ -73,7 +73,7 @@ export function Layout({ children }: { children: ReactNode }) {
                     <p className="text-xs text-slate-400">(A Unit of Shanti Food Industries)</p>
                   </div>
                 </div>
-                <p className="text-sm leading-relaxed">Your one-stop shop for robotics, microcontrollers, and high-performance PC components.</p>
+                <p className="text-sm leading-relaxed">The ultimate hub for robotics, hardware, and digital excellence. Whether you need high-end components or expert services in software development and digital marketing, Mechafy Global delivers the tools and tech you need to succeed.</p>
               </div>
               
               <div>
