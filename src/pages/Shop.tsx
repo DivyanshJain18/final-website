@@ -43,7 +43,7 @@ export default function Shop() {
         console.error(err);
         setIsLoading(false);
       });
-  }, [categoryFilter, subcategoryFilter, searchQuery, sortOption]);
+  }, [categoryFilter, subcategoryFilter, subsubcategoryFilter, searchQuery, sortOption]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -104,7 +104,7 @@ export default function Shop() {
                   <Filter className="h-5 w-5 text-electric-blue" />
                   <h2>Filters</h2>
                 </div>
-                {(categoryFilter || searchQuery || sortOption) && (
+                {(categoryFilter || subcategoryFilter || subsubcategoryFilter || searchQuery || sortOption) && (
                   <button 
                     onClick={() => setSearchParams({})}
                     className="text-xs text-slate-400 hover:text-electric-blue transition-colors"

@@ -130,6 +130,11 @@ export default function ProductDetails() {
                       {product.subcategory_name}
                     </span>
                   )}
+                  {product.subsubcategory_name && (
+                    <span className="inline-block px-3 py-1 text-xs font-bold tracking-wider text-pink-400 uppercase bg-pink-500/10 rounded-full border border-pink-500/20">
+                      {product.subsubcategory_name}
+                    </span>
+                  )}
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{product.name}</h1>
                 <div className="mb-6">
