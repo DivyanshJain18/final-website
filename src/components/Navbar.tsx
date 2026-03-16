@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { fetchCategories, fetchSubcategories, fetchSubsubcategories, Category, Subcategory, Subsubcategory } from '../services/productService';
 
@@ -111,91 +111,95 @@ export function Navbar() {
                   </button>
                   
                   {isProductsOpen && (
-                    <div
-                      className="absolute left-0 top-full mt-2 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10"
-                    >
-                      <div className="py-1" role="menu" aria-orientation="vertical">
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[800px] rounded-2xl shadow-2xl bg-slate-900/95 backdrop-blur-xl ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 overflow-hidden flex">
+                      {/* Left side: Categories list */}
+                      <div className="w-1/3 bg-slate-800/50 p-4 border-r border-white/5">
                         <Link 
                           to="/shop" 
-                          className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white font-semibold border-b border-white/10 mb-1 transition-colors"
-                          role="menuitem"
+                          className="block px-4 py-3 text-sm text-white font-bold rounded-lg hover:bg-electric-blue/20 hover:text-electric-blue transition-colors mb-2"
                           onClick={() => setIsProductsOpen(false)}
                         >
                           All Products
                         </Link>
-                        {categories.map((category) => (
-                          <div 
-                            key={category.id}
-                            className="relative group/item"
-                            onMouseEnter={() => setHoveredCategory(category.id)}
-                            onMouseLeave={() => setHoveredCategory(null)}
-                          >
-                            <Link
-                              to={`/shop?category=${category.slug}`}
-                              className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-                              role="menuitem"
-                              onClick={() => setIsProductsOpen(false)}
+                        <div className="space-y-1">
+                          {categories.map((category) => (
+                            <button
+                              key={category.id}
+                              className={`w-full text-left flex items-center justify-between px-4 py-3 text-sm rounded-lg transition-colors ${hoveredCategory === category.id ? 'bg-electric-blue/20 text-electric-blue font-medium' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
+                              onMouseEnter={() => setHoveredCategory(category.id)}
+                              onClick={() => {
+                                navigate(`/shop?category=${category.slug}`);
+                                setIsProductsOpen(false);
+                              }}
                             >
                               <span>{category.name}</span>
-                              {subcategoriesByCategory[category.id]?.length > 0 ? (
-                                <ChevronRight className="h-4 w-4 text-slate-500" />
-                              ) : null}
-                            </Link>
-
-                            {/* Nested Dropdown for Subcategories */}
-                            {hoveredCategory === category.id && subcategoriesByCategory[category.id]?.length > 0 && (
-                              <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
-                                <div className="py-1">
-                                  {subcategoriesByCategory[category.id]?.map((subcat) => (
-                                    <div 
-                                      key={subcat.id}
-                                      className="relative group/subitem"
-                                      onMouseEnter={() => setHoveredSubcategory(subcat.id)}
-                                      onMouseLeave={() => setHoveredSubcategory(null)}
+                              <ChevronRight className={`h-4 w-4 ${hoveredCategory === category.id ? 'text-electric-blue' : 'text-slate-500'}`} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Right side: Subcategories & Sub-subcategories */}
+                      <div className="w-2/3 p-6 bg-slate-900/50">
+                        {hoveredCategory ? (
+                          <div>
+                            <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+                              <h3 className="text-lg font-bold text-white">
+                                {categories.find(c => c.id === hoveredCategory)?.name}
+                              </h3>
+                              <Link 
+                                to={`/shop?category=${categories.find(c => c.id === hoveredCategory)?.slug}`}
+                                className="text-xs font-semibold text-electric-blue hover:text-cyan-400 flex items-center transition-colors"
+                                onClick={() => setIsProductsOpen(false)}
+                              >
+                                View All <ArrowRight className="ml-1 h-3 w-3" />
+                              </Link>
+                            </div>
+                            
+                            {subcategoriesByCategory[hoveredCategory]?.length > 0 ? (
+                              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
+                                {subcategoriesByCategory[hoveredCategory].map(subcat => (
+                                  <div key={subcat.id}>
+                                    <Link
+                                      to={`/shop?category=${categories.find(c => c.id === hoveredCategory)?.slug}&subcategory=${subcat.slug}`}
+                                      className="block text-sm font-bold text-slate-200 hover:text-electric-blue mb-3 transition-colors"
+                                      onClick={() => setIsProductsOpen(false)}
                                     >
-                                      <Link
-                                        to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
-                                        className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-                                        onClick={() => {
-                                          setIsProductsOpen(false);
-                                          setHoveredCategory(null);
-                                          setHoveredSubcategory(null);
-                                        }}
-                                      >
-                                        <span>{subcat.name}</span>
-                                        {subsubcategoriesBySubcategory[subcat.id]?.length > 0 ? (
-                                          <ChevronRight className="h-4 w-4 text-slate-500" />
-                                        ) : null}
-                                      </Link>
-
-                                      {/* Nested Dropdown for Subsubcategories */}
-                                      {hoveredSubcategory === subcat.id && subsubcategoriesBySubcategory[subcat.id]?.length > 0 && (
-                                        <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
-                                          <div className="py-1">
-                                            {subsubcategoriesBySubcategory[subcat.id]?.map((subsubcat) => (
-                                              <Link
-                                                key={subsubcat.id}
-                                                to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
-                                                className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-                                                onClick={() => {
-                                                  setIsProductsOpen(false);
-                                                  setHoveredCategory(null);
-                                                  setHoveredSubcategory(null);
-                                                }}
-                                              >
-                                                {subsubcat.name}
-                                              </Link>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
+                                      {subcat.name}
+                                    </Link>
+                                    {subsubcategoriesBySubcategory[subcat.id]?.length > 0 && (
+                                      <ul className="space-y-2">
+                                        {subsubcategoriesBySubcategory[subcat.id].map(subsubcat => (
+                                          <li key={subsubcat.id}>
+                                            <Link
+                                              to={`/shop?category=${categories.find(c => c.id === hoveredCategory)?.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
+                                              className="text-sm text-slate-400 hover:text-white transition-colors flex items-center group"
+                                              onClick={() => setIsProductsOpen(false)}
+                                            >
+                                              <span className="w-1.5 h-1.5 rounded-full bg-slate-600 mr-2 group-hover:bg-electric-blue transition-colors"></span>
+                                              {subsubcat.name}
+                                            </Link>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center h-48 text-slate-500">
+                                <Package className="h-12 w-12 mb-3 opacity-20" />
+                                <p>No subcategories found.</p>
                               </div>
                             )}
                           </div>
-                        ))}
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-slate-500">
+                            <Package className="h-16 w-16 mb-4 opacity-20" />
+                            <p className="text-lg font-medium text-slate-400">Select a category</p>
+                            <p className="text-sm mt-2">Hover over a category on the left to explore its products.</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
