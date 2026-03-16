@@ -99,24 +99,24 @@ export default function Shop() {
         <aside className="w-full md:w-64 flex-shrink-0">
           <Reveal width="100%">
             <div className="glass-panel p-6 rounded-xl sticky top-24">
-              <div className="flex items-center gap-2 mb-4 text-white font-bold">
-                <Filter className="h-5 w-5 text-electric-blue" />
-                <h2>Filters</h2>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2 text-white font-bold">
+                  <Filter className="h-5 w-5 text-electric-blue" />
+                  <h2>Filters</h2>
+                </div>
+                {(categoryFilter || searchQuery || sortOption) && (
+                  <button 
+                    onClick={() => setSearchParams({})}
+                    className="text-xs text-slate-400 hover:text-electric-blue transition-colors"
+                  >
+                    Clear All
+                  </button>
+                )}
               </div>
               
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Categories</h3>
                 <div className="space-y-2">
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input 
-                      type="radio" 
-                      name="category" 
-                      checked={categoryFilter === ''}
-                      onChange={() => handleCategoryChange('')}
-                      className="text-electric-blue focus:ring-electric-blue bg-white/5 border-white/10"
-                    />
-                    <span className={categoryFilter === '' ? 'font-medium text-white' : 'text-slate-400'}>All Products</span>
-                  </label>
                   {categories.map(cat => (
                     <div key={cat.id} className="space-y-1">
                       <label className="flex items-center space-x-2 cursor-pointer">
@@ -133,16 +133,6 @@ export default function Shop() {
                       {/* Subcategories */}
                       {categoryFilter === cat.slug && subcategories.filter(sub => sub.category_id === cat.id).length > 0 && (
                         <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
-                          <label className="flex items-center space-x-2 cursor-pointer">
-                            <input 
-                              type="radio" 
-                              name="subcategory" 
-                              checked={subcategoryFilter === ''}
-                              onChange={() => handleSubcategoryChange('')}
-                              className="text-purple-500 focus:ring-purple-500 bg-white/5 border-white/10"
-                            />
-                            <span className={subcategoryFilter === '' ? 'font-medium text-white text-sm' : 'text-slate-400 text-sm'}>All in {cat.name}</span>
-                          </label>
                           {subcategories.filter(sub => sub.category_id === cat.id).map(subcat => (
                             <div key={subcat.id} className="space-y-1">
                               <label className="flex items-center space-x-2 cursor-pointer">
@@ -159,16 +149,6 @@ export default function Shop() {
                               {/* Subsubcategories */}
                               {subcategoryFilter === subcat.slug && subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).length > 0 && (
                                 <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
-                                  <label className="flex items-center space-x-2 cursor-pointer">
-                                    <input 
-                                      type="radio" 
-                                      name="subsubcategory" 
-                                      checked={subsubcategoryFilter === ''}
-                                      onChange={() => handleSubsubcategoryChange('')}
-                                      className="text-pink-500 focus:ring-pink-500 bg-white/5 border-white/10"
-                                    />
-                                    <span className={subsubcategoryFilter === '' ? 'font-medium text-white text-xs' : 'text-slate-400 text-xs'}>All in {subcat.name}</span>
-                                  </label>
                                   {subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).map(subsubcat => (
                                     <label key={subsubcat.id} className="flex items-center space-x-2 cursor-pointer">
                                       <input 
