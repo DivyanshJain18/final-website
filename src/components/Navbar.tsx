@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight, ArrowRight, Layers, Zap } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { fetchCategories, fetchSubcategories, fetchSubsubcategories, Category, Subcategory, Subsubcategory } from '../services/productService';
 
@@ -111,95 +111,92 @@ export function Navbar() {
                   </button>
                   
                   {isProductsOpen && (
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 w-[800px] rounded-2xl shadow-2xl bg-slate-900/95 backdrop-blur-xl ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 overflow-hidden flex">
-                      {/* Left side: Categories list */}
-                      <div className="w-1/3 bg-slate-800/50 p-4 border-r border-white/5">
-                        <Link 
-                          to="/shop" 
-                          className="block px-4 py-3 text-sm text-white font-bold rounded-lg hover:bg-electric-blue/20 hover:text-electric-blue transition-colors mb-2"
-                          onClick={() => setIsProductsOpen(false)}
-                        >
-                          All Products
-                        </Link>
-                        <div className="space-y-1">
-                          {categories.map((category) => (
-                            <button
-                              key={category.id}
-                              className={`w-full text-left flex items-center justify-between px-4 py-3 text-sm rounded-lg transition-colors ${hoveredCategory === category.id ? 'bg-electric-blue/20 text-electric-blue font-medium' : 'text-slate-300 hover:bg-white/5 hover:text-white'}`}
-                              onMouseEnter={() => setHoveredCategory(category.id)}
-                              onClick={() => {
-                                navigate(`/shop?category=${category.slug}`);
-                                setIsProductsOpen(false);
-                              }}
-                            >
-                              <span>{category.name}</span>
-                              <ChevronRight className={`h-4 w-4 ${hoveredCategory === category.id ? 'text-electric-blue' : 'text-slate-500'}`} />
-                            </button>
+                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 w-[900px] rounded-2xl shadow-2xl bg-slate-900/95 backdrop-blur-2xl ring-1 ring-white/10 focus:outline-none z-50 overflow-hidden flex transform transition-all duration-200 origin-top">
+                      {/* Left side: Grid of Categories */}
+                      <div className="w-3/4 p-8">
+                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
+                          <h3 className="text-lg font-bold text-white flex items-center">
+                            <Layers className="mr-2 h-5 w-5 text-electric-blue" />
+                            Product Categories
+                          </h3>
+                          <Link 
+                            to="/shop" 
+                            className="text-sm font-semibold text-electric-blue hover:text-cyan-400 flex items-center transition-colors bg-electric-blue/10 px-4 py-2 rounded-full"
+                            onClick={() => setIsProductsOpen(false)}
+                          >
+                            Browse All Products <ArrowRight className="ml-2 h-4 w-4" />
+                          </Link>
+                        </div>
+                        
+                        <div className="grid grid-cols-3 gap-x-8 gap-y-8">
+                          {categories.slice(0, 6).map((category) => (
+                            <div key={category.id} className="group/cat">
+                              <Link
+                                to={`/shop?category=${category.slug}`}
+                                className="inline-flex items-center text-base font-bold text-slate-200 hover:text-electric-blue mb-3 transition-colors"
+                                onClick={() => setIsProductsOpen(false)}
+                              >
+                                {category.name}
+                              </Link>
+                              
+                              {subcategoriesByCategory[category.id]?.length > 0 ? (
+                                <ul className="space-y-2.5">
+                                  {subcategoriesByCategory[category.id].slice(0, 4).map(subcat => (
+                                    <li key={subcat.id}>
+                                      <Link
+                                        to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                                        className="text-sm text-slate-400 hover:text-white transition-colors flex items-center group/link"
+                                        onClick={() => setIsProductsOpen(false)}
+                                      >
+                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-700 mr-2 group-hover/link:bg-electric-blue transition-colors"></span>
+                                        {subcat.name}
+                                      </Link>
+                                    </li>
+                                  ))}
+                                  {subcategoriesByCategory[category.id].length > 4 && (
+                                    <li>
+                                      <Link
+                                        to={`/shop?category=${category.slug}`}
+                                        className="text-xs font-medium text-slate-500 hover:text-electric-blue transition-colors flex items-center mt-1"
+                                        onClick={() => setIsProductsOpen(false)}
+                                      >
+                                        + {subcategoriesByCategory[category.id].length - 4} more
+                                      </Link>
+                                    </li>
+                                  )}
+                                </ul>
+                              ) : (
+                                <p className="text-xs text-slate-600 italic">No subcategories</p>
+                              )}
+                            </div>
                           ))}
                         </div>
                       </div>
                       
-                      {/* Right side: Subcategories & Sub-subcategories */}
-                      <div className="w-2/3 p-6 bg-slate-900/50">
-                        {hoveredCategory ? (
-                          <div>
-                            <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
-                              <h3 className="text-lg font-bold text-white">
-                                {categories.find(c => c.id === hoveredCategory)?.name}
-                              </h3>
-                              <Link 
-                                to={`/shop?category=${categories.find(c => c.id === hoveredCategory)?.slug}`}
-                                className="text-xs font-semibold text-electric-blue hover:text-cyan-400 flex items-center transition-colors"
-                                onClick={() => setIsProductsOpen(false)}
-                              >
-                                View All <ArrowRight className="ml-1 h-3 w-3" />
-                              </Link>
-                            </div>
-                            
-                            {subcategoriesByCategory[hoveredCategory]?.length > 0 ? (
-                              <div className="grid grid-cols-2 gap-x-8 gap-y-6">
-                                {subcategoriesByCategory[hoveredCategory].map(subcat => (
-                                  <div key={subcat.id}>
-                                    <Link
-                                      to={`/shop?category=${categories.find(c => c.id === hoveredCategory)?.slug}&subcategory=${subcat.slug}`}
-                                      className="block text-sm font-bold text-slate-200 hover:text-electric-blue mb-3 transition-colors"
-                                      onClick={() => setIsProductsOpen(false)}
-                                    >
-                                      {subcat.name}
-                                    </Link>
-                                    {subsubcategoriesBySubcategory[subcat.id]?.length > 0 && (
-                                      <ul className="space-y-2">
-                                        {subsubcategoriesBySubcategory[subcat.id].map(subsubcat => (
-                                          <li key={subsubcat.id}>
-                                            <Link
-                                              to={`/shop?category=${categories.find(c => c.id === hoveredCategory)?.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
-                                              className="text-sm text-slate-400 hover:text-white transition-colors flex items-center group"
-                                              onClick={() => setIsProductsOpen(false)}
-                                            >
-                                              <span className="w-1.5 h-1.5 rounded-full bg-slate-600 mr-2 group-hover:bg-electric-blue transition-colors"></span>
-                                              {subsubcat.name}
-                                            </Link>
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              <div className="flex flex-col items-center justify-center h-48 text-slate-500">
-                                <Package className="h-12 w-12 mb-3 opacity-20" />
-                                <p>No subcategories found.</p>
-                              </div>
-                            )}
+                      {/* Right side: Promo / Featured */}
+                      <div className="w-1/4 bg-gradient-to-br from-slate-800 to-navy-900 p-8 border-l border-white/5 flex flex-col relative overflow-hidden">
+                        {/* Decorative background element */}
+                        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-electric-blue/20 rounded-full blur-3xl pointer-events-none"></div>
+                        
+                        <div className="relative z-10 flex-grow">
+                          <div className="w-12 h-12 bg-electric-blue/20 rounded-xl flex items-center justify-center mb-6 border border-electric-blue/30">
+                            <Zap className="h-6 w-6 text-electric-blue" />
                           </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center h-full text-slate-500">
-                            <Package className="h-16 w-16 mb-4 opacity-20" />
-                            <p className="text-lg font-medium text-slate-400">Select a category</p>
-                            <p className="text-sm mt-2">Hover over a category on the left to explore its products.</p>
-                          </div>
-                        )}
+                          <h4 className="text-xl font-bold text-white mb-3">Enterprise Solutions</h4>
+                          <p className="text-sm text-slate-400 mb-6 leading-relaxed">
+                            Discover our premium range of industrial and IT solutions designed for modern businesses.
+                          </p>
+                        </div>
+                        
+                        <div className="relative z-10 mt-auto">
+                          <Link 
+                            to="/contact" 
+                            className="block w-full text-center bg-white text-navy-900 font-bold py-3 px-4 rounded-lg hover:bg-electric-blue hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
+                            onClick={() => setIsProductsOpen(false)}
+                          >
+                            Request a Quote
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   )}
