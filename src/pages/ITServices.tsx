@@ -1,6 +1,6 @@
 import { Layout } from '../components/Layout';
 import { Reveal } from '../components/Reveal';
-import { Globe, LayoutTemplate, ShoppingCart, Server, Code, Wrench } from 'lucide-react';
+import { Globe, LayoutTemplate, ShoppingCart, Server, Code, Wrench, Terminal, PenTool, TrendingUp } from 'lucide-react';
 
 export default function ITServices() {
   const services = [
@@ -33,6 +33,21 @@ export default function ITServices() {
       icon: <Wrench className="h-8 w-8 text-electric-blue" />,
       title: "Maintenance & Support",
       description: "Ongoing website maintenance, security updates, and technical support to ensure everything runs smoothly."
+    },
+    {
+      icon: <Terminal className="h-8 w-8 text-electric-blue" />,
+      title: "Software Development",
+      description: "Custom software solutions tailored to your business needs, from desktop applications to enterprise systems."
+    },
+    {
+      icon: <PenTool className="h-8 w-8 text-electric-blue" />,
+      title: "Professional Content Writing",
+      description: "Engaging, SEO-optimized content that tells your brand's story and connects with your target audience."
+    },
+    {
+      icon: <TrendingUp className="h-8 w-8 text-electric-blue" />,
+      title: "Digital Marketing",
+      description: "Data-driven marketing strategies, SEO, and social media campaigns to boost your online visibility and growth."
     }
   ];
 
