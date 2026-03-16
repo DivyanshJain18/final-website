@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight, ArrowRight, Layers, Zap } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { fetchCategories, fetchSubcategories, fetchSubsubcategories, Category, Subcategory, Subsubcategory } from '../services/productService';
 
@@ -111,92 +111,110 @@ export function Navbar() {
                   </button>
                   
                   {isProductsOpen && (
-                    <div className="absolute left-1/2 -translate-x-1/2 top-full mt-4 w-[900px] rounded-2xl shadow-2xl bg-slate-900/95 backdrop-blur-2xl ring-1 ring-white/10 focus:outline-none z-50 overflow-hidden flex transform transition-all duration-200 origin-top">
-                      {/* Left side: Grid of Categories */}
-                      <div className="w-3/4 p-8">
-                        <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
-                          <h3 className="text-lg font-bold text-white flex items-center">
-                            <Layers className="mr-2 h-5 w-5 text-electric-blue" />
-                            Product Categories
-                          </h3>
-                          <Link 
-                            to="/shop" 
-                            className="text-sm font-semibold text-electric-blue hover:text-cyan-400 flex items-center transition-colors bg-electric-blue/10 px-4 py-2 rounded-full"
-                            onClick={() => setIsProductsOpen(false)}
+                    <div
+                      className="absolute left-0 top-full mt-2 w-[600px] rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 flex"
+                    >
+                      <div className="w-64 py-1 shrink-0" role="menu" aria-orientation="vertical">
+                        <Link 
+                          to="/shop" 
+                          className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white font-semibold border-b border-white/10 mb-1 transition-colors"
+                          role="menuitem"
+                          onClick={() => setIsProductsOpen(false)}
+                        >
+                          All Products
+                        </Link>
+                        {categories.map((category) => (
+                          <div 
+                            key={category.id}
+                            className="relative group/item"
+                            onMouseEnter={() => setHoveredCategory(category.id)}
+                            onMouseLeave={() => setHoveredCategory(null)}
                           >
-                            Browse All Products <ArrowRight className="ml-2 h-4 w-4" />
-                          </Link>
-                        </div>
-                        
-                        <div className="grid grid-cols-3 gap-x-8 gap-y-8">
-                          {categories.slice(0, 6).map((category) => (
-                            <div key={category.id} className="group/cat">
-                              <Link
-                                to={`/shop?category=${category.slug}`}
-                                className="inline-flex items-center text-base font-bold text-slate-200 hover:text-electric-blue mb-3 transition-colors"
-                                onClick={() => setIsProductsOpen(false)}
-                              >
-                                {category.name}
-                              </Link>
-                              
+                            <Link
+                              to={`/shop?category=${category.slug}`}
+                              className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                              role="menuitem"
+                              onClick={() => setIsProductsOpen(false)}
+                            >
+                              <span>{category.name}</span>
                               {subcategoriesByCategory[category.id]?.length > 0 ? (
-                                <ul className="space-y-2.5">
-                                  {subcategoriesByCategory[category.id].slice(0, 4).map(subcat => (
-                                    <li key={subcat.id}>
+                                <ChevronRight className="h-4 w-4 text-slate-500" />
+                              ) : null}
+                            </Link>
+
+                            {/* Nested Dropdown for Subcategories */}
+                            {hoveredCategory === category.id && subcategoriesByCategory[category.id]?.length > 0 && (
+                              <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
+                                <div className="py-1">
+                                  {subcategoriesByCategory[category.id]?.map((subcat) => (
+                                    <div 
+                                      key={subcat.id}
+                                      className="relative group/subitem"
+                                      onMouseEnter={() => setHoveredSubcategory(subcat.id)}
+                                      onMouseLeave={() => setHoveredSubcategory(null)}
+                                    >
                                       <Link
                                         to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
-                                        className="text-sm text-slate-400 hover:text-white transition-colors flex items-center group/link"
-                                        onClick={() => setIsProductsOpen(false)}
+                                        className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                                        onClick={() => {
+                                          setIsProductsOpen(false);
+                                          setHoveredCategory(null);
+                                          setHoveredSubcategory(null);
+                                        }}
                                       >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-slate-700 mr-2 group-hover/link:bg-electric-blue transition-colors"></span>
-                                        {subcat.name}
+                                        <span>{subcat.name}</span>
+                                        {subsubcategoriesBySubcategory[subcat.id]?.length > 0 ? (
+                                          <ChevronRight className="h-4 w-4 text-slate-500" />
+                                        ) : null}
                                       </Link>
-                                    </li>
+
+                                      {/* Nested Dropdown for Subsubcategories */}
+                                      {hoveredSubcategory === subcat.id && subsubcategoriesBySubcategory[subcat.id]?.length > 0 && (
+                                        <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
+                                          <div className="py-1">
+                                            {subsubcategoriesBySubcategory[subcat.id]?.map((subsubcat) => (
+                                              <Link
+                                                key={subsubcat.id}
+                                                to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
+                                                className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
+                                                onClick={() => {
+                                                  setIsProductsOpen(false);
+                                                  setHoveredCategory(null);
+                                                  setHoveredSubcategory(null);
+                                                }}
+                                              >
+                                                {subsubcat.name}
+                                              </Link>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
                                   ))}
-                                  {subcategoriesByCategory[category.id].length > 4 && (
-                                    <li>
-                                      <Link
-                                        to={`/shop?category=${category.slug}`}
-                                        className="text-xs font-medium text-slate-500 hover:text-electric-blue transition-colors flex items-center mt-1"
-                                        onClick={() => setIsProductsOpen(false)}
-                                      >
-                                        + {subcategoriesByCategory[category.id].length - 4} more
-                                      </Link>
-                                    </li>
-                                  )}
-                                </ul>
-                              ) : (
-                                <p className="text-xs text-slate-600 italic">No subcategories</p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
                       </div>
                       
-                      {/* Right side: Promo / Featured */}
-                      <div className="w-1/4 bg-gradient-to-br from-slate-800 to-navy-900 p-8 border-l border-white/5 flex flex-col relative overflow-hidden">
-                        {/* Decorative background element */}
-                        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-electric-blue/20 rounded-full blur-3xl pointer-events-none"></div>
+                      {/* Promotional Box */}
+                      <div className="flex-1 p-6 bg-gradient-to-br from-electric-blue/10 to-transparent border-l border-white/10 flex flex-col justify-center items-start relative overflow-hidden rounded-r-xl">
+                        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-32 h-32 bg-electric-blue/20 rounded-full blur-3xl pointer-events-none"></div>
+                        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
                         
-                        <div className="relative z-10 flex-grow">
-                          <div className="w-12 h-12 bg-electric-blue/20 rounded-xl flex items-center justify-center mb-6 border border-electric-blue/30">
-                            <Zap className="h-6 w-6 text-electric-blue" />
-                          </div>
-                          <h4 className="text-xl font-bold text-white mb-3">Enterprise Solutions</h4>
-                          <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                            Discover our premium range of industrial and IT solutions designed for modern businesses.
-                          </p>
-                        </div>
-                        
-                        <div className="relative z-10 mt-auto">
-                          <Link 
-                            to="/contact" 
-                            className="block w-full text-center bg-white text-navy-900 font-bold py-3 px-4 rounded-lg hover:bg-electric-blue hover:text-white transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]"
-                            onClick={() => setIsProductsOpen(false)}
-                          >
-                            Request a Quote
-                          </Link>
-                        </div>
+                        <Package className="h-8 w-8 text-electric-blue mb-4" />
+                        <h3 className="text-lg font-bold text-white mb-2">Enterprise Solutions</h3>
+                        <p className="text-sm text-slate-300 mb-6 leading-relaxed">
+                          Scale your business with our enterprise-grade hardware, custom configurations, and dedicated 24/7 support.
+                        </p>
+                        <Link 
+                          to="/contact" 
+                          className="btn-glow text-xs uppercase tracking-wide mt-auto"
+                          onClick={() => setIsProductsOpen(false)}
+                        >
+                          Request a Quote
+                        </Link>
                       </div>
                     </div>
                   )}
