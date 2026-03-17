@@ -30,6 +30,7 @@ const AdminLayout: React.FC = () => {
     { path: '/admin/categories', icon: FolderTree, label: 'Categories' },
     { path: '/admin/subcategories', icon: Layers, label: 'Subcategories' },
     { path: '/admin/subsubcategories', icon: Layers, label: 'Sub-subcategories' },
+    { path: '/admin/nested-subcategories', icon: Layers, label: 'Nested Subcategories' },
     { path: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
   ];
 
