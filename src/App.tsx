@@ -21,6 +21,7 @@ import AdminProducts from './pages/admin/Products';
 import AdminCategories from './pages/admin/Categories';
 import AdminSubcategories from './pages/admin/Subcategories';
 import AdminSubsubcategories from './pages/admin/Subsubcategories';
+import AdminNestedSubcategories from './pages/admin/NestedSubcategories';
 import AdminOrders from './pages/admin/Orders';
 
 // Placeholder components for now
@@ -76,6 +77,7 @@ export default function App() {
               <Route path="categories" element={<AdminCategories />} />
               <Route path="subcategories" element={<AdminSubcategories />} />
               <Route path="subsubcategories" element={<AdminSubsubcategories />} />
+              <Route path="nested-subcategories" element={<AdminNestedSubcategories />} />
               <Route path="orders" element={<AdminOrders />} />
             </Route>
           </Routes>

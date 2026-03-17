@@ -1,118 +1,127 @@
-import { ReactNode, useState, useEffect } from 'react';
-import { Navbar } from './Navbar';
-import { Reveal } from './Reveal';
-import { PageTransition } from './PageTransition';
-import { FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa6';
-import { Link } from 'react-router-dom';
-import { fetchCategories, Category } from '../services/productService';
+import React, { useEffect } from 'react';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { LayoutDashboard, Package, FolderTree, Layers, ShoppingCart, LogOut, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 
-export function Layout({ children }: { children: ReactNode }) {
-  const [categories, setCategories] = useState<Category[]>([]);
+const AdminLayout: React.FC = () => {
+  const { user, logout, isLoading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
   useEffect(() => {
-    fetchCategories()
-      .then(data => {
-        if (Array.isArray(data)) {
-          setCategories(data);
-        } else {
-          console.error('Categories data is not an array:', data);
-          setCategories([]);
-        }
-      })
-      .catch(err => {
-        console.error('Failed to fetch categories', err);
-        setCategories([]);
-      });
-  }, []);
+    if (!isLoading && (!user || user.role !== 'admin')) {
+      navigate('/login');
+    }
+  }, [user, isLoading, navigate]);
+
+  if (isLoading) {
+    return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-cyan-500">Loading...</div>;
+  }
+
+  if (!user || user.role !== 'admin') {
+    return null;
+  }
+
+  const navItems = [
+    { path: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/admin/products', icon: Package, label: 'Products' },
+    { path: '/admin/categories', icon: FolderTree, label: 'Categories' },
+    { path: '/admin/subcategories', icon: Layers, label: 'Subcategories' },
+    { path: '/admin/subsubcategories', icon: Layers, label: 'Sub-subcategories' },
+    { path: '/admin/nested-subcategories', icon: Layers, label: 'Nested Subcategories' },
+    { path: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
+  ];
 
   return (
-    <div className="min-h-screen text-slate-200 flex flex-col">
-      <Navbar />
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <PageTransition>
-          {children}
-        </PageTransition>
+    <div className="min-h-screen bg-zinc-950 text-slate-200 flex">
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Sidebar */}
+      <motion.aside
+        className={`fixed md:sticky top-0 left-0 h-screen w-64 bg-zinc-900 border-r border-zinc-800 z-50 transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+      >
+        <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
+          <h1 className="text-xl font-bold text-cyan-400 tracking-wider">ADMIN PANEL</h1>
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-400 hover:text-white">
+            <X size={24} />
+          </button>
+        </div>
+
+        <nav className="p-4 space-y-2">
+          {navItems.map((item) => {
+            const isActive = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsSidebarOpen(false)}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors ${
+                  isActive
+                    ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
+                    : 'text-slate-400 hover:bg-zinc-800 hover:text-white'
+                }`}
+              >
+                <item.icon size={20} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-zinc-800">
+          <div className="flex items-center space-x-3 px-4 py-3 mb-2">
+            <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 font-bold">
+              {user.name.charAt(0)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{user.name}</p>
+              <p className="text-xs text-slate-500 truncate">{user.email}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              logout();
+              navigate('/login');
+            }}
+            className="w-full flex items-center space-x-3 px-4 py-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        </div>
+      </motion.aside>
+
+      {/* Main Content */}
+      <main className="flex-1 min-w-0">
+        <header className="md:hidden bg-zinc-900 border-b border-zinc-800 p-4 flex items-center justify-between sticky top-0 z-30">
+          <button onClick={() => setIsSidebarOpen(true)} className="text-slate-400 hover:text-white">
+            <Menu size={24} />
+          </button>
+          <span className="font-bold text-slate-200">Mechafy Admin</span>
+          <div className="w-6" /> {/* Spacer */}
+        </header>
+        
+        <div className="p-4 md:p-8 max-w-7xl mx-auto">
+          <Outlet />
+        </div>
       </main>
-
-      {/* Social Section */}
-      <section className="bg-navy-900/50 backdrop-blur-sm py-12 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <Reveal width="100%" direction="up" delay={0.2}>
-            <div className="flex flex-col items-center justify-center w-full">
-              <h2 className="text-2xl font-bold text-white uppercase tracking-[0.2em] mb-8 text-center">Social</h2>
-              <div className="flex flex-wrap justify-center gap-6 md:gap-8">
-                <a href="#" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-blue-600 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]">
-                  <FaFacebook className="w-6 h-6 text-[#1877F2] group-hover:text-white transition-colors" />
-                </a>
-                <a href="#" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-red-500 hover:to-purple-500 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(236,72,153,0.5)]">
-                  <FaInstagram className="w-6 h-6 text-[#E4405F] group-hover:text-white transition-colors" />
-                </a>
-                <a href="https://www.linkedin.com/company/112983537/" target="_blank" rel="noopener noreferrer" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-blue-700 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(29,78,216,0.5)]">
-                  <FaLinkedin className="w-6 h-6 text-[#0A66C2] group-hover:text-white transition-colors" />
-                </a>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      <footer className="bg-navy-900/80 backdrop-blur-md text-slate-400 py-12 border-t border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Reveal width="100%" direction="up" delay={0.1}>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div>
-                <div className="flex items-center mb-4">
-                  <img 
-                    src="https://raw.githubusercontent.com/DivyanshJain18/Mechafy-assets/main/Mechafy%20Logo.jpg" 
-                    alt="Mechafy Global Logo" 
-                    className="h-12 w-auto object-contain rounded mr-4"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div>
-                    <h3 className="text-white text-lg font-bold">Mechafy Global</h3>
-                    <p className="text-xs text-slate-400">(A Unit of Shanti Food Industries)</p>
-                  </div>
-                </div>
-                <p className="text-sm leading-relaxed">The ultimate hub for robotics, hardware, and digital excellence. Whether you need high-end components or expert services in software development and digital marketing, Mechafy Global delivers the tools and tech you need to succeed.</p>
-              </div>
-              
-              <div>
-                <h3 className="text-white text-lg font-bold mb-4">Shop</h3>
-                <ul className="space-y-2 text-sm">
-                  <li><Link to="/shop" className="hover:text-cyan-400 transition-colors">All Products</Link></li>
-                  {categories.map((category) => (
-                    <li key={category.id}>
-                      <Link to={`/shop?category=${category.slug}`} className="hover:text-cyan-400 transition-colors">
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div>
-                <h3 className="text-white text-lg font-bold mb-4">Links</h3>
-                <ul className="space-y-2 text-sm">
-                  <li><Link to="/about" className="hover:text-cyan-400 transition-colors">About Us</Link></li>
-                  <li><Link to="/contact" className="hover:text-cyan-400 transition-colors">Contact Us</Link></li>
-                </ul>
-              </div>
-              
-              <div>
-                <h3 className="text-white text-lg font-bold mb-4">Contact</h3>
-                <ul className="space-y-2 text-sm">
-                  <li>Email: info@mechafyglobal.com</li>
-                  <li>Phone: +91 7015072323</li>
-                  <li>Address: 582, HSIIDC Industrial Area, Rai, Sonipat, Haryana 131029</li>
-                </ul>
-              </div>
-            </div>
-            <div className="mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500">
-              Copyright &copy; 2026 Mechafy Global – All Rights Reserved.
-            </div>
-          </Reveal>
-        </div>
-      </footer>
     </div>
   );
-}
+};
+
+export default AdminLayout;
