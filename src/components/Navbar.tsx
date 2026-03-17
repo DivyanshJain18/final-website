@@ -207,33 +207,7 @@ export function Navbar() {
                                                   }}
                                                 >
                                                   <span>{subsubcat.name}</span>
-                                                  {nestedSubcategoriesBySubsubcategory[subsubcat.id]?.length > 0 ? (
-                                                    <ChevronRight className="h-4 w-4 text-slate-500" />
-                                                  ) : null}
                                                 </Link>
-
-                                                {/* Nested Dropdown for Nested Subcategories */}
-                                                {hoveredSubsubcategory === subsubcat.id && nestedSubcategoriesBySubsubcategory[subsubcat.id]?.length > 0 && (
-                                                  <div className="absolute left-full top-0 w-64 rounded-xl shadow-lg bg-navy-900/90 backdrop-blur-md ring-1 ring-white/10 focus:outline-none z-50 border border-white/10 -ml-1">
-                                                    <div className="py-1">
-                                                      {nestedSubcategoriesBySubsubcategory[subsubcat.id]?.map((nestedSubcat) => (
-                                                        <Link
-                                                          key={nestedSubcat.id}
-                                                          to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}&nestedSubcategory=${nestedSubcat.slug}`}
-                                                          className="block px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
-                                                          onClick={() => {
-                                                            setIsProductsOpen(false);
-                                                            setHoveredCategory(null);
-                                                            setHoveredSubcategory(null);
-                                                            setHoveredSubsubcategory(null);
-                                                          }}
-                                                        >
-                                                          {nestedSubcat.name}
-                                                        </Link>
-                                                      ))}
-                                                    </div>
-                                                  </div>
-                                                )}
                                               </div>
                                             ))}
                                           </div>
@@ -344,19 +318,6 @@ export function Navbar() {
                                   >
                                     {subsubcat.name}
                                   </Link>
-                                  {nestedSubcategoriesBySubsubcategory[subsubcat.id]?.length > 0 && (
-                                    <div className="pl-4 space-y-1 border-l border-white/10 ml-3 mt-1">
-                                      {nestedSubcategoriesBySubsubcategory[subsubcat.id].map(nestedSubcat => (
-                                        <Link
-                                          key={nestedSubcat.id}
-                                          to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}&nestedSubcategory=${nestedSubcat.slug}`}
-                                          className="text-gray-600 hover:text-white block px-3 py-1.5 rounded-md text-[10px] transition-colors"
-                                        >
-                                          {nestedSubcat.name}
-                                        </Link>
-                                      ))}
-                                    </div>
-                                  )}
                                 </div>
                               ))}
                             </div>
