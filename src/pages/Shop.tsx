@@ -5,13 +5,14 @@ import { useCart } from '../context/CartContext';
 import { Search, Filter, ArrowRight } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
-import { fetchProducts, fetchCategories, fetchSubcategories, fetchSubsubcategories, Product, Category, Subcategory, Subsubcategory } from '../services/productService';
+import { fetchProducts, fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Product, Category, Subcategory, Subsubcategory, NestedSubcategory } from '../services/productService';
 
 export default function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [subsubcategories, setSubsubcategories] = useState<Subsubcategory[]>([]);
+  const [nestedSubcategories, setNestedSubcategories] = useState<NestedSubcategory[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
   const [isLoading, setIsLoading] = useState(true);
@@ -19,22 +20,24 @@ export default function Shop() {
   const categoryFilter = searchParams.get('category') || '';
   const subcategoryFilter = searchParams.get('subcategory') || '';
   const subsubcategoryFilter = searchParams.get('subsubcategory') || '';
+  const nestedSubcategoryFilter = searchParams.get('nestedSubcategory') || '';
   const searchQuery = searchParams.get('search') || '';
   const sortOption = searchParams.get('sort') || '';
 
   useEffect(() => {
-    // Fetch categories, subcategories, and subsubcategories
-    Promise.all([fetchCategories(), fetchSubcategories(), fetchSubsubcategories()]).then(([cats, subcats, subsubcats]) => {
+    // Fetch categories, subcategories, subsubcategories, and nested subcategories
+    Promise.all([fetchCategories(), fetchSubcategories(), fetchSubsubcategories(), fetchNestedSubcategories()]).then(([cats, subcats, subsubcats, nestedSubcats]) => {
       setCategories(cats);
       setSubcategories(subcats);
       setSubsubcategories(subsubcats);
+      setNestedSubcategories(nestedSubcats);
     });
   }, []);
 
   useEffect(() => {
     // Fetch products with filters
     setIsLoading(true);
-    fetchProducts(categoryFilter, subcategoryFilter, subsubcategoryFilter, searchQuery, sortOption)
+    fetchProducts(categoryFilter, subcategoryFilter, subsubcategoryFilter, nestedSubcategoryFilter, searchQuery, sortOption)
       .then(data => {
         setProducts(data);
         setIsLoading(false);
@@ -43,7 +46,7 @@ export default function Shop() {
         console.error(err);
         setIsLoading(false);
       });
-  }, [categoryFilter, subcategoryFilter, subsubcategoryFilter, searchQuery, sortOption]);
+  }, [categoryFilter, subcategoryFilter, subsubcategoryFilter, nestedSubcategoryFilter, searchQuery, sortOption]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,6 +84,15 @@ export default function Shop() {
     setSearchParams(prev => {
       if (slug) prev.set('subsubcategory', slug);
       else prev.delete('subsubcategory');
+      prev.delete('nestedSubcategory'); // Reset nested subcategory when subsubcategory changes
+      return prev;
+    });
+  };
+
+  const handleNestedSubcategoryChange = (slug: string) => {
+    setSearchParams(prev => {
+      if (slug) prev.set('nestedSubcategory', slug);
+      else prev.delete('nestedSubcategory');
       return prev;
     });
   };
@@ -104,7 +116,7 @@ export default function Shop() {
                   <Filter className="h-5 w-5 text-electric-blue" />
                   <h2>Filters</h2>
                 </div>
-                {(categoryFilter || subcategoryFilter || subsubcategoryFilter || searchQuery || sortOption) && (
+                {(categoryFilter || subcategoryFilter || subsubcategoryFilter || nestedSubcategoryFilter || searchQuery || sortOption) && (
                   <button 
                     onClick={() => setSearchParams({})}
                     className="text-xs text-slate-400 hover:text-electric-blue transition-colors"
@@ -150,16 +162,36 @@ export default function Shop() {
                               {subcategoryFilter === subcat.slug && subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).length > 0 && (
                                 <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
                                   {subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).map(subsubcat => (
-                                    <label key={subsubcat.id} className="flex items-center space-x-2 cursor-pointer">
-                                      <input 
-                                        type="radio" 
-                                        name="subsubcategory" 
-                                        checked={subsubcategoryFilter === subsubcat.slug}
-                                        onChange={() => handleSubsubcategoryChange(subsubcat.slug)}
-                                        className="text-pink-500 focus:ring-pink-500 bg-white/5 border-white/10"
-                                      />
-                                      <span className={subsubcategoryFilter === subsubcat.slug ? 'font-medium text-white text-xs' : 'text-slate-400 text-xs'}>{subsubcat.name}</span>
-                                    </label>
+                                    <div key={subsubcat.id} className="space-y-1">
+                                      <label className="flex items-center space-x-2 cursor-pointer">
+                                        <input 
+                                          type="radio" 
+                                          name="subsubcategory" 
+                                          checked={subsubcategoryFilter === subsubcat.slug}
+                                          onChange={() => handleSubsubcategoryChange(subsubcat.slug)}
+                                          className="text-pink-500 focus:ring-pink-500 bg-white/5 border-white/10"
+                                        />
+                                        <span className={subsubcategoryFilter === subsubcat.slug ? 'font-medium text-white text-xs' : 'text-slate-400 text-xs'}>{subsubcat.name}</span>
+                                      </label>
+
+                                      {/* Nested Subcategories */}
+                                      {subsubcategoryFilter === subsubcat.slug && nestedSubcategories.filter(nested => nested.subsubcategory_id === subsubcat.id).length > 0 && (
+                                        <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
+                                          {nestedSubcategories.filter(nested => nested.subsubcategory_id === subsubcat.id).map(nestedSubcat => (
+                                            <label key={nestedSubcat.id} className="flex items-center space-x-2 cursor-pointer">
+                                              <input 
+                                                type="radio" 
+                                                name="nestedSubcategory" 
+                                                checked={nestedSubcategoryFilter === nestedSubcat.slug}
+                                                onChange={() => handleNestedSubcategoryChange(nestedSubcat.slug)}
+                                                className="text-amber-500 focus:ring-amber-500 bg-white/5 border-white/10"
+                                              />
+                                              <span className={nestedSubcategoryFilter === nestedSubcat.slug ? 'font-medium text-white text-[10px]' : 'text-slate-400 text-[10px]'}>{nestedSubcat.name}</span>
+                                            </label>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
                                   ))}
                                 </div>
                               )}
@@ -240,6 +272,12 @@ export default function Shop() {
                             <>
                               <span className="text-slate-500">•</span>
                               <span className="text-pink-400">{product.subsubcategory_name}</span>
+                            </>
+                          )}
+                          {product.nested_subcategory_name && (
+                            <>
+                              <span className="text-slate-500">•</span>
+                              <span className="text-amber-400">{product.nested_subcategory_name}</span>
                             </>
                           )}
                         </div>

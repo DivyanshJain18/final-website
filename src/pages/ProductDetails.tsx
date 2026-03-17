@@ -135,6 +135,11 @@ export default function ProductDetails() {
                       {product.subsubcategory_name}
                     </span>
                   )}
+                  {product.nested_subcategory_name && (
+                    <span className="inline-block px-3 py-1 text-xs font-bold tracking-wider text-amber-400 uppercase bg-amber-500/10 rounded-full border border-amber-500/20">
+                      {product.nested_subcategory_name}
+                    </span>
+                  )}
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{product.name}</h1>
                 <div className="mb-6">

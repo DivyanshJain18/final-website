@@ -15,11 +15,13 @@ export interface Product {
   category_id: string;
   subcategory_id?: string;
   subsubcategory_id?: string;
+  nested_subcategory_id?: string;
   image_url: string;
   created_at?: string;
   category_name?: string;
   subcategory_name?: string;
   subsubcategory_name?: string;
+  nested_subcategory_name?: string;
 }
 
 export interface Category {
@@ -45,11 +47,28 @@ export interface Subsubcategory {
   subcategory_id: string;
 }
 
-export const fetchProducts = async (categorySlug?: string, subcategorySlug?: string, subsubcategorySlug?: string, search?: string, sort?: string) => {
+export interface NestedSubcategory {
+  id?: string;
+  name: string;
+  slug: string;
+  description: string;
+  subsubcategory_id: string;
+}
+
+export const fetchProducts = async (categorySlug?: string, subcategorySlug?: string, subsubcategorySlug?: string, nestedSubcategorySlug?: string, search?: string, sort?: string) => {
   let q = collection(db, 'products');
   const queryConstraints: any[] = [];
 
-  if (subsubcategorySlug) {
+  if (nestedSubcategorySlug) {
+    const nestedSubcatQuery = query(collection(db, 'nested_subcategories'), where('slug', '==', nestedSubcategorySlug));
+    const nestedSubcatSnap = await getDocs(nestedSubcatQuery);
+    if (!nestedSubcatSnap.empty) {
+      const nestedSubcatId = nestedSubcatSnap.docs[0].id;
+      queryConstraints.push(where('nested_subcategory_id', '==', nestedSubcatId));
+    } else {
+      return [];
+    }
+  } else if (subsubcategorySlug) {
     const subsubcatQuery = query(collection(db, 'subsubcategories'), where('slug', '==', subsubcategorySlug));
     const subsubcatSnap = await getDocs(subsubcatQuery);
     if (!subsubcatSnap.empty) {
@@ -126,11 +145,19 @@ export const fetchProducts = async (categorySlug?: string, subcategorySlug?: str
     return acc;
   }, {} as Record<string, string>);
 
+  // Fetch nested subcategory names
+  const nestedSubcatSnapshot = await getDocs(collection(db, 'nested_subcategories'));
+  const nestedSubcategories = nestedSubcatSnapshot.docs.reduce((acc, doc) => {
+    acc[doc.id] = doc.data().name;
+    return acc;
+  }, {} as Record<string, string>);
+
   return products.map(p => ({ 
     ...p, 
     category_name: categories[p.category_id] || 'Unknown',
     subcategory_name: p.subcategory_id ? subcategories[p.subcategory_id] || 'Unknown' : undefined,
-    subsubcategory_name: p.subsubcategory_id ? subsubcategories[p.subsubcategory_id] || 'Unknown' : undefined
+    subsubcategory_name: p.subsubcategory_id ? subsubcategories[p.subsubcategory_id] || 'Unknown' : undefined,
+    nested_subcategory_name: p.nested_subcategory_id ? nestedSubcategories[p.nested_subcategory_id] || 'Unknown' : undefined
   }));
 };
 
@@ -161,6 +188,13 @@ export const fetchProductBySlug = async (slug: string) => {
       product.subsubcategory_name = subsubcatDoc.data().name;
     }
   }
+
+  if (product.nested_subcategory_id) {
+    const nestedSubcatDoc = await getDoc(doc(db, 'nested_subcategories', product.nested_subcategory_id));
+    if (nestedSubcatDoc.exists()) {
+      product.nested_subcategory_name = nestedSubcatDoc.data().name;
+    }
+  }
   
   return product;
 };
@@ -178,6 +212,11 @@ export const fetchSubcategories = async () => {
 export const fetchSubsubcategories = async () => {
   const snapshot = await getDocs(collection(db, 'subsubcategories'));
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subsubcategory));
+};
+
+export const fetchNestedSubcategories = async () => {
+  const snapshot = await getDocs(collection(db, 'nested_subcategories'));
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as NestedSubcategory));
 };
 
 export const addProduct = async (product: Product) => {
@@ -250,6 +289,22 @@ export const updateSubsubcategory = async (id: string, updates: Partial<Subsubca
 
 export const deleteSubsubcategory = async (id: string) => {
   const docRef = doc(db, 'subsubcategories', id);
+  await deleteDoc(docRef);
+};
+
+export const addNestedSubcategory = async (nestedSubcategory: NestedSubcategory) => {
+  const docRef = await addDoc(collection(db, 'nested_subcategories'), nestedSubcategory);
+  return { id: docRef.id, ...nestedSubcategory };
+};
+
+export const updateNestedSubcategory = async (id: string, updates: Partial<NestedSubcategory>) => {
+  const docRef = doc(db, 'nested_subcategories', id);
+  await updateDoc(docRef, updates);
+  return { id, ...updates };
+};
+
+export const deleteNestedSubcategory = async (id: string) => {
+  const docRef = doc(db, 'nested_subcategories', id);
   await deleteDoc(docRef);
 };
 
