@@ -24,6 +24,13 @@ export default function Shop() {
   const searchQuery = searchParams.get('search') || '';
   const sortOption = searchParams.get('sort') || '';
 
+  // Normalize slugs for robust matching (handles casing and hyphenation mismatches)
+  const normalizeSlug = (slug: string) => slug ? slug.toLowerCase().replace(/\s+/g, '-') : '';
+  const normalizedCategoryFilter = normalizeSlug(categoryFilter);
+  const normalizedSubcategoryFilter = normalizeSlug(subcategoryFilter);
+  const normalizedSubsubcategoryFilter = normalizeSlug(subsubcategoryFilter);
+  const normalizedNestedSubcategoryFilter = normalizeSlug(nestedSubcategoryFilter);
+
   useEffect(() => {
     // Fetch categories, subcategories, subsubcategories, and nested subcategories
     Promise.all([fetchCategories(), fetchSubcategories(), fetchSubsubcategories(), fetchNestedSubcategories()]).then(([cats, subcats, subsubcats, nestedSubcats]) => {
@@ -135,15 +142,15 @@ export default function Shop() {
                         <input 
                           type="radio" 
                           name="category" 
-                          checked={categoryFilter === cat.slug}
+                          checked={normalizedCategoryFilter === normalizeSlug(cat.slug)}
                           onChange={() => handleCategoryChange(cat.slug)}
                           className="text-electric-blue focus:ring-electric-blue bg-white/5 border-white/10"
                         />
-                        <span className={categoryFilter === cat.slug ? 'font-medium text-white' : 'text-slate-400'}>{cat.name}</span>
+                        <span className={normalizedCategoryFilter === normalizeSlug(cat.slug) ? 'font-medium text-white' : 'text-slate-400'}>{cat.name}</span>
                       </label>
                       
                       {/* Subcategories */}
-                      {categoryFilter === cat.slug && subcategories.filter(sub => sub.category_id === cat.id).length > 0 && (
+                      {normalizedCategoryFilter === normalizeSlug(cat.slug) && subcategories.filter(sub => sub.category_id === cat.id).length > 0 && (
                         <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
                           {subcategories.filter(sub => sub.category_id === cat.id).map(subcat => (
                             <div key={subcat.id} className="space-y-1">
@@ -151,15 +158,15 @@ export default function Shop() {
                                 <input 
                                   type="radio" 
                                   name="subcategory" 
-                                  checked={subcategoryFilter === subcat.slug}
+                                  checked={normalizedSubcategoryFilter === normalizeSlug(subcat.slug)}
                                   onChange={() => handleSubcategoryChange(subcat.slug)}
                                   className="text-purple-500 focus:ring-purple-500 bg-white/5 border-white/10"
                                 />
-                                <span className={subcategoryFilter === subcat.slug ? 'font-medium text-white text-sm' : 'text-slate-400 text-sm'}>{subcat.name}</span>
+                                <span className={normalizedSubcategoryFilter === normalizeSlug(subcat.slug) ? 'font-medium text-white text-sm' : 'text-slate-400 text-sm'}>{subcat.name}</span>
                               </label>
 
                               {/* Subsubcategories */}
-                              {subcategoryFilter === subcat.slug && subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).length > 0 && (
+                              {normalizedSubcategoryFilter === normalizeSlug(subcat.slug) && subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).length > 0 && (
                                 <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
                                   {subsubcategories.filter(subsub => subsub.subcategory_id === subcat.id).map(subsubcat => (
                                     <div key={subsubcat.id} className="space-y-1">
@@ -167,26 +174,26 @@ export default function Shop() {
                                         <input 
                                           type="radio" 
                                           name="subsubcategory" 
-                                          checked={subsubcategoryFilter === subsubcat.slug}
+                                          checked={normalizedSubsubcategoryFilter === normalizeSlug(subsubcat.slug)}
                                           onChange={() => handleSubsubcategoryChange(subsubcat.slug)}
                                           className="text-pink-500 focus:ring-pink-500 bg-white/5 border-white/10"
                                         />
-                                        <span className={subsubcategoryFilter === subsubcat.slug ? 'font-medium text-white text-xs' : 'text-slate-400 text-xs'}>{subsubcat.name}</span>
+                                        <span className={normalizedSubsubcategoryFilter === normalizeSlug(subsubcat.slug) ? 'font-medium text-white text-xs' : 'text-slate-400 text-xs'}>{subsubcat.name}</span>
                                       </label>
 
                                       {/* Nested Subcategories */}
-                                      {subsubcategoryFilter === subsubcat.slug && nestedSubcategories.filter(nested => nested.subsubcategory_id === subsubcat.id).length > 0 && (
+                                      {normalizedSubsubcategoryFilter === normalizeSlug(subsubcat.slug) && nestedSubcategories.filter(nested => nested.subsubcategory_id === subsubcat.id).length > 0 && (
                                         <div className="pl-6 space-y-1 mt-1 border-l border-white/10 ml-2">
                                           {nestedSubcategories.filter(nested => nested.subsubcategory_id === subsubcat.id).map(nestedSubcat => (
                                             <label key={nestedSubcat.id} className="flex items-center space-x-2 cursor-pointer">
                                               <input 
                                                 type="radio" 
                                                 name="nestedSubcategory" 
-                                                checked={nestedSubcategoryFilter === nestedSubcat.slug}
+                                                checked={normalizedNestedSubcategoryFilter === normalizeSlug(nestedSubcat.slug)}
                                                 onChange={() => handleNestedSubcategoryChange(nestedSubcat.slug)}
                                                 className="text-amber-500 focus:ring-amber-500 bg-white/5 border-white/10"
                                               />
-                                              <span className={nestedSubcategoryFilter === nestedSubcat.slug ? 'font-medium text-white text-[10px]' : 'text-slate-400 text-[10px]'}>{nestedSubcat.name}</span>
+                                              <span className={normalizedNestedSubcategoryFilter === normalizeSlug(nestedSubcat.slug) ? 'font-medium text-white text-[10px]' : 'text-slate-400 text-[10px]'}>{nestedSubcat.name}</span>
                                             </label>
                                           ))}
                                         </div>

@@ -59,41 +59,37 @@ export const fetchProducts = async (categorySlug?: string, subcategorySlug?: str
   let q = collection(db, 'products');
   const queryConstraints: any[] = [];
 
+  const normalizeSlug = (slug: string) => slug ? slug.toLowerCase().replace(/\s+/g, '-') : '';
+
   if (nestedSubcategorySlug) {
-    const nestedSubcatQuery = query(collection(db, 'nested_subcategories'), where('slug', '==', nestedSubcategorySlug));
-    const nestedSubcatSnap = await getDocs(nestedSubcatQuery);
-    if (!nestedSubcatSnap.empty) {
-      const nestedSubcatId = nestedSubcatSnap.docs[0].id;
-      queryConstraints.push(where('nested_subcategory_id', '==', nestedSubcatId));
+    const snap = await getDocs(collection(db, 'nested_subcategories'));
+    const match = snap.docs.find(doc => normalizeSlug(doc.data().slug) === normalizeSlug(nestedSubcategorySlug));
+    if (match) {
+      queryConstraints.push(where('nested_subcategory_id', '==', match.id));
     } else {
       return [];
     }
   } else if (subsubcategorySlug) {
-    const subsubcatQuery = query(collection(db, 'subsubcategories'), where('slug', '==', subsubcategorySlug));
-    const subsubcatSnap = await getDocs(subsubcatQuery);
-    if (!subsubcatSnap.empty) {
-      const subsubcatId = subsubcatSnap.docs[0].id;
-      queryConstraints.push(where('subsubcategory_id', '==', subsubcatId));
+    const snap = await getDocs(collection(db, 'subsubcategories'));
+    const match = snap.docs.find(doc => normalizeSlug(doc.data().slug) === normalizeSlug(subsubcategorySlug));
+    if (match) {
+      queryConstraints.push(where('subsubcategory_id', '==', match.id));
     } else {
       return [];
     }
   } else if (subcategorySlug) {
-    // We need to get the subcategory ID first
-    const subcatQuery = query(collection(db, 'subcategories'), where('slug', '==', subcategorySlug));
-    const subcatSnap = await getDocs(subcatQuery);
-    if (!subcatSnap.empty) {
-      const subcatId = subcatSnap.docs[0].id;
-      queryConstraints.push(where('subcategory_id', '==', subcatId));
+    const snap = await getDocs(collection(db, 'subcategories'));
+    const match = snap.docs.find(doc => normalizeSlug(doc.data().slug) === normalizeSlug(subcategorySlug));
+    if (match) {
+      queryConstraints.push(where('subcategory_id', '==', match.id));
     } else {
       return [];
     }
   } else if (categorySlug) {
-    // We need to get the category ID first
-    const catQuery = query(collection(db, 'categories'), where('slug', '==', categorySlug));
-    const catSnap = await getDocs(catQuery);
-    if (!catSnap.empty) {
-      const catId = catSnap.docs[0].id;
-      queryConstraints.push(where('category_id', '==', catId));
+    const snap = await getDocs(collection(db, 'categories'));
+    const match = snap.docs.find(doc => normalizeSlug(doc.data().slug) === normalizeSlug(categorySlug));
+    if (match) {
+      queryConstraints.push(where('category_id', '==', match.id));
     } else {
       return [];
     }
