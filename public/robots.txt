@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+
+# Ensure Googlebot-Image can crawl your favicons and logos
+User-agent: Googlebot-Image
+Allow: /favicon-48x48.png
+Allow: /favicon-96x96.png
+Allow: /favicon-144x144.png
+Allow: /favicon-192x192.png
+Allow: /favicon.ico
+Allow: /apple-touch-icon.png
+Allow: /favicon.svg
+
+# Sitemap location (update with your actual domain when deployed)
+Sitemap: https://www.mechafyglobal.com/sitemap.xml

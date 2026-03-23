@@ -65,7 +65,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen text-slate-200 flex flex-col">
       {/* Advanced Meta Tags for 2026 SEO */}
-      <title>Robotics Hardware & IT Services | Mechafy Global</title>
+      <title>Robotics and Computer Hardware & IT Services | Mechafy Global</title>
       <meta name="description" content="Shop premium robotics, microcontrollers & PC components. Mechafy Global also offers B2B IT services: custom software, web design & digital marketing." />
       <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
       
