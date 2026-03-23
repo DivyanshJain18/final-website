@@ -25,7 +25,14 @@ export default function Shop() {
   const sortOption = searchParams.get('sort') || '';
 
   // Normalize slugs for robust matching (handles casing and hyphenation mismatches)
-  const normalizeSlug = (slug: string) => slug ? slug.toLowerCase().replace(/\s+/g, '-') : '';
+  const normalizeSlug = (slug: string) => {
+    if (!slug) return '';
+    try {
+      return decodeURIComponent(slug).toLowerCase().replace(/\s+/g, '-');
+    } catch (e) {
+      return slug.toLowerCase().replace(/\s+/g, '-');
+    }
+  };
   const normalizedCategoryFilter = normalizeSlug(categoryFilter);
   const normalizedSubcategoryFilter = normalizeSlug(subcategoryFilter);
   const normalizedSubsubcategoryFilter = normalizeSlug(subsubcategoryFilter);

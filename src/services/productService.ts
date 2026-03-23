@@ -59,7 +59,14 @@ export const fetchProducts = async (categorySlug?: string, subcategorySlug?: str
   let q = collection(db, 'products');
   const queryConstraints: any[] = [];
 
-  const normalizeSlug = (slug: string) => slug ? slug.toLowerCase().replace(/\s+/g, '-') : '';
+  const normalizeSlug = (slug: string) => {
+    if (!slug) return '';
+    try {
+      return decodeURIComponent(slug).toLowerCase().replace(/\s+/g, '-');
+    } catch (e) {
+      return slug.toLowerCase().replace(/\s+/g, '-');
+    }
+  };
 
   if (nestedSubcategorySlug) {
     const snap = await getDocs(collection(db, 'nested_subcategories'));

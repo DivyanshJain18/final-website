@@ -157,7 +157,7 @@ export function Navbar() {
                             onMouseLeave={() => setHoveredCategory(null)}
                           >
                             <Link
-                              to={`/shop?category=${category.slug}`}
+                              to={`/shop?category=${encodeURIComponent(category.slug || '')}`}
                               className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
                               role="menuitem"
                               onClick={() => setIsProductsOpen(false)}
@@ -180,7 +180,7 @@ export function Navbar() {
                                       onMouseLeave={() => setHoveredSubcategory(null)}
                                     >
                                       <Link
-                                        to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                                        to={`/shop?category=${encodeURIComponent(category.slug || '')}&subcategory=${encodeURIComponent(subcat.slug || '')}`}
                                         className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
                                         onClick={() => {
                                           setIsProductsOpen(false);
@@ -206,7 +206,7 @@ export function Navbar() {
                                                 onMouseLeave={() => setHoveredSubsubcategory(null)}
                                               >
                                                 <Link
-                                                  to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
+                                                  to={`/shop?category=${encodeURIComponent(category.slug || '')}&subcategory=${encodeURIComponent(subcat.slug || '')}&subsubcategory=${encodeURIComponent(subsubcat.slug || '')}`}
                                                   className="flex items-center justify-between px-4 py-2 text-sm text-slate-300 hover:bg-white/10 hover:text-white transition-colors"
                                                   onClick={() => {
                                                     setIsProductsOpen(false);
@@ -315,7 +315,7 @@ export function Navbar() {
                     <div key={category.id}>
                       <div className="flex items-center justify-between pr-2">
                         <Link
-                          to={`/shop?category=${category.slug}`}
+                          to={`/shop?category=${encodeURIComponent(category.slug || '')}`}
                           onClick={() => setIsMenuOpen(false)}
                           className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-sm transition-colors flex-grow"
                         >
@@ -341,7 +341,7 @@ export function Navbar() {
                               <div key={subcat.id}>
                                 <div className="flex items-center justify-between pr-2">
                                   <Link
-                                    to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                                    to={`/shop?category=${encodeURIComponent(category.slug || '')}&subcategory=${encodeURIComponent(subcat.slug || '')}`}
                                     onClick={() => setIsMenuOpen(false)}
                                     className="text-gray-400 hover:text-white block px-3 py-1.5 rounded-md text-sm transition-colors flex-grow"
                                   >
@@ -362,7 +362,7 @@ export function Navbar() {
                                     {subsubcategoriesBySubcategory[subcat.id].map(subsubcat => (
                                       <div key={subsubcat.id}>
                                         <Link
-                                          to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
+                                          to={`/shop?category=${encodeURIComponent(category.slug || '')}&subcategory=${encodeURIComponent(subcat.slug || '')}&subsubcategory=${encodeURIComponent(subsubcat.slug || '')}`}
                                           onClick={() => setIsMenuOpen(false)}
                                           className="text-gray-500 hover:text-white block px-3 py-1.5 rounded-md text-xs transition-colors"
                                         >

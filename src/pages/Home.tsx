@@ -37,17 +37,17 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-white mb-8">Popular Categories</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <CategoryCard 
-              title="Robotics" 
+              title="Robotic Components" 
               icon={<Cpu className="h-8 w-8 text-electric-blue" />} 
-              description="Chassis, servos, and complete kits for your next bot."
-              link="/shop?category=robotics"
+              description="Motors, sensors, and components for your next bot."
+              link="/shop?category=robotic-components"
               delay={0}
             />
             <CategoryCard 
-              title="Microcontrollers" 
+              title="Computer Components" 
               icon={<Zap className="h-8 w-8 text-yellow-500" />} 
-              description="Arduino, ESP32, and Raspberry Pi boards."
-              link="/shop?category=microcontrollers"
+              description="Processors, memory, and high-performance hardware."
+              link="/shop?category=computer-components"
               delay={0.1}
             />
             <CategoryCard 
