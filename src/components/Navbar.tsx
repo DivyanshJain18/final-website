@@ -10,6 +10,8 @@ export function Navbar() {
   const { items } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
+  const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
+  const [expandedMobileCategories, setExpandedMobileCategories] = useState<Record<string, boolean>>({});
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategoriesByCategory, setSubcategoriesByCategory] = useState<Record<string, Subcategory[]>>({});
   const [subsubcategoriesBySubcategory, setSubsubcategoriesBySubcategory] = useState<Record<string, Subsubcategory[]>>({});
@@ -85,6 +87,13 @@ export function Navbar() {
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  };
+
+  const toggleMobileCategory = (id: string) => {
+    setExpandedMobileCategories(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
   const handleMouseEnter = () => {
@@ -283,63 +292,107 @@ export function Navbar() {
         <div
           className="md:hidden bg-navy-900/95 backdrop-blur-md border-b border-white/10"
         >
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link to="/" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Home</Link>
-            <Link to="/about" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Company Profile</Link>
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 max-h-[80vh] overflow-y-auto">
+            <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Home</Link>
+            <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Company Profile</Link>
             
-            <div className="px-3 py-2 text-electric-blue font-medium text-base">Products</div>
-            <div className="pl-6 space-y-1 border-l border-white/10 ml-3">
-              <Link to="/shop" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-sm transition-colors">All Products</Link>
-              {categories.map((category) => (
-                <div key={category.id}>
-                  <Link
-                    to={`/shop?category=${category.slug}`}
-                    className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-sm transition-colors"
-                  >
-                    {category.name}
-                  </Link>
-                  {subcategoriesByCategory[category.id]?.length > 0 && (
-                    <div className="pl-4 space-y-1 border-l border-white/10 ml-3 mt-1">
-                      {subcategoriesByCategory[category.id].map(subcat => (
-                        <div key={subcat.id}>
-                          <Link
-                            to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
-                            className="text-gray-400 hover:text-white block px-3 py-1.5 rounded-md text-sm transition-colors"
+            <button 
+              onClick={() => setIsMobileProductsOpen(!isMobileProductsOpen)}
+              className="w-full flex items-center justify-between px-3 py-2 text-gray-300 hover:text-white rounded-md text-base font-medium transition-colors"
+            >
+              <span>Products</span>
+              <ChevronDown className={`h-5 w-5 transition-transform ${isMobileProductsOpen ? 'rotate-180' : ''}`} />
+            </button>
+            
+            {isMobileProductsOpen && (
+              <div className="pl-4 space-y-1 border-l border-white/10 ml-4 mb-2">
+                <Link to="/shop" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-sm transition-colors">All Products</Link>
+                {categories.map((category) => {
+                  const hasSubcats = subcategoriesByCategory[category.id]?.length > 0;
+                  const isExpanded = expandedMobileCategories[category.id];
+                  
+                  return (
+                    <div key={category.id}>
+                      <div className="flex items-center justify-between pr-2">
+                        <Link
+                          to={`/shop?category=${category.slug}`}
+                          onClick={() => setIsMenuOpen(false)}
+                          className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-sm transition-colors flex-grow"
+                        >
+                          {category.name}
+                        </Link>
+                        {hasSubcats && (
+                          <button 
+                            onClick={() => toggleMobileCategory(category.id)}
+                            className="p-2 text-gray-400 hover:text-white focus:outline-none"
                           >
-                            {subcat.name}
-                          </Link>
-                          {subsubcategoriesBySubcategory[subcat.id]?.length > 0 && (
-                            <div className="pl-4 space-y-1 border-l border-white/10 ml-3 mt-1">
-                              {subsubcategoriesBySubcategory[subcat.id].map(subsubcat => (
-                                <div key={subsubcat.id}>
+                            <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                        )}
+                      </div>
+                      
+                      {hasSubcats && isExpanded && (
+                        <div className="pl-4 space-y-1 border-l border-white/10 ml-3 mt-1">
+                          {subcategoriesByCategory[category.id].map(subcat => {
+                            const hasSubsubcats = subsubcategoriesBySubcategory[subcat.id]?.length > 0;
+                            const isSubExpanded = expandedMobileCategories[subcat.id];
+                            
+                            return (
+                              <div key={subcat.id}>
+                                <div className="flex items-center justify-between pr-2">
                                   <Link
-                                    to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
-                                    className="text-gray-500 hover:text-white block px-3 py-1.5 rounded-md text-xs transition-colors"
+                                    to={`/shop?category=${category.slug}&subcategory=${subcat.slug}`}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="text-gray-400 hover:text-white block px-3 py-1.5 rounded-md text-sm transition-colors flex-grow"
                                   >
-                                    {subsubcat.name}
+                                    {subcat.name}
                                   </Link>
+                                  {hasSubsubcats && (
+                                    <button 
+                                      onClick={() => toggleMobileCategory(subcat.id)}
+                                      className="p-1.5 text-gray-500 hover:text-white focus:outline-none"
+                                    >
+                                      <ChevronDown className={`h-3 w-3 transition-transform ${isSubExpanded ? 'rotate-180' : ''}`} />
+                                    </button>
+                                  )}
                                 </div>
-                              ))}
-                            </div>
-                          )}
+                                
+                                {hasSubsubcats && isSubExpanded && (
+                                  <div className="pl-4 space-y-1 border-l border-white/10 ml-3 mt-1">
+                                    {subsubcategoriesBySubcategory[subcat.id].map(subsubcat => (
+                                      <div key={subsubcat.id}>
+                                        <Link
+                                          to={`/shop?category=${category.slug}&subcategory=${subcat.slug}&subsubcategory=${subsubcat.slug}`}
+                                          onClick={() => setIsMenuOpen(false)}
+                                          className="text-gray-500 hover:text-white block px-3 py-1.5 rounded-md text-xs transition-colors"
+                                        >
+                                          {subsubcat.name}
+                                        </Link>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
-                      ))}
+                      )}
                     </div>
-                  )}
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
 
-            <Link to="/it-services" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">IT Services</Link>
-            <Link to="/contact" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Contact Us</Link>
+            <Link to="/it-services" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">IT Services</Link>
+            <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Contact Us</Link>
             
             {user && user.role === 'admin' ? (
               <>
-                <Link to="/admin" className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Admin Dashboard</Link>
+                <Link to="/admin" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Admin Dashboard</Link>
                 <button onClick={handleLogout} className="text-left w-full text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Logout</button>
               </>
             ) : (
-              <Link to="/contact" className="btn-glow block mt-4 text-center mx-3">
+              <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="btn-glow block mt-4 text-center mx-3">
                 Request a Quote
               </Link>
             )}
