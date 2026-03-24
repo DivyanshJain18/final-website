@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight, Search, Loader2 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Category, Subcategory, Subsubcategory, NestedSubcategory } from '../services/productService';
+import { fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, fetchProducts, Category, Subcategory, Subsubcategory, NestedSubcategory, Product } from '../services/productService';
 
 export function Navbar() {
   const { user, logout } = useAuth();
@@ -19,8 +19,49 @@ export function Navbar() {
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
   const [hoveredSubcategory, setHoveredSubcategory] = useState<string | null>(null);
   const [hoveredSubsubcategory, setHoveredSubsubcategory] = useState<string | null>(null);
+  
+  // Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showSearchResults, setShowSearchResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
   const navigate = useNavigate();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
+        fetchProducts(undefined, undefined, undefined, undefined, searchQuery)
+          .then(results => {
+            setSearchResults(results.slice(0, 5)); // Limit to 5 results
+            setIsSearching(false);
+            setShowSearchResults(true);
+          })
+          .catch(err => {
+            console.error('Search error:', err);
+            setIsSearching(false);
+          });
+      } else {
+        setSearchResults([]);
+        setShowSearchResults(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   useEffect(() => {
     // Fetch Categories
@@ -258,6 +299,73 @@ export function Navbar() {
               </div>
             </div>
           </div>
+
+          {/* Search Bar */}
+          <div className="hidden lg:flex flex-1 max-w-sm xl:max-w-md mx-4 relative" ref={searchRef}>
+            <div className="relative w-full">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSearchResults(true);
+                }}
+                onFocus={() => {
+                  if (searchQuery.trim().length >= 2) setShowSearchResults(true);
+                }}
+                placeholder="Search products (e.g., ESP32)..."
+                className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-electric-blue transition-all"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-slate-400" />
+              </div>
+              {isSearching && (
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <Loader2 className="h-4 w-4 text-electric-blue animate-spin" />
+                </div>
+              )}
+            </div>
+
+            {/* Search Dropdown */}
+            {showSearchResults && (
+              <div className="absolute top-full mt-2 w-full bg-navy-900/95 backdrop-blur-md border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                {searchResults.length > 0 ? (
+                  <div className="max-h-96 overflow-y-auto py-2">
+                    {searchResults.map((product) => (
+                      <Link
+                        key={product.id}
+                        to={`/product/${product.slug}`}
+                        onClick={() => {
+                          setShowSearchResults(false);
+                          setSearchQuery('');
+                        }}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
+                      >
+                        <div className="w-10 h-10 rounded-md overflow-hidden bg-white/5 shrink-0">
+                          {product.image_url ? (
+                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <Package className="w-full h-full p-2 text-slate-400" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-white truncate">{product.name}</h4>
+                          <p className="text-xs text-electric-blue font-semibold mt-0.5">
+                            ₹{product.price.toLocaleString('en-IN')}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                ) : searchQuery.trim().length >= 2 && !isSearching ? (
+                  <div className="px-4 py-6 text-center text-sm text-slate-400">
+                    No products found for "{searchQuery}"
+                  </div>
+                ) : null}
+              </div>
+            )}
+          </div>
+
           <div className="hidden md:block">
             <div className="ml-2 flex items-center md:ml-4 space-x-2 lg:space-x-4">
               {user && user.role === 'admin' ? (
@@ -293,6 +401,73 @@ export function Navbar() {
           className="md:hidden bg-navy-900/95 backdrop-blur-md border-b border-white/10"
         >
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 max-h-[80vh] overflow-y-auto">
+            {/* Mobile Search Bar */}
+            <div className="px-3 py-2 mb-2 relative">
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSearchResults(true);
+                  }}
+                  onFocus={() => {
+                    if (searchQuery.trim().length >= 2) setShowSearchResults(true);
+                  }}
+                  placeholder="Search products..."
+                  className="w-full bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-electric-blue transition-all"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-slate-400" />
+                </div>
+                {isSearching && (
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                    <Loader2 className="h-4 w-4 text-electric-blue animate-spin" />
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Search Dropdown */}
+              {showSearchResults && (
+                <div className="absolute top-full left-3 right-3 mt-1 bg-navy-800 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                  {searchResults.length > 0 ? (
+                    <div className="max-h-60 overflow-y-auto py-2">
+                      {searchResults.map((product) => (
+                        <Link
+                          key={product.id}
+                          to={`/product/${product.slug}`}
+                          onClick={() => {
+                            setShowSearchResults(false);
+                            setSearchQuery('');
+                            setIsMenuOpen(false);
+                          }}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
+                        >
+                          <div className="w-10 h-10 rounded-md overflow-hidden bg-white/5 shrink-0">
+                            {product.image_url ? (
+                              <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Package className="w-full h-full p-2 text-slate-400" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-white truncate">{product.name}</h4>
+                            <p className="text-xs text-electric-blue font-semibold mt-0.5">
+                              ₹{product.price.toLocaleString('en-IN')}
+                            </p>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : searchQuery.trim().length >= 2 && !isSearching ? (
+                    <div className="px-4 py-4 text-center text-sm text-slate-400">
+                      No products found
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </div>
+
             <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Home</Link>
             <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Company Profile</Link>
             
