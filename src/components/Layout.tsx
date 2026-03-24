@@ -5,6 +5,7 @@ import { PageTransition } from './PageTransition';
 import { FaFacebook, FaInstagram, FaLinkedin } from 'react-icons/fa6';
 import { Link } from 'react-router-dom';
 import { fetchCategories, Category } from '../services/productService';
+import { CookieConsent } from './CookieConsent';
 
 export function Layout({ children }: { children: ReactNode }) {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -134,11 +135,12 @@ export function Layout({ children }: { children: ReactNode }) {
               </nav>
 
               <nav aria-label="Company Links">
-                <h2 className="text-white text-lg font-bold mb-4">Company & Services</h2>
+                <h2 className="text-white text-lg font-bold mb-4">Support</h2>
                 <ul className="space-y-2 text-sm">
-                  <li><Link to="/about" aria-label="Learn more about Mechafy Global" className="hover:text-cyan-400 transition-colors">About Us</Link></li>
-                  <li><Link to="/it-services" aria-label="Explore our B2B IT Services" className="hover:text-cyan-400 transition-colors">IT Services</Link></li>
                   <li><Link to="/contact" aria-label="Contact our support team" className="hover:text-cyan-400 transition-colors">Contact Us</Link></li>
+                  <li><Link to="/faq" aria-label="Frequently Asked Questions" className="hover:text-cyan-400 transition-colors">FAQ</Link></li>
+                  <li><Link to="/privacy-policy" aria-label="Privacy Policy" className="hover:text-cyan-400 transition-colors">Privacy Policy</Link></li>
+                  <li><Link to="/terms-conditions" aria-label="Terms & Conditions" className="hover:text-cyan-400 transition-colors">Terms & Conditions</Link></li>
                 </ul>
               </nav>
               
@@ -157,6 +159,7 @@ export function Layout({ children }: { children: ReactNode }) {
           </Reveal>
         </div>
       </footer>
+      <CookieConsent />
     </div>
   );
 }

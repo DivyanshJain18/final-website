@@ -9,6 +9,9 @@ import ProductDetails from './pages/ProductDetails';
 import Contact from './pages/Contact';
 import About from './pages/About';
 import ITServices from './pages/ITServices';
+import FAQPage from './pages/FAQPage';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
 
 import { Layout } from './components/Layout';
 
@@ -31,24 +34,6 @@ const Categories = () => (
   </Layout>
 );
 
-const PrivacyPolicy = () => (
-  <Layout>
-    <div className="text-white p-8">
-      <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
-      <p>Privacy Policy content goes here.</p>
-    </div>
-  </Layout>
-);
-
-const TermsConditions = () => (
-  <Layout>
-    <div className="text-white p-8">
-      <h1 className="text-3xl font-bold mb-4">Terms and Conditions</h1>
-      <p>Terms and Conditions content goes here.</p>
-    </div>
-  </Layout>
-);
-
 export default function App() {
   return (
     <BrowserRouter>
@@ -65,6 +50,7 @@ export default function App() {
             <Route path="/about" element={<About />} />
             <Route path="/it-services" element={<ITServices />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<FAQPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route path="/terms-conditions" element={<TermsConditions />} />
 

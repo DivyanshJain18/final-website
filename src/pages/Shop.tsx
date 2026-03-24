@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { useCart } from '../context/CartContext';
-import { Search, Filter, ArrowRight } from 'lucide-react';
+import { Search, Filter, ArrowRight, ChevronDown } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
 import { fetchProducts, fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Product, Category, Subcategory, Subsubcategory, NestedSubcategory } from '../services/productService';
@@ -16,6 +16,7 @@ export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { addToCart } = useCart();
   const [isLoading, setIsLoading] = useState(true);
+  const [isSeoExpanded, setIsSeoExpanded] = useState(false);
 
   const categoryFilter = searchParams.get('category') || '';
   const subcategoryFilter = searchParams.get('subcategory') || '';
@@ -353,6 +354,54 @@ export default function Shop() {
           </Reveal>
         </div>
       </div>
+
+      {/* SEO Content Section */}
+      <Reveal width="100%" delay={0.3}>
+        <section className="mt-20 pt-12 border-t border-white/10 mb-12">
+          <div className="max-w-4xl mx-auto">
+            <div className={`relative overflow-hidden transition-all duration-700 ease-in-out ${isSeoExpanded ? 'max-h-[2000px]' : 'max-h-[140px]'}`}>
+              <div className="prose prose-invert prose-slate max-w-none">
+                <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">Your Premier Robotic Component & Computer Parts Store</h2>
+                <p className="text-slate-400 leading-relaxed mb-8">
+                  Welcome to Mechafy Global, the ultimate destination for innovators, engineers, and DIY tech enthusiasts. Whether you are building complex industrial automation systems or upgrading your high-performance PC, we provide the reliable hardware you need to bring your vision to life.
+                </p>
+
+                <h3 className="text-xl font-semibold text-electric-blue mb-3">Top-Tier Robotics & Microcontrollers</h3>
+                <p className="text-slate-400 leading-relaxed mb-8">
+                  As a leading robotic component store, we specialize in high-quality, authentic parts for every level of engineering. From advanced microcontrollers (like Arduino and Raspberry Pi) to precision motor drivers, sensors, and structural chassis kits, our inventory is carefully curated to support IoT projects, STEM education, and professional prototyping.
+                </p>
+
+                <h3 className="text-xl font-semibold text-electric-blue mb-3">High-Performance Computer Components</h3>
+                <p className="text-slate-400 leading-relaxed mb-8">
+                  Beyond robotics, Mechafy Global is your trusted computer parts store. We supply essential, high-performance PC components designed for speed and durability. We understand that your hardware is the backbone of your digital work, which is why we only source components that meet strict quality standards.
+                </p>
+
+                <h3 className="text-xl font-semibold text-electric-blue mb-3">Why Choose Mechafy Global?</h3>
+                <p className="text-slate-400 leading-relaxed mb-6">
+                  Based in the HSIIDC Industrial Area of Sonipat, Haryana, and backed by the established Shanti Food Industries, we offer more than just parts—we offer reliability. We provide fast shipping across India, transparent pricing, and expert B2B IT services. When you buy robotics parts online from us, you aren't just getting hardware; you are gaining a technology partner dedicated to your growth.
+                </p>
+
+                <p className="text-white font-medium">
+                  Browse our catalog above to find the exact microcontrollers, sensors, and PC components your next project requires.
+                </p>
+              </div>
+              
+              {/* Gradient overlay when collapsed */}
+              {!isSeoExpanded && (
+                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#0a0f1c] to-transparent pointer-events-none"></div>
+              )}
+            </div>
+            
+            <button 
+              onClick={() => setIsSeoExpanded(!isSeoExpanded)}
+              className="mt-6 text-electric-blue hover:text-cyan-400 font-medium flex items-center gap-2 transition-colors mx-auto bg-white/5 hover:bg-white/10 px-6 py-2 rounded-full border border-white/10"
+            >
+              {isSeoExpanded ? 'Read Less' : 'Read More'}
+              <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isSeoExpanded ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+        </section>
+      </Reveal>
     </Layout>
   );
 }
