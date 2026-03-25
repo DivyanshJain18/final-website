@@ -18,7 +18,7 @@ export default function Home() {
               Build the Future with <span className="text-electric-blue">Mechafy</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl">
-               Powering innovation worldwide with bulk supply of robotics systems, electronic modules, and computer hardware solutions.
+              From bulk supply of precision robotics to cutting-edge IT services, Mechafy Global delivers the end-to-end technology your business needs to scale.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Link to="/shop">
