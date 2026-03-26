@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
+import { motion } from 'motion/react';
 import { Layout } from '../components/Layout';
 import { useCart } from '../context/CartContext';
 import { Search, Filter, ArrowRight, ChevronDown } from 'lucide-react';
@@ -121,6 +122,16 @@ export default function Shop() {
 
   return (
     <Layout>
+      {/* Announcement Bar */}
+      <motion.div 
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] bg-white/5 backdrop-blur-md border-b border-white/10 text-slate-300 text-center text-[13px] py-[10px] px-4 -mt-8 mb-8 z-10"
+      >
+        Leading Importer & Wholesale Supplier: Our online catalog is currently being updated. We supply all varieties of robotics and computer components—please <a href="mailto:sales@mechafyglobal.com" className="text-electric-blue hover:text-blue-400 hover:underline font-semibold transition-colors">REQUEST A QUOTE VIA EMAIL</a> for items not yet listed.
+      </motion.div>
+
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar Filters */}
         <aside className="w-full md:w-64 flex-shrink-0">

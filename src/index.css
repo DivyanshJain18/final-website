@@ -13,7 +13,7 @@
 }
 
 body {
-  @apply min-h-screen text-white;
+  @apply min-h-screen text-white overflow-x-hidden;
   background-color: #0a0a0a;
   background-attachment: fixed;
   position: relative;

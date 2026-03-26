@@ -21,9 +21,14 @@ export default function Home() {
               From bulk supply of precision robotics to cutting-edge IT services, Mechafy Global delivers the end-to-end technology your business needs to scale.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Link to="/shop">
-                <button className="btn-glow inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full text-white">
-                  Shop Now <ArrowRight className="ml-2 h-5 w-5" />
+              <Link to="/shop" className="w-full sm:w-48">
+                <button className="btn-glow flex items-center justify-center px-4 py-3 text-base font-medium rounded-full text-white w-full">
+                  Shop Now <ArrowRight className="ml-2 h-5 w-5 flex-shrink-0" />
+                </button>
+              </Link>
+              <Link to="/it-services" className="w-full sm:w-48">
+                <button className="btn-glow flex items-center justify-center px-4 py-3 text-base font-medium rounded-full text-white w-full">
+                  IT Services <ArrowRight className="ml-2 h-5 w-5 flex-shrink-0" />
                 </button>
               </Link>
             </div>
