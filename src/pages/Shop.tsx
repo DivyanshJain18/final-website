@@ -129,7 +129,7 @@ export default function Shop() {
         transition={{ duration: 0.5, ease: "easeOut" }}
         className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] bg-white/5 backdrop-blur-md border-b border-white/10 text-slate-300 text-center text-[13px] py-[10px] px-4 -mt-8 mb-8 z-10"
       >
-        Leading Importer & Wholesale Supplier: Our online catalog is currently being updated. We supply all varieties of robotics and computer components—please <a href="mailto:sales@mechafyglobal.com" className="text-electric-blue hover:text-blue-400 hover:underline font-semibold transition-colors">REQUEST A QUOTE VIA EMAIL</a> for items not yet listed.
+        Leading Importer & Wholesale Supplier: Our online catalog is currently being updated. We supply all varieties of robotics and computer components—please <a href="mailto:sales@mechafyglobal.com?subject=Quote%20Request%20-%20Mechafy%20Global" target="_blank" rel="noopener noreferrer" className="text-electric-blue hover:text-blue-400 hover:underline font-semibold transition-colors">REQUEST A QUOTE VIA EMAIL</a> for items not yet listed.
       </motion.div>
 
       <div className="flex flex-col md:flex-row gap-8">

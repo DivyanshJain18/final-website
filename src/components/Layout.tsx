@@ -148,7 +148,7 @@ export function Layout({ children }: { children: ReactNode }) {
               <address className="not-italic">
                 <h2 className="text-white text-lg font-bold mb-4">Contact Information</h2>
                 <ul className="space-y-2 text-sm">
-                  <li>Email: <a href="mailto:info@mechafyglobal.com" aria-label="Email Mechafy Global" className="hover:text-cyan-400 transition-colors">info@mechafyglobal.com</a></li>
+                  <li>Email: <a href="mailto:info@mechafyglobal.com" target="_blank" rel="noopener noreferrer" aria-label="Email Mechafy Global" className="hover:text-cyan-400 transition-colors">info@mechafyglobal.com</a></li>
                   <li>Phone: <a href="tel:+917015072323" aria-label="Call Mechafy Global" className="hover:text-cyan-400 transition-colors">+91 7015072323</a></li>
                   <li>Address: 582, HSIIDC Industrial Area, Rai, Sonipat, Haryana 131029, IN</li>
                 </ul>

@@ -171,10 +171,10 @@ export default function Contact() {
                     <div className="flex items-center">
                       <Mail className="h-6 w-6 text-electric-blue mr-3 flex-shrink-0" />
                       <div className="flex flex-col">
-                        <a href="mailto:info@mechafyglobal.com" className="text-slate-300 hover:text-electric-blue transition-colors">
+                        <a href="mailto:info@mechafyglobal.com" target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-electric-blue transition-colors">
                           info@mechafyglobal.com
                         </a>
-                        <a href="mailto:sales@mechafyglobal.com" className="text-slate-300 hover:text-electric-blue transition-colors">
+                        <a href="mailto:sales@mechafyglobal.com" target="_blank" rel="noopener noreferrer" className="text-slate-300 hover:text-electric-blue transition-colors">
                           sales@mechafyglobal.com
                         </a>
                       </div>
