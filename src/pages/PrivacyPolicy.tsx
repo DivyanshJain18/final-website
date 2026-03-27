@@ -59,7 +59,7 @@ export default function PrivacyPolicy() {
               </p>
               <ul className="mt-4 space-y-2 text-slate-400">
                 <li>Email: info@mechafyglobal.com</li>
-                <li>Phone: +91 7015072323</li>
+                <li>Phone: +91 9817056538</li>
                 <li>Address: 582, HSIIDC Industrial Area, Rai, Sonipat, Haryana 131029, IN</li>
               </ul>
             </section>

@@ -125,7 +125,7 @@ export default function Contact() {
                 </p>
                 
                 <a 
-                  href="https://wa.me/917015072323" 
+                  href="https://wa.me/919817056538" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="group inline-flex items-center bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 px-6 rounded-full transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
@@ -163,8 +163,8 @@ export default function Contact() {
                     
                     <div className="flex items-center">
                       <Phone className="h-6 w-6 text-electric-blue mr-3 flex-shrink-0" />
-                      <a href="tel:+917015072323" className="text-slate-300 hover:text-electric-blue transition-colors">
-                        +91 7015072323
+                      <a href="tel:+919817056538" className="text-slate-300 hover:text-electric-blue transition-colors">
+                        +91 9817056538
                       </a>
                     </div>
                     

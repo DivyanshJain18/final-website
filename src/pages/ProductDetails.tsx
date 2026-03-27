@@ -282,7 +282,7 @@ export default function ProductDetails() {
                       </button>
                       
                       <a
-                        href={`https://wa.me/917015072323?text=Hi%20Mechafy%20Global,%20I%20would%20like%20to%20request%20a%20quote%20for%20${quantity}%20units%20of%20${encodeURIComponent(product.name)}.`}
+                        href={`https://wa.me/919817056538?text=Hi%20Mechafy%20Global,%20I%20would%20like%20to%20request%20a%20quote%20for%20${quantity}%20units%20of%20${encodeURIComponent(product.name)}.`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold border border-[#25D366]/30 text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
