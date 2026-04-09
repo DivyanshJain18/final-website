@@ -3,7 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { Layout } from '../components/Layout';
 import { useCart } from '../context/CartContext';
-import { Search, Filter, ArrowRight, ChevronDown } from 'lucide-react';
+import { Search, Filter, ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
 import { fetchProducts, fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Product, Category, Subcategory, Subsubcategory, NestedSubcategory } from '../services/productService';
@@ -18,6 +18,8 @@ export default function Shop() {
   const { addToCart } = useCart();
   const [isLoading, setIsLoading] = useState(true);
   const [isSeoExpanded, setIsSeoExpanded] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 9;
 
   const categoryFilter = searchParams.get('category') || '';
   const subcategoryFilter = searchParams.get('subcategory') || '';
@@ -56,6 +58,7 @@ export default function Shop() {
     fetchProducts(categoryFilter, subcategoryFilter, subsubcategoryFilter, nestedSubcategoryFilter, searchQuery, sortOption)
       .then(data => {
         setProducts(data);
+        setCurrentPage(1); // Reset to first page on filter change
         setIsLoading(false);
       })
       .catch(err => {
@@ -118,6 +121,25 @@ export default function Shop() {
       prev.set('sort', e.target.value);
       return prev;
     });
+  };
+
+  // Determine current category name for announcement
+  const activeCategory = categories.find(c => normalizeSlug(c.slug) === normalizedCategoryFilter);
+  const activeSubcategory = subcategories.find(s => normalizeSlug(s.slug) === normalizedSubcategoryFilter);
+  const activeSubsubcategory = subsubcategories.find(s => normalizeSlug(s.slug) === normalizedSubsubcategoryFilter);
+  const activeNestedSubcategory = nestedSubcategories.find(n => normalizeSlug(n.slug) === normalizedNestedSubcategoryFilter);
+  
+  const currentCategoryName = activeNestedSubcategory?.name || activeSubsubcategory?.name || activeSubcategory?.name || activeCategory?.name;
+
+  // Pagination logic
+  const indexOfLastProduct = currentPage * PRODUCTS_PER_PAGE;
+  const indexOfFirstProduct = indexOfLastProduct - PRODUCTS_PER_PAGE;
+  const currentProducts = products.slice(indexOfFirstProduct, indexOfLastProduct);
+  const totalPages = Math.ceil(products.length / PRODUCTS_PER_PAGE);
+
+  const paginate = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -236,6 +258,19 @@ export default function Shop() {
         {/* Main Content */}
         <div className="flex-grow">
           <Reveal width="100%" delay={0.2}>
+            {/* Dynamic Category Announcement */}
+            {currentCategoryName && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-6 p-4 rounded-xl bg-electric-blue/10 border border-electric-blue/20 text-blue-100"
+              >
+                <p className="text-sm md:text-base leading-relaxed">
+                  Looking for a specific type of <strong className="text-white">{currentCategoryName}</strong>? We supply a comprehensive range from all leading brands. Request a custom quote today for our best competitive pricing and dedicated assistance.
+                </p>
+              </motion.div>
+            )}
+
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
               <form onSubmit={handleSearch} className="relative w-full sm:w-96">
@@ -267,10 +302,11 @@ export default function Shop() {
                   <div key={i} className="glass-card h-96 rounded-xl animate-pulse"></div>
                 ))}
               </div>
-            ) : products.length > 0 ? (
-              <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.08}>
-                {products.map(product => (
-                  <StaggerItem key={product.id}>
+            ) : currentProducts.length > 0 ? (
+              <>
+                <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.08}>
+                  {currentProducts.map(product => (
+                    <StaggerItem key={product.id}>
                     <div 
                       className="glass-card rounded-xl overflow-hidden flex flex-col h-full group"
                     >
@@ -340,7 +376,62 @@ export default function Shop() {
                     </div>
                   </StaggerItem>
                 ))}
-              </StaggerContainer>
+                </StaggerContainer>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                  <div className="mt-12 flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => paginate(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map(number => {
+                        // Show first, last, current, and adjacent pages
+                        if (
+                          number === 1 ||
+                          number === totalPages ||
+                          (number >= currentPage - 1 && number <= currentPage + 1)
+                        ) {
+                          return (
+                            <button
+                              key={number}
+                              onClick={() => paginate(number)}
+                              className={`w-10 h-10 rounded-lg font-medium transition-colors ${
+                                currentPage === number
+                                  ? 'bg-electric-blue text-white shadow-[0_0_10px_rgba(59,130,246,0.5)]'
+                                  : 'bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
+                              }`}
+                            >
+                              {number}
+                            </button>
+                          );
+                        } else if (
+                          number === currentPage - 2 ||
+                          number === currentPage + 2
+                        ) {
+                          return <span key={number} className="text-slate-500 px-1">...</span>;
+                        }
+                        return null;
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => paginate(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="p-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      aria-label="Next page"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
+              </>
             ) : (
               <Reveal duration={0.4}>
                 <div className="text-center py-20 glass-panel rounded-2xl">
