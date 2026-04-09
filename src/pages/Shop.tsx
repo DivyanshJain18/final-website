@@ -19,7 +19,7 @@ export default function Shop() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSeoExpanded, setIsSeoExpanded] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const PRODUCTS_PER_PAGE = 9;
+  const PRODUCTS_PER_PAGE = 10;
 
   const categoryFilter = searchParams.get('category') || '';
   const subcategoryFilter = searchParams.get('subcategory') || '';
@@ -304,7 +304,7 @@ export default function Shop() {
               </div>
             ) : currentProducts.length > 0 ? (
               <>
-                <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.08}>
+                <StaggerContainer key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.08}>
                   {currentProducts.map(product => (
                     <StaggerItem key={product.id}>
                     <div 
