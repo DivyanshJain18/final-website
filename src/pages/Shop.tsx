@@ -45,10 +45,14 @@ export default function Shop() {
   useEffect(() => {
     // Fetch categories, subcategories, subsubcategories, and nested subcategories
     Promise.all([fetchCategories(), fetchSubcategories(), fetchSubsubcategories(), fetchNestedSubcategories()]).then(([cats, subcats, subsubcats, nestedSubcats]) => {
-      setCategories(cats);
-      setSubcategories(subcats);
-      setSubsubcategories(subsubcats);
-      setNestedSubcategories(nestedSubcats);
+      const sortAlphanumeric = <T extends { name: string }>(items: T[]): T[] => {
+        return [...items].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+      };
+
+      setCategories(sortAlphanumeric(cats));
+      setSubcategories(sortAlphanumeric(subcats));
+      setSubsubcategories(sortAlphanumeric(subsubcats));
+      setNestedSubcategories(sortAlphanumeric(nestedSubcats));
     });
   }, []);
 
