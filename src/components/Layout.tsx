@@ -39,7 +39,7 @@ export function Layout({ children }: { children: ReactNode }) {
     "logo": "https://raw.githubusercontent.com/DivyanshJain18/Mechafy-assets/main/Mechafy%20Logo.jpg",
     "sameAs": [
       "https://www.facebook.com/mechafyglobal",
-      "https://www.instagram.com/mechafyglobal",
+      "https://www.instagram.com/mechafyglobal?igsh=OHBpYTZtZ2Uybnpj",
       "https://www.linkedin.com/company/112983537/"
     ]
   };
@@ -86,7 +86,7 @@ export function Layout({ children }: { children: ReactNode }) {
                 <a href="https://www.facebook.com/mechafyglobal" aria-label="Visit Mechafy Global on Facebook" target="_blank" rel="noopener noreferrer" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-blue-600 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]">
                   <FaFacebook className="w-6 h-6 text-[#1877F2] group-hover:text-white transition-colors" aria-hidden="true" />
                 </a>
-                <a href="https://www.instagram.com/mechafyglobal" aria-label="Visit Mechafy Global on Instagram" target="_blank" rel="noopener noreferrer" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-red-500 hover:to-purple-500 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(236,72,153,0.5)]">
+                <a href="https://www.instagram.com/mechafyglobal?igsh=OHBpYTZtZ2Uybnpj" aria-label="Visit Mechafy Global on Instagram" target="_blank" rel="noopener noreferrer" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-gradient-to-tr hover:from-yellow-400 hover:via-red-500 hover:to-purple-500 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(236,72,153,0.5)]">
                   <FaInstagram className="w-6 h-6 text-[#E4405F] group-hover:text-white transition-colors" aria-hidden="true" />
                 </a>
                 <a href="https://www.linkedin.com/company/112983537/" aria-label="Visit Mechafy Global on LinkedIn" target="_blank" rel="noopener noreferrer" className="group glass-panel p-4 rounded-full transition-all duration-300 hover:bg-blue-700 hover:-translate-y-1 shadow-sm hover:shadow-[0_0_15px_rgba(29,78,216,0.5)]">
