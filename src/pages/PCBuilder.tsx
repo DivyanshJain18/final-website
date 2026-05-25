@@ -11,19 +11,19 @@ interface BuilderCategory {
   id: string;
   name: string;
   icon: React.ElementType;
-  keywords: string[];
+  categoryKeywords: string[];
 }
 
 const BUILDER_CATEGORIES: BuilderCategory[] = [
-  { id: 'processor', name: 'Processor (CPU)', icon: Cpu, keywords: ['processor', 'cpu', 'core', 'ryzen', 'intel', 'amd'] },
-  { id: 'motherboard', name: 'Motherboard', icon: Box, keywords: ['motherboard', 'mobo', 'h610', 'b660', 'z690', 'b450', 'x570', 'board'] },
-  { id: 'ram', name: 'RAM (Memory)', icon: MemoryStick, keywords: ['ram', 'memory', 'ddr4', 'ddr5', 'corsair', 'crucial', 'adata'] },
-  { id: 'gpu', name: 'Graphics Card (GPU)', icon: GpuIcon, keywords: ['graphics', 'gpu', 'rtx', 'gtx', 'radeon', 'rx', 'nvidia', 'amd'] },
-  { id: 'storage', name: 'Storage (SSD/HDD)', icon: HardDrive, keywords: ['ssd', 'hdd', 'nvme', 'storage', 'hard drive', 'solid state'] },
-  { id: 'psu', name: 'Power Supply (PSU)', icon: Zap, keywords: ['power supply', 'psu', 'watt', 'corsair', 'cooler master', 'smps'] },
-  { id: 'cabinet', name: 'Cabinet / Case', icon: Box, keywords: ['cabinet', 'case', 'chassis', 'tower'] },
-  { id: 'cooler', name: 'CPU Cooler', icon: Fan, keywords: ['cooler', 'liquid cooling', 'aio', 'air cooler', 'fan'] },
-  { id: 'os', name: 'Operating System', icon: Monitor, keywords: ['windows', 'os', 'operating system', 'ubuntu', 'software'] },
+  { id: 'processor', name: 'Processor (CPU)', icon: Cpu, categoryKeywords: ['processor', 'cpu'] },
+  { id: 'motherboard', name: 'Motherboard', icon: Box, categoryKeywords: ['motherboard', 'mainboard'] },
+  { id: 'ram', name: 'RAM (Memory)', icon: MemoryStick, categoryKeywords: ['ram', 'memory'] },
+  { id: 'gpu', name: 'Graphics Card (GPU)', icon: GpuIcon, categoryKeywords: ['graphic', 'gpu', 'video card', 'vga'] },
+  { id: 'storage', name: 'Storage (SSD/HDD)', icon: HardDrive, categoryKeywords: ['ssd', 'hdd', 'storage', 'hard drive', 'nvme', 'solid state'] },
+  { id: 'psu', name: 'Power Supply (PSU)', icon: Zap, categoryKeywords: ['power supply', 'psu', 'smps'] },
+  { id: 'cabinet', name: 'Cabinet / Case', icon: Box, categoryKeywords: ['cabinet', 'case', 'chassis', 'tower'] },
+  { id: 'cooler', name: 'CPU Cooler', icon: Fan, categoryKeywords: ['cooler', 'liquid cooling', 'aio', 'air cooler', 'fan'] },
+  { id: 'os', name: 'Operating System', icon: Monitor, categoryKeywords: ['windows', 'os', 'operating system', 'software', 'ubuntu'] },
 ];
 
 export default function PCBuilder() {
@@ -45,7 +45,7 @@ export default function PCBuilder() {
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
   useEffect(() => {
-    // Fetch all products so we can search/filter them locally by keywords representing the categories
+    // Fetch all products so we can search/filter them locally
     fetchProducts()
       .then((data) => {
         setAllProducts(data);
@@ -59,16 +59,30 @@ export default function PCBuilder() {
 
   const totalCost = Object.values(selectedParts).reduce((sum, part) => sum + (part?.price || 0), 0);
 
-  // Filter products for the active category
+  // Filter products for the active category using strict mapping rules
   const activeProducts = useMemo(() => {
     const categoryDef = BUILDER_CATEGORIES.find(c => c.id === activeCategory);
     if (!categoryDef) return [];
     
-    // Simple matching logic: if category_name, subcategory_name, or name contains any keyword
     return allProducts.filter(p => {
-      const searchString = `${p.name} ${p.category_name || ''} ${p.subcategory_name || ''} ${p.subsubcategory_name || ''} ${p.nested_subcategory_name || ''}`.toLowerCase();
-      // Match if ANY keyword is in the searchString
-      return categoryDef.keywords.some(keyword => searchString.includes(keyword));
+      // 1. Build a strict string composed ONLY of the actual backend category mappings
+      const categoryPath = `${p.category_name || ''} | ${p.subcategory_name || ''} | ${p.subsubcategory_name || ''} | ${p.nested_subcategory_name || ''}`.toLowerCase();
+      
+      // 2. See if the product's assigned categories match any of the component's required keywords
+      const matchesCategoryPath = categoryDef.categoryKeywords.some(keyword => categoryPath.includes(keyword));
+      
+      if (matchesCategoryPath) return true;
+
+      // 3. Fallback logic: check the product name only if the categories were blank/unmapped,
+      // but enforce strict boundary checks to prevent cross-contamination (e.g., motherboards with "Intel" in them)
+      const productName = (p.name || '').toLowerCase();
+      
+      // Negative exclusions to prevent mismatch
+      if (categoryDef.id === 'processor' && productName.includes('motherboard')) return false;
+      if (categoryDef.id === 'motherboard' && productName.includes('processor')) return false;
+
+      // Check product name with strict word boundaries
+      return categoryDef.categoryKeywords.some(keyword => new RegExp(`\\b${keyword}\\b`).test(productName));
     });
   }, [allProducts, activeCategory]);
 
