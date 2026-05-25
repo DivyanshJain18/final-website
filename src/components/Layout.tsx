@@ -124,7 +124,6 @@ export function Layout({ children }: { children: ReactNode }) {
               <nav aria-label="Shop Navigation">
                 <h2 className="text-white text-lg font-bold mb-4">Shop Hardware</h2>
                 <ul className="space-y-2 text-sm">
-                  <li><Link to="/pc-builder" aria-label="Build a Custom PC" className="hover:text-cyan-400 font-bold transition-colors">Custom PC Builder</Link></li>
                   <li><Link to="/shop" aria-label="View all robotics and PC products" className="hover:text-cyan-400 transition-colors">All Products</Link></li>
                   {categories.map((category) => (
                     <li key={category.id}>
@@ -133,6 +132,7 @@ export function Layout({ children }: { children: ReactNode }) {
                       </Link>
                     </li>
                   ))}
+                  <li><Link to="/pc-builder" aria-label="Build a Custom PC" className="hover:text-cyan-400 transition-colors">Custom PC Builder</Link></li>
                 </ul>
               </nav>
 
