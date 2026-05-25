@@ -137,15 +137,22 @@ export default function PCBuilder() {
       const partsMap = Object.entries(selectedParts).map(([catId, part]) => ({
         categoryId: catId,
         categoryName: BUILDER_CATEGORIES.find(c => c.id === catId)?.name || catId,
-        productId: part.id,
+        productId: part.id || '', // Fallback to empty string to prevent Firebase undefined crash
         productName: part.name,
-        price: part.price
+        price: part.price || 0
       }));
 
+      // Strip invisible formatting characters or emojis from mobile autocompletes
+      const sanitizedPhone = formData.phone.replace(/[^\d+\-()\s]/g, '').trim();
+
       await addDoc(collection(db, 'custom_pc_quotes'), {
-        ...formData,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        phone: sanitizedPhone,
+        city: formData.city.trim(),
+        notes: formData.notes.trim() || '',
         parts: partsMap,
-        totalEstimatedPrice: totalCost,
+        totalEstimatedPrice: totalCost || 0,
         createdAt: serverTimestamp(),
       });
 
@@ -460,7 +467,6 @@ export default function PCBuilder() {
                       <p className="text-xs text-slate-400">Opens your default email app with the parts list pre-filled.</p>
                     </button>
                     <div className="p-6 border border-electric-blue/30 rounded-xl bg-electric-blue/10 relative">
-                      <div className="absolute top-0 right-0 bg-electric-blue text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">Recommended</div>
                       <Send className="w-8 h-8 text-electric-blue mb-4" />
                       <h4 className="font-bold text-white mb-1">Submit Form Here</h4>
                       <p className="text-xs text-blue-200/70">Fill out the form below to send it directly to our sales team.</p>
