@@ -63,35 +63,7 @@ export default function PCBuilder() {
     setActiveSubcategory('All');
   }, [activeCategory]);
 
-  // Filter products for the active category using strict taxonomy mapping rules
-  const activeProducts = useMemo(() => {
-    const categoryDef = BUILDER_CATEGORIES.find(c => c.id === activeCategory);
-    if (!categoryDef) return [];
-    
-    return allProducts.filter(p => {
-      // 1. Basic visibility rules: check stock and status if present
-      const isStatusValid = (p as any).status ? (p as any).status === 'active' : true;
-      if (!isStatusValid || p.stock <= 0) {
-        return false;
-      }
-
-      const taxonomyLevels = [
-        (p.category_name || '').toLowerCase().trim(),
-        (p.subcategory_name || '').toLowerCase().trim(),
-        (p.subsubcategory_name || '').toLowerCase().trim(),
-        (p.nested_subcategory_name || '').toLowerCase().trim()
-      ].filter(Boolean);
-
-      // 2. Fetch products by evaluating loose groups mapping matching
-      const groups = getProductGroups(activeCategory, p);
-      if (groups.length > 0) return true;
-
-      // 3. Fallback to broad substring matching against taxonomy
-      return categoryDef.exactCategories.some(cat => taxonomyLevels.some(t => t.includes(cat)));
-    });
-  }, [allProducts, activeCategory]);
-
-  const getProductGroups = (categoryId: string, p: Product): string[] => {
+  function getProductGroups(categoryId: string, p: Product): string[] {
     const allText = `${p.name || ''} ${p.subcategory_name || ''} ${p.subsubcategory_name || ''} ${p.nested_subcategory_name || ''}`.toLowerCase();
     
     if (categoryId === 'motherboard') {
@@ -123,7 +95,35 @@ export default function PCBuilder() {
     
     // Default to empty for items like Cases, PSUs, Coolers where flat listing is better
     return [];
-  };
+  }
+
+  // Filter products for the active category using strict taxonomy mapping rules
+  const activeProducts = useMemo(() => {
+    const categoryDef = BUILDER_CATEGORIES.find(c => c.id === activeCategory);
+    if (!categoryDef) return [];
+    
+    return allProducts.filter(p => {
+      // 1. Basic visibility rules: check stock and status if present
+      const isStatusValid = (p as any).status ? (p as any).status === 'active' : true;
+      if (!isStatusValid || p.stock <= 0) {
+        return false;
+      }
+
+      const taxonomyLevels = [
+        (p.category_name || '').toLowerCase().trim(),
+        (p.subcategory_name || '').toLowerCase().trim(),
+        (p.subsubcategory_name || '').toLowerCase().trim(),
+        (p.nested_subcategory_name || '').toLowerCase().trim()
+      ].filter(Boolean);
+
+      // 2. Fetch products by evaluating loose groups mapping matching
+      const groups = getProductGroups(activeCategory, p);
+      if (groups.length > 0) return true;
+
+      // 3. Fallback to broad substring matching against taxonomy
+      return categoryDef.exactCategories.some(cat => taxonomyLevels.some(t => t.includes(cat)));
+    });
+  }, [allProducts, activeCategory]);
 
   const activeCategoryFilterTags = useMemo(() => {
     if (!activeProducts || activeProducts.length === 0) return [];
