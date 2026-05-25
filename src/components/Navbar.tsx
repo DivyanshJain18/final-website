@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Category, Subcategory, Subsubcategory, NestedSubcategory } from '../services/productService';
 
 export function Navbar() {
@@ -21,6 +21,7 @@ export function Navbar() {
   const [hoveredSubsubcategory, setHoveredSubsubcategory] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     // Fetch Categories

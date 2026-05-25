@@ -29,6 +29,7 @@ export default function PCBuilder() {
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState<string>('processor');
+  const [activeSubcategory, setActiveSubcategory] = useState<string>('All');
   const [selectedParts, setSelectedParts] = useState<Record<string, Product>>({});
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
@@ -58,6 +59,10 @@ export default function PCBuilder() {
 
   const totalCost = Object.values(selectedParts).reduce((sum, part) => sum + (part?.price || 0), 0);
 
+  useEffect(() => {
+    setActiveSubcategory('All');
+  }, [activeCategory]);
+
   // Filter products for the active category using strict taxonomy mapping rules
   const activeProducts = useMemo(() => {
     const categoryDef = BUILDER_CATEGORIES.find(c => c.id === activeCategory);
@@ -83,6 +88,42 @@ export default function PCBuilder() {
       return categoryDef.exactCategories.some(cat => taxonomyLevels.includes(cat));
     });
   }, [allProducts, activeCategory]);
+
+  const activeCategoryFilterTags = useMemo(() => {
+    if (!activeProducts || activeProducts.length === 0) return [];
+    const tags = new Set<string>();
+    const categoryDef = BUILDER_CATEGORIES.find(c => c.id === activeCategory);
+    if (!categoryDef) return [];
+
+    activeProducts.forEach(p => {
+      const levels = [
+        p.subcategory_name,
+        p.subsubcategory_name,
+        p.nested_subcategory_name
+      ];
+      levels.forEach(l => {
+        if (l && typeof l === 'string') {
+          const lLower = l.toLowerCase().trim();
+          // Add if not root category name and not the parent matching name
+          if (lLower && lLower !== 'computer components' && !categoryDef.exactCategories.includes(lLower)) {
+            tags.add(l.trim());
+          }
+        }
+      });
+    });
+    return Array.from(tags).sort();
+  }, [activeProducts, activeCategory]);
+
+  const displayedProducts = useMemo(() => {
+    if (activeSubcategory === 'All') return activeProducts;
+    return activeProducts.filter(p => {
+      return (
+        p.subcategory_name === activeSubcategory ||
+        p.subsubcategory_name === activeSubcategory ||
+        p.nested_subcategory_name === activeSubcategory
+      );
+    });
+  }, [activeProducts, activeSubcategory]);
 
   const handleSelectPart = (categoryId: string, product: Product) => {
     setSelectedParts(prev => ({
@@ -292,31 +333,56 @@ export default function PCBuilder() {
                               </div>
                             </div>
                           ) : activeProducts.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                              {activeProducts.map(product => (
-                                <div 
-                                  key={product.id}
-                                  onClick={() => handleSelectPart(category.id, product)}
-                                  className={`flex items-start gap-4 p-3 rounded-lg border cursor-pointer transition-all ${selectedPart?.id === product.id ? 'border-electric-blue bg-electric-blue/10' : 'border-white/10 bg-white/5 hover:border-electric-blue/50'}`}
-                                >
-                                  <div className="w-16 h-16 rounded-md overflow-hidden bg-navy-900 shrink-0">
-                                    {product.image_url ? (
-                                      <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                                    ) : (
-                                      <Box className="w-full h-full p-4 text-slate-500" />
-                                    )}
-                                  </div>
-                                  <div className="flex-1">
-                                    <h4 className="text-sm font-medium text-white line-clamp-2">{product.name}</h4>
-                                    <div className="flex justify-between items-center mt-2">
-                                      <p className="text-electric-blue font-bold">₹{product.price.toFixed(2)}</p>
-                                      {selectedPart?.id === product.id && (
-                                        <CheckCircle className="w-4 h-4 text-electric-blue" />
+                            <div className="flex flex-col gap-4">
+                              {activeCategoryFilterTags.length > 0 && (
+                                <div className="flex gap-2 p-1 overflow-x-auto custom-scrollbar">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setActiveSubcategory('All'); }}
+                                    className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${activeSubcategory === 'All' ? 'bg-electric-blue text-white shadow-md' : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/10'}`}
+                                  >
+                                    All
+                                  </button>
+                                  {activeCategoryFilterTags.map(tag => (
+                                    <button
+                                      key={tag}
+                                      onClick={(e) => { e.stopPropagation(); setActiveSubcategory(tag); }}
+                                      className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${activeSubcategory === tag ? 'bg-electric-blue text-white shadow-md' : 'bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/10'}`}
+                                    >
+                                      {tag}
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                {displayedProducts.length > 0 ? displayedProducts.map(product => (
+                                  <div 
+                                    key={product.id}
+                                    onClick={() => handleSelectPart(category.id, product)}
+                                    className={`flex items-start gap-4 p-3 rounded-lg border cursor-pointer transition-all ${selectedPart?.id === product.id ? 'border-electric-blue bg-electric-blue/10' : 'border-white/10 bg-white/5 hover:border-electric-blue/50'}`}
+                                  >
+                                    <div className="w-16 h-16 rounded-md overflow-hidden bg-navy-900 shrink-0">
+                                      {product.image_url ? (
+                                        <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                                      ) : (
+                                        <Box className="w-full h-full p-4 text-slate-500" />
                                       )}
                                     </div>
+                                    <div className="flex-1">
+                                      <h4 className="text-sm font-medium text-white line-clamp-2">{product.name}</h4>
+                                      <div className="flex justify-between items-center mt-2">
+                                        <p className="text-electric-blue font-bold">₹{product.price.toFixed(2)}</p>
+                                        {selectedPart?.id === product.id && (
+                                          <CheckCircle className="w-4 h-4 text-electric-blue" />
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                )) : (
+                                  <div className="col-span-1 md:col-span-2 text-center py-8 text-slate-400">
+                                    <p>No products match this sub-category.</p>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           ) : (
                             <div className="text-center py-8 text-slate-400">
