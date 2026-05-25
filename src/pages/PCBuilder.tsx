@@ -130,27 +130,33 @@ export default function PCBuilder() {
   };
 
   const handleQuoteSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    if (e && e.preventDefault) {
+      e.preventDefault();
+    }
     setIsSubmitting(true);
     
     try {
+      const sanitizedName = formData.name ? formData.name.trim() : '';
+      const sanitizedEmail = formData.email ? formData.email.trim() : '';
+      // Strip everything except digits, plus, minus, and standard spaces (helps with mobile autofill)
+      const sanitizedPhone = formData.phone ? formData.phone.replace(/[^\d+\-()]/g, '').trim() : '';
+      const sanitizedCity = formData.city ? formData.city.trim() : '';
+      const sanitizedNotes = formData.notes ? formData.notes.trim() : '';
+
       const partsMap = Object.entries(selectedParts).map(([catId, part]) => ({
         categoryId: catId,
         categoryName: BUILDER_CATEGORIES.find(c => c.id === catId)?.name || catId,
         productId: part.id || '', // Fallback to empty string to prevent Firebase undefined crash
-        productName: part.name,
+        productName: part.name || '',
         price: part.price || 0
       }));
 
-      // Strip invisible formatting characters or emojis from mobile autocompletes
-      const sanitizedPhone = formData.phone.replace(/[^\d+\-()\s]/g, '').trim();
-
       await addDoc(collection(db, 'custom_pc_quotes'), {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
+        name: sanitizedName,
+        email: sanitizedEmail,
         phone: sanitizedPhone,
-        city: formData.city.trim(),
-        notes: formData.notes.trim() || '',
+        city: sanitizedCity,
+        notes: sanitizedNotes,
         parts: partsMap,
         totalEstimatedPrice: totalCost || 0,
         createdAt: serverTimestamp(),
@@ -160,21 +166,21 @@ export default function PCBuilder() {
       const web3formsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
       if (web3formsAccessKey) {
         let emailMessage = `New Custom PC Build Quote Request\n\n`;
-        emailMessage += `Name: ${formData.name}\n`;
-        emailMessage += `Email: ${formData.email}\n`;
-        emailMessage += `Phone: ${formData.phone}\n`;
-        emailMessage += `City: ${formData.city}\n`;
-        emailMessage += `Notes: ${formData.notes || 'None'}\n\n`;
+        emailMessage += `Name: ${sanitizedName}\n`;
+        emailMessage += `Email: ${sanitizedEmail}\n`;
+        emailMessage += `Phone: ${sanitizedPhone}\n`;
+        emailMessage += `City: ${sanitizedCity}\n`;
+        emailMessage += `Notes: ${sanitizedNotes || 'None'}\n\n`;
         emailMessage += `--- SELECTED COMPONENTS ---\n`;
         
         BUILDER_CATEGORIES.forEach(cat => {
           const part = selectedParts[cat.id];
           if (part) {
-            emailMessage += `${cat.name}: ${part.name} (₹${part.price.toFixed(2)})\n`;
+            emailMessage += `${cat.name}: ${part.name} (₹${(part.price || 0).toFixed(2)})\n`;
           }
         });
         
-        emailMessage += `\nTotal Estimated Price: ₹${totalCost.toFixed(2)}`;
+        emailMessage += `\nTotal Estimated Price: ₹${(totalCost || 0).toFixed(2)}`;
 
         const response = await fetch('https://api.web3forms.com/submit', {
           method: 'POST',
@@ -184,10 +190,10 @@ export default function PCBuilder() {
           },
           body: JSON.stringify({
             access_key: web3formsAccessKey,
-            subject: `New Custom PC Build Quote Request from ${formData.name}`,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
+            subject: `New Custom PC Build Quote Request from ${sanitizedName}`,
+            name: sanitizedName,
+            email: sanitizedEmail,
+            phone: sanitizedPhone,
             message: emailMessage,
           }),
         });

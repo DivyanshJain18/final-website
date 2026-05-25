@@ -385,7 +385,7 @@ export function Navbar() {
               </div>
             )}
 
-            <Link to="/pc-builder" onClick={() => setIsMenuOpen(false)} className="text-electric-blue hover:text-blue-400 block px-3 py-2 rounded-md text-base font-bold transition-colors">PC Builder</Link>
+            <Link to="/pc-builder" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">PC Builder</Link>
             <Link to="/it-services" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">IT Services</Link>
             <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Contact Us</Link>
             
