@@ -12,6 +12,7 @@ import ITServices from './pages/ITServices';
 import FAQPage from './pages/FAQPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
+import PCBuilder from './pages/PCBuilder';
 
 import { Layout } from './components/Layout';
 
@@ -43,6 +44,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
+            <Route path="/pc-builder" element={<PCBuilder />} />
             <Route path="/product/:slug" element={<ProductDetails />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/cart" element={<Cart />} />
