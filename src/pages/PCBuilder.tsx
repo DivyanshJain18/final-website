@@ -149,6 +149,48 @@ export default function PCBuilder() {
         createdAt: serverTimestamp(),
       });
 
+      // Send email via Web3Forms
+      const web3formsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
+      if (web3formsAccessKey) {
+        let emailMessage = `New Custom PC Build Quote Request\n\n`;
+        emailMessage += `Name: ${formData.name}\n`;
+        emailMessage += `Email: ${formData.email}\n`;
+        emailMessage += `Phone: ${formData.phone}\n`;
+        emailMessage += `City: ${formData.city}\n`;
+        emailMessage += `Notes: ${formData.notes || 'None'}\n\n`;
+        emailMessage += `--- SELECTED COMPONENTS ---\n`;
+        
+        BUILDER_CATEGORIES.forEach(cat => {
+          const part = selectedParts[cat.id];
+          if (part) {
+            emailMessage += `${cat.name}: ${part.name} (₹${part.price.toFixed(2)})\n`;
+          }
+        });
+        
+        emailMessage += `\nTotal Estimated Price: ₹${totalCost.toFixed(2)}`;
+
+        const response = await fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            access_key: web3formsAccessKey,
+            subject: `New Custom PC Build Quote Request from ${formData.name}`,
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+            message: emailMessage,
+          }),
+        });
+        
+        const data = await response.json();
+        if (!response.ok || !data.success) {
+          console.error("Web3Forms submission failed:", data);
+        }
+      }
+
       setSubmitSuccess(true);
     } catch (err) {
       console.error("Error submitting quote", err);
@@ -370,7 +412,7 @@ export default function PCBuilder() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-2xl bg-navy-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden p-6 lg:p-8"
+              className="relative w-full max-w-2xl bg-navy-900 border border-white/10 rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] p-6 lg:p-8 custom-scrollbar"
             >
               {!submitSuccess && (
                 <button 
