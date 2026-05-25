@@ -69,59 +69,79 @@ export default function PCBuilder() {
     if (!categoryDef) return [];
     
     return allProducts.filter(p => {
-      // 1. MUST explicitly belong to "Computer Components" department. Never fetch items from "Robotic Components"
-      const topLevelCategory = (p.category_name || '').toLowerCase().trim();
-      const isComputerComponent = topLevelCategory === 'computer components' || 
-                                  topLevelCategory.includes('computer');
-                                  
-      if (!isComputerComponent) {
+      // 1. Basic visibility rules: check stock and status if present
+      const isStatusValid = (p as any).status ? (p as any).status === 'active' : true;
+      if (!isStatusValid || p.stock <= 0) {
         return false;
       }
 
-      // 2. Fetch products matching the exact category mappings at any level
       const taxonomyLevels = [
+        (p.category_name || '').toLowerCase().trim(),
         (p.subcategory_name || '').toLowerCase().trim(),
         (p.subsubcategory_name || '').toLowerCase().trim(),
         (p.nested_subcategory_name || '').toLowerCase().trim()
-      ];
+      ].filter(Boolean);
 
-      return categoryDef.exactCategories.some(cat => taxonomyLevels.includes(cat));
+      // 2. Fetch products by evaluating loose groups mapping matching
+      const groups = getProductGroups(activeCategory, p);
+      if (groups.length > 0) return true;
+
+      // 3. Fallback to broad substring matching against taxonomy
+      return categoryDef.exactCategories.some(cat => taxonomyLevels.some(t => t.includes(cat)));
     });
   }, [allProducts, activeCategory]);
+
+  const getProductGroups = (categoryId: string, p: Product): string[] => {
+    const allText = `${p.name || ''} ${p.subcategory_name || ''} ${p.subsubcategory_name || ''} ${p.nested_subcategory_name || ''}`.toLowerCase();
+    
+    if (categoryId === 'motherboard') {
+      if (allText.includes('amd') || allText.includes('ryzen') || allText.match(/\b(a520|b450|b550|x570|x670|b650|tr4|strx4)\b/)) return ['AMD Chipset'];
+      if (allText.includes('intel') || allText.includes('core') || allText.match(/\b(h610|b660|b760|z690|z790|h510|b560|z590)\b/)) return ['Intel Chipset'];
+      return [];
+    }
+    if (categoryId === 'processor') {
+      if (allText.includes('amd') || allText.includes('ryzen') || allText.includes('threadripper') || allText.includes('athlon')) return ['AMD Processor'];
+      if (allText.includes('intel') || allText.includes('core') || allText.includes('pentium') || allText.includes('celeron')) return ['Intel Processor'];
+      return [];
+    }
+    if (categoryId === 'storage') {
+      if (allText.includes('ssd') || allText.includes('nvme') || allText.includes('solid state') || allText.includes('m.2')) return ['SSD'];
+      if (allText.includes('hdd') || allText.includes('hard drive')) return ['HDD'];
+      return [];
+    }
+    if (categoryId === 'ram') {
+      if (allText.includes('ddr5')) return ['DDR5'];
+      if (allText.includes('ddr4')) return ['DDR4'];
+      if (allText.includes('ddr3')) return ['DDR3'];
+      return [];
+    }
+    if (categoryId === 'gpu') {
+      if (allText.includes('nvidia') || allText.includes('geforce') || allText.includes('rtx') || allText.includes('gtx')) return ['NVIDIA'];
+      if (allText.includes('amd') || allText.includes('radeon') || allText.includes('rx')) return ['AMD Radeon'];
+      return [];
+    }
+    
+    // Default to empty for items like Cases, PSUs, Coolers where flat listing is better
+    return [];
+  };
 
   const activeCategoryFilterTags = useMemo(() => {
     if (!activeProducts || activeProducts.length === 0) return [];
     const tags = new Set<string>();
-    const categoryDef = BUILDER_CATEGORIES.find(c => c.id === activeCategory);
-    if (!categoryDef) return [];
 
     activeProducts.forEach(p => {
-      const levels = [
-        p.subcategory_name,
-        p.subsubcategory_name,
-        p.nested_subcategory_name
-      ];
-      levels.forEach(l => {
-        if (l && typeof l === 'string') {
-          const lLower = l.toLowerCase().trim();
-          // Add if not root category name and not the parent matching name
-          if (lLower && lLower !== 'computer components' && !categoryDef.exactCategories.includes(lLower)) {
-            tags.add(l.trim());
-          }
-        }
-      });
+      const groups = getProductGroups(activeCategory, p);
+      groups.forEach(g => tags.add(g));
     });
+    
     return Array.from(tags).sort();
   }, [activeProducts, activeCategory]);
 
   const displayedProducts = useMemo(() => {
     if (activeSubcategory === 'All') return activeProducts;
     return activeProducts.filter(p => {
-      return (
-        p.subcategory_name === activeSubcategory ||
-        p.subsubcategory_name === activeSubcategory ||
-        p.nested_subcategory_name === activeSubcategory
-      );
+      const groups = getProductGroups(activeCategory, p);
+      return groups.includes(activeSubcategory);
     });
   }, [activeProducts, activeSubcategory]);
 
