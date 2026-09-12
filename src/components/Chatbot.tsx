@@ -94,15 +94,15 @@ export function Chatbot() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 lg:bottom-8 lg:right-8 z-[9999]">
+    <div className={`fixed right-4 sm:right-6 z-[9999] transition-all duration-300 ${isOpen ? 'bottom-4 sm:bottom-6' : 'bottom-20 sm:bottom-24'}`}>
       {/* Chat Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open support chat"
-          className="flex items-center justify-center w-14 h-14 bg-electric-blue text-navy-900 rounded-full shadow-[0_0_20px_rgba(0,255,255,0.4)] hover:scale-110 transition-transform duration-300 focus:outline-none focus:ring-4 focus:ring-cyan-400/50 group"
+          className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-electric-blue text-navy-900 rounded-full shadow-lg hover:bg-cyan-400 transition-colors duration-200 focus:outline-none"
         >
-          <MessageCircle className="w-7 h-7 transition-transform group-hover:rotate-12" />
+          <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7" />
         </button>
       )}
 
