@@ -1,0 +1,147 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the application",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A product category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name", "slug"]
+    },
+    "Subcategory": {
+      "title": "Subcategory",
+      "description": "A product subcategory",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "category_id": { "type": "string" }
+      },
+      "required": ["name", "slug", "category_id"]
+    },
+    "Subsubcategory": {
+      "title": "Subsubcategory",
+      "description": "A product sub-subcategory",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "subcategory_id": { "type": "string" }
+      },
+      "required": ["name", "slug", "subcategory_id"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "A product in the store",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "stock": { "type": "number" },
+        "category_id": { "type": "string" },
+        "subcategory_id": { "type": "string" },
+        "subsubcategory_id": { "type": "string" },
+        "category_name": { "type": "string" },
+        "subcategory_name": { "type": "string" },
+        "subsubcategory_name": { "type": "string" },
+        "image_url": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "slug", "price", "stock", "category_id"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A user order",
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "user_name": { "type": "string" },
+        "user_email": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected", "completed"] },
+        "total_amount": { "type": "number" },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/entities/OrderItem" }
+        },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["user_id", "status", "total_amount", "items"]
+    },
+    "OrderItem": {
+      "title": "OrderItem",
+      "description": "An item in an order",
+      "type": "object",
+      "properties": {
+        "product_id": { "type": "string" },
+        "quantity": { "type": "number" },
+        "price": { "type": "number" }
+      },
+      "required": ["product_id", "quantity", "price"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "A product inquiry",
+      "type": "object",
+      "properties": {
+        "product_id": { "type": "string" },
+        "client_name": { "type": "string" },
+        "client_email": { "type": "string" },
+        "client_phone": { "type": "string" },
+        "quantity": { "type": "number" },
+        "message": { "type": "string" },
+        "status": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["product_id", "client_name", "client_email"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles"
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Product categories"
+    },
+    "/subcategories/{subcategoryId}": {
+      "schema": { "$ref": "#/entities/Subcategory" },
+      "description": "Product subcategories"
+    },
+    "/subsubcategories/{subsubcategoryId}": {
+      "schema": { "$ref": "#/entities/Subsubcategory" },
+      "description": "Product sub-subcategories"
+    },
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Products"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Orders"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": { "$ref": "#/entities/Inquiry" },
+      "description": "Inquiries"
+    }
+  }
+}
