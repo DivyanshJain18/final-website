@@ -2,8 +2,8 @@ import React from 'react';
 
 export function WhatsAppButton() {
   return (
-    <div className="fixed bottom-24 right-4 lg:bottom-28 lg:right-8 z-[9999] flex items-center justify-center">
-      <a
+          <div className="fixed bottom-24 right-4 lg:bottom-28 lg:right-8 z-[9999] flex items-center justify-center">
+          <a
         href="https://wa.me/919817056538?text=Hi%20Mechafy%20Global,%20I%20am%20looking%20for%20some%20help%20with..."
         target="_blank"
         rel="noopener noreferrer"
