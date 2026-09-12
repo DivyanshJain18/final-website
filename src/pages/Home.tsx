@@ -22,7 +22,7 @@ const PROMO_SLIDES = [
     id: 3,
     title: "3D Printers & Accessories",
     tagline: "Advanced printers, scanners, pens, and premium filament.",
-    image: "https://images.unsplash.com/photo-1589254066213-a0c9dc853511?auto=format&fit=crop&w=1920&q=80"
+    image: "https://upload.wikimedia.org/wikipedia/commons/4/4b/3D_Printing_Materials_%2816837486456%29.jpg"
   },
   {
     id: 4,
