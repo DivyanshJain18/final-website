@@ -5,33 +5,127 @@ import { ReactNode, useState, useEffect } from 'react';
 import { Reveal } from '../components/Reveal';
 import { fetchProducts, Product } from '../services/productService';
 
+const PROMO_SLIDES = [
+  {
+    id: 1,
+    title: "Computer Components",
+    tagline: "High-performance motherboards, processors, and graphics cards.",
+    image: "https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=1920&q=80"
+  },
+  {
+    id: 2,
+    title: "Robotics Components",
+    tagline: "Precision motors, sensors, and development boards.",
+    image: "https://images.unsplash.com/photo-1589254065878-42c9da997008?auto=format&fit=crop&w=1920&q=80"
+  },
+  {
+    id: 3,
+    title: "3D Printers & Accessories",
+    tagline: "Advanced printers, scanners, pens, and premium filament.",
+    image: "https://images.unsplash.com/photo-1589254066213-a0c9dc853511?auto=format&fit=crop&w=1920&q=80"
+  },
+  {
+    id: 4,
+    title: "IT Services & Solutions",
+    tagline: "Custom software, web design, and digital marketing strategies.",
+    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1920&q=80"
+  }
+];
+
 export default function Home() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % PROMO_SLIDES.length);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <Layout>
       {/* Hero Section */}
       <Reveal>
-        <section className="relative glass-panel rounded-3xl overflow-hidden mb-16 group">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1920&q=80')] bg-cover bg-center opacity-30 group-hover:scale-105 transition-transform duration-[2s]"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-navy-900 via-navy-900/80 to-transparent"></div>
-          <div className="relative z-10 px-8 py-24 md:py-32 text-center md:text-left max-w-4xl mx-auto md:mx-0">
-            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
+        <section className="relative glass-panel rounded-3xl overflow-hidden mb-16 h-[600px] md:h-[500px]">
+          {/* Background Slides */}
+          {PROMO_SLIDES.map((slide, index) => (
+            <div
+              key={slide.id}
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+                index === currentSlide ? 'opacity-40' : 'opacity-0'
+              }`}
+              style={{ backgroundImage: `url('${slide.image}')` }}
+            ></div>
+          ))}
+          
+          {/* Main Dark Gradient Overlay for Readability */}
+          <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-navy-900/90"></div>
+          
+          {/* Content Container */}
+          <div className="absolute inset-0 flex flex-col justify-center items-center md:items-start text-center md:text-left px-6 py-12 md:px-16 max-w-7xl mx-auto w-full">
+            
+            {/* Mechafy Logo (Visible on all slides) */}
+            <div className="mb-6 flex items-center justify-center md:justify-start gap-3 relative z-10">
+              <img 
+                src="https://raw.githubusercontent.com/DivyanshJain18/Mechafy-assets/main/Mechafy%20Logo.jpg" 
+                alt="Mechafy Global Logo" 
+                className="w-10 h-10 md:w-12 md:h-12 rounded shadow-lg object-cover border border-white/10"
+              />
+              <span className="text-sm md:text-base font-bold text-electric-blue uppercase tracking-widest drop-shadow">Mechafy Global</span>
+            </div>
+
+            {/* Main Headline */}
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 md:mb-8 tracking-tight drop-shadow-lg relative z-10">
               Build the Future with <span className="text-electric-blue">Mechafy</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl">
-              From bulk supply of precision robotics to cutting-edge IT services, Mechafy Global delivers the end-to-end technology your business needs to scale.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+            
+            {/* Rotating Category Text */}
+            <div className="relative h-24 md:h-32 w-full max-w-3xl overflow-hidden mb-8 md:mb-10 z-10">
+               {PROMO_SLIDES.map((slide, index) => (
+                 <div 
+                   key={slide.id} 
+                   className={`absolute inset-0 transition-all duration-700 flex flex-col justify-start ${
+                     index === currentSlide ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+                   }`}
+                 >
+                   <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 md:mb-3 drop-shadow-lg flex items-center justify-center md:justify-start">
+                     {slide.title}
+                   </h2>
+                   <p className="text-base md:text-xl text-slate-200 drop-shadow-md leading-relaxed">
+                     {slide.tagline}
+                   </p>
+                 </div>
+               ))}
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center md:justify-start relative z-10">
               <Link to="/shop" className="w-full sm:w-48">
-                <button className="btn-glow flex items-center justify-center px-4 py-3 text-base font-medium rounded-full text-white w-full">
+                <button className="bg-electric-blue hover:bg-cyan-400 transition-colors flex items-center justify-center px-4 py-3 text-base font-medium rounded-full text-navy-900 w-full shadow-lg">
                   Shop Now <ArrowRight className="ml-2 h-5 w-5 flex-shrink-0" />
                 </button>
               </Link>
               <Link to="/it-services" className="w-full sm:w-48">
-                <button className="btn-glow flex items-center justify-center px-4 py-3 text-base font-medium rounded-full text-white w-full">
+                <button className="bg-white/10 hover:bg-white/20 border border-white/20 transition-colors flex items-center justify-center px-4 py-3 text-base font-medium rounded-full text-white w-full backdrop-blur-sm shadow-sm">
                   IT Services <ArrowRight className="ml-2 h-5 w-5 flex-shrink-0" />
                 </button>
               </Link>
             </div>
+
+          </div>
+
+          {/* Navigation Controls at bottom center */}
+          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
+            {PROMO_SLIDES.map((_, idx) => (
+              <button 
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  idx === currentSlide ? 'w-8 bg-electric-blue' : 'w-2 bg-white/40 hover:bg-white/70'
+                }`}
+                aria-label={`Go to slide ${idx + 1}`}
+              />
+            ))}
           </div>
         </section>
       </Reveal>

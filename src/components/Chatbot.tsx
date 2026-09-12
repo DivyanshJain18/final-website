@@ -100,39 +100,39 @@ export function Chatbot() {
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open support chat"
-          className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-electric-blue text-navy-900 rounded-full shadow-lg hover:bg-cyan-400 transition-colors duration-200 focus:outline-none"
+          className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none"
         >
-          <MessageCircle className="w-6 h-6 sm:w-7 sm:h-7" />
+          <Bot className="w-6 h-6 sm:w-7 sm:h-7" />
         </button>
       )}
 
       {/* Chat Panel */}
       {isOpen && (
-        <div className="flex flex-col w-[90vw] sm:w-[380px] h-[75vh] max-h-[600px] bg-navy-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5 duration-300">
+        <div className="flex flex-col w-[90vw] sm:w-[380px] h-[75vh] max-h-[600px] bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-2 duration-200">
           
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-navy-800 border-b border-white/10 shrink-0">
+          <div className="flex items-center justify-between px-4 py-3 bg-blue-600 shrink-0 shadow-sm z-10">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-electric-blue/20 flex items-center justify-center text-electric-blue border border-electric-blue/30 relative">
+              <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white relative">
                 <Bot className="w-5 h-5" />
-                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-navy-800 rounded-full"></span>
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-400 border-2 border-blue-600 rounded-full"></span>
               </div>
               <div>
                 <h3 className="text-white font-bold text-sm tracking-wide">Mechafy Assistant</h3>
-                <p className="text-xs text-electric-blue">Online</p>
+                <p className="text-xs text-blue-100">Online</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <button 
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-md transition-colors"
+                className="p-1.5 text-blue-100 hover:text-white hover:bg-white/10 rounded-md transition-colors"
                 aria-label="Minimize chat"
               >
                 <Minus className="w-5 h-5" />
               </button>
               <button 
                 onClick={() => setIsOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-md transition-colors"
+                className="p-1.5 text-blue-100 hover:text-white hover:bg-white/10 rounded-md transition-colors"
                 aria-label="Close chat"
               >
                 <X className="w-5 h-5" />
@@ -141,7 +141,7 @@ export function Chatbot() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-navy-900/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-white">
             {messages.map((msg) => (
               <div 
                 key={msg.id} 
@@ -151,7 +151,7 @@ export function Chatbot() {
                   {/* Avatar */}
                   <div className="shrink-0 mt-1">
                     {msg.sender === 'bot' ? (
-                      <div className="w-6 h-6 rounded-full bg-electric-blue/20 flex items-center justify-center text-electric-blue text-xs">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs">
                         <Bot className="w-3.5 h-3.5" />
                       </div>
                     ) : (
@@ -166,8 +166,8 @@ export function Chatbot() {
                     <div 
                       className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                         msg.sender === 'user' 
-                          ? 'bg-electric-blue text-navy-900 rounded-tr-sm font-medium' 
-                          : 'bg-navy-800 text-slate-200 border border-white/5 rounded-tl-sm'
+                          ? 'bg-blue-50 text-slate-800 rounded-tr-sm font-medium' 
+                          : 'bg-gray-100 text-slate-800 rounded-tl-sm'
                       }`}
                     >
                       {msg.text}
@@ -180,7 +180,7 @@ export function Chatbot() {
                           <button
                             key={idx}
                             onClick={() => handleOptionClick(opt)}
-                            className="text-xs px-3 py-1.5 bg-navy-800 border border-electric-blue/30 text-cyan-100 rounded-full hover:bg-electric-blue hover:text-navy-900 transition-colors text-left"
+                            className="text-xs px-3 py-1.5 bg-white border border-gray-200 text-blue-700 rounded-full hover:bg-blue-50 hover:border-blue-300 transition-colors text-left shadow-sm"
                           >
                             {opt}
                           </button>
@@ -197,14 +197,14 @@ export function Chatbot() {
               <div className="flex w-full justify-start">
                 <div className="flex max-w-[85%] gap-2 flex-row">
                   <div className="shrink-0 mt-1">
-                    <div className="w-6 h-6 rounded-full bg-electric-blue/20 flex items-center justify-center text-electric-blue text-xs">
+                    <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs">
                       <Bot className="w-3.5 h-3.5" />
                     </div>
                   </div>
-                  <div className="bg-navy-800 border border-white/5 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
-                    <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                    <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                    <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  <div className="bg-gray-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-1.5">
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '0ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '150ms' }}></div>
+                    <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: '300ms' }}></div>
                   </div>
                 </div>
               </div>
@@ -213,7 +213,7 @@ export function Chatbot() {
           </div>
 
           {/* Input Area */}
-          <div className="p-3 bg-navy-800 border-t border-white/10 shrink-0">
+          <div className="p-3 bg-white border-t border-gray-100 shrink-0">
             <form 
               onSubmit={(e) => {
                 e.preventDefault();
@@ -221,7 +221,7 @@ export function Chatbot() {
               }}
               className="flex items-end gap-2"
             >
-              <div className="flex-1 bg-navy-900 border border-white/10 rounded-xl overflow-hidden focus-within:border-electric-blue/50 transition-colors">
+              <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
                 <textarea
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
@@ -232,7 +232,7 @@ export function Chatbot() {
                     }
                   }}
                   placeholder="Type your message..."
-                  className="w-full max-h-32 bg-transparent text-sm text-white px-3 py-3 resize-none outline-none custom-scrollbar"
+                  className="w-full max-h-32 bg-transparent text-sm text-slate-800 placeholder-gray-400 px-3 py-3 resize-none outline-none custom-scrollbar"
                   rows={1}
                   style={{ minHeight: '44px' }}
                 />
@@ -240,14 +240,14 @@ export function Chatbot() {
               <button
                 type="submit"
                 disabled={!inputValue.trim() || isTyping}
-                className="shrink-0 p-3 bg-electric-blue text-navy-900 rounded-xl hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="shrink-0 p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 aria-label="Send message"
               >
                 <Send className="w-5 h-5" />
               </button>
             </form>
             <div className="mt-2 text-center">
-              <span className="text-[10px] text-slate-500">AI Support Assistant • Powered by Mechafy Global</span>
+              <span className="text-[10px] text-gray-400 font-medium">AI Support Assistant • Powered by Mechafy Global</span>
             </div>
           </div>
         </div>
