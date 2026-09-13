@@ -31,11 +31,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userSnap = await getDoc(userRef);
         
         let userData: User;
+        const isDefaultAdmin = firebaseUser.email === 'mechafyglobal@gmail.com' || firebaseUser.email === 'director@mechafyglobal.com';
+        
         if (userSnap.exists()) {
           userData = { id: firebaseUser.uid, ...userSnap.data() } as User;
+          // Force admin role if they are the default admin but were saved as user
+          if (isDefaultAdmin && userData.role !== 'admin') {
+            userData.role = 'admin';
+            await setDoc(userRef, { role: 'admin' }, { merge: true });
+          }
         } else {
           // Create new user
-          const isDefaultAdmin = firebaseUser.email === 'director@mechafyglobal.com';
           userData = {
             id: firebaseUser.uid,
             name: firebaseUser.displayName || 'User',
