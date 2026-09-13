@@ -91,21 +91,46 @@ const AdminProducts: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload: Product = {
+      const payload: any = {
         name: formData.name,
         slug: formData.slug,
         description: formData.description,
         price: parseFloat(formData.price),
-        originalPrice: formData.originalPrice ? parseFloat(formData.originalPrice) : undefined,
         unit: formData.unit,
         taxText: formData.taxText,
         stock: parseInt(formData.stock),
         category_id: formData.category_id,
-        subcategory_id: formData.subcategory_id || undefined,
-        subsubcategory_id: formData.subsubcategory_id || undefined,
-        nested_subcategory_id: formData.nested_subcategory_id || undefined,
         image_url: formData.image_url
       };
+
+      if (formData.originalPrice) {
+        payload.originalPrice = parseFloat(formData.originalPrice);
+      } else {
+        payload.originalPrice = null;
+      }
+      if (formData.subcategory_id) {
+        payload.subcategory_id = formData.subcategory_id;
+      } else {
+        payload.subcategory_id = null;
+      }
+      if (formData.subsubcategory_id) {
+        payload.subsubcategory_id = formData.subsubcategory_id;
+      } else {
+        payload.subsubcategory_id = null;
+      }
+      if (formData.nested_subcategory_id) {
+        payload.nested_subcategory_id = formData.nested_subcategory_id;
+      } else {
+        payload.nested_subcategory_id = null;
+      }
+      
+      // Clean any undefined
+      Object.keys(payload).forEach(key => {
+        if (payload[key] === undefined) {
+          payload[key] = null;
+        }
+      });
+
 
       if (currentProduct && currentProduct.id) {
         await updateProduct(currentProduct.id, payload);
@@ -115,9 +140,9 @@ const AdminProducts: React.FC = () => {
       
       setIsModalOpen(false);
       loadData();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save product:', error);
-      alert('Failed to save product. Please check the console for details.');
+      alert('Failed to save product: ' + (error.message || error));
     }
   };
 
