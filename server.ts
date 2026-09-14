@@ -67,7 +67,7 @@ ${context}`;
       const lastMessage = messages[messages.length - 1].text;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
+        model: 'gemini-3.6-flash',
         contents: [
             ...history,
             { role: 'user', parts: [{ text: lastMessage }] }
@@ -83,7 +83,20 @@ ${context}`;
       res.json({ text: data.text || "I'm sorry, I couldn't process that.", options: data.options || [] });
     } catch (error: any) {
       console.error('Error in /api/chat:', error);
-      res.status(500).json({ error: error.message || 'Failed to generate response' });
+      let errorMessage = 'Failed to generate response';
+      if (error.status === 400 && error.message?.includes('API key not valid')) {
+        errorMessage = 'Invalid Gemini API Key. Please update it in settings.';
+      } else if (error.message) {
+        try {
+          const parsed = JSON.parse(error.message);
+          if (parsed.error && parsed.error.message) {
+            errorMessage = parsed.error.message;
+          }
+        } catch (e) {
+          errorMessage = error.message;
+        }
+      }
+      res.status(500).json({ error: errorMessage });
     }
   });
 

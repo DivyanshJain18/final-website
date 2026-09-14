@@ -153,11 +153,11 @@ ${contextStr}
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to get response');
-      }
-
       const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to get response');
+      }
       
       setMessages(prev => [
         ...prev,
@@ -170,13 +170,13 @@ ${contextStr}
           options: data.options || []
         }
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
       setMessages(prev => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: "I'm having trouble connecting right now. Please try again later or contact our team directly.",
+          text: `Error: ${error.message}. Please check your API keys or contact support.`,
           sender: 'bot',
           timestamp: new Date(),
           isOptions: true,
