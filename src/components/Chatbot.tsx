@@ -15,10 +15,34 @@ interface Message {
 
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showGreeting, setShowGreeting] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Initialize greeting popup
+  useEffect(() => {
+    const showTimer = setTimeout(() => {
+      setShowGreeting(true);
+    }, 1500);
+
+    const hideTimer = setTimeout(() => {
+      setShowGreeting(false);
+    }, 8000);
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
+
+  // Hide greeting if chat is opened
+  useEffect(() => {
+    if (isOpen) {
+      setShowGreeting(false);
+    }
+  }, [isOpen]);
 
   // Initialize welcome message
   useEffect(() => {
@@ -94,16 +118,34 @@ export function Chatbot() {
   };
 
   return (
-    <div className={`fixed right-4 sm:right-6 z-[9999] transition-all duration-300 ${isOpen ? 'bottom-4 sm:bottom-6' : 'bottom-20 sm:bottom-24'}`}>
-      {/* Chat Button */}
+    <div className={`fixed right-4 sm:right-6 bottom-4 sm:bottom-6 z-[9999] transition-all duration-300`}>
+      {/* Chat Button and Greeting */}
       {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          aria-label="Open support chat"
-          className="flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors duration-200 focus:outline-none"
-        >
-          <Bot className="w-6 h-6 sm:w-7 sm:h-7" />
-        </button>
+        <div className="relative flex flex-col items-end">
+          {/* Greeting Popup */}
+          <div 
+            onClick={() => setIsOpen(true)}
+            className={`absolute right-full bottom-0 mr-4 w-64 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 p-4 transition-all duration-500 origin-bottom-right cursor-pointer ${showGreeting ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 translate-x-2 pointer-events-none'}`}
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-slate-800 font-semibold text-sm">Hey there!</span>
+            </div>
+            <div className="text-slate-600 text-xs leading-relaxed">
+              How can we help you today?
+            </div>
+            
+            {/* Speech pointer */}
+            <div className="absolute top-1/2 -right-2 -translate-y-1/2 w-4 h-4 bg-white border-t border-r border-gray-100 transform rotate-45"></div>
+          </div>
+
+          <button
+            onClick={() => setIsOpen(true)}
+            aria-label="Open support chat"
+            className="relative z-10 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-blue-600 text-white rounded-full shadow-[0_4px_14px_0_rgba(37,99,235,0.39)] hover:bg-blue-700 hover:shadow-[0_6px_20px_rgba(37,99,235,0.23)] hover:-translate-y-0.5 transition-all duration-200 focus:outline-none"
+          >
+            <Bot className="w-6 h-6 sm:w-7 sm:h-7" />
+          </button>
+        </div>
       )}
 
       {/* Chat Panel */}
