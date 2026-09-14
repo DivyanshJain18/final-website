@@ -107,85 +107,24 @@ ${contextStr}
     setInputValue('');
     setIsTyping(true);
 
-    if (text === "Talk to Mechafy Global Team") {
-      setTimeout(() => {
-        setIsTyping(false);
-        setMessages(prev => [
-          ...prev,
-          {
-            id: (Date.now() + 1).toString(),
-            text: `You can reach our team directly via:\nEmail: ${chatbotConfig.supportEmail}\nPhone: ${chatbotConfig.supportPhone}`,
-            sender: 'bot',
-            timestamp: new Date(),
-            isOptions: true,
-            options: ["Back to Menu"]
-          }
-        ]);
-      }, 500);
-      return;
-    } else if (text === "Back to Menu") {
-      setTimeout(() => {
-        setIsTyping(false);
-        setMessages(prev => [
-          ...prev,
-          {
-            id: (Date.now() + 1).toString(),
-            text: "How else can I assist you today?",
-            sender: 'bot',
-            timestamp: new Date(),
-            isOptions: true,
-            options: chatbotConfig.quickActions
-          }
-        ]);
-      }, 500);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          messages: newMessages.map(m => ({ role: m.sender === 'bot' ? 'model' : 'user', text: m.text })),
-          context: websiteContext
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to get response');
-      }
-      
-      setMessages(prev => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          text: data.text,
-          sender: 'bot',
-          timestamp: new Date(),
-          isOptions: data.options && data.options.length > 0,
-          options: data.options || []
-        }
-      ]);
-    } catch (error: any) {
-      console.error("Chat error:", error);
-      setMessages(prev => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          text: `Error: ${error.message}. Please check your API keys or contact support.`,
-          sender: 'bot',
-          timestamp: new Date(),
-          isOptions: true,
-          options: ["Talk to Mechafy Global Team"]
-        }
-      ]);
-    } finally {
+    // Simulate thinking delay
+    setTimeout(() => {
       setIsTyping(false);
-    }
+      
+      const inquirySubject = text.length > 60 ? text.substring(0, 60) + "..." : text;
+      
+      setMessages(prev => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          text: `Thank you for reaching out to Mechafy Global! \n\nRegarding your inquiry for "${inquirySubject}", we can certainly help you with that.\n\nTo get the most accurate pricing, stock availability, or a custom quote, please contact our team directly:\n\n📞 Phone / WhatsApp: +91-9817056538\n✉️ Email: info@mechafyglobal.com\n\nWe look forward to assisting you!`,
+          sender: 'bot',
+          timestamp: new Date(),
+          isOptions: false,
+          options: []
+        }
+      ]);
+    }, 1000);
   };
 
   const handleOptionClick = (option: string) => {
