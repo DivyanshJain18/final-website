@@ -19,7 +19,7 @@ export default function Shop() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSeoExpanded, setIsSeoExpanded] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const PRODUCTS_PER_PAGE = 10;
+  const PRODUCTS_PER_PAGE = 9;
 
   const categoryFilter = searchParams.get('category') || '';
   const subcategoryFilter = searchParams.get('subcategory') || '';
@@ -291,11 +291,11 @@ export default function Shop() {
               <select 
                 value={sortOption} 
                 onChange={handleSortChange}
-                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-electric-blue"
+                className="w-full sm:w-auto px-4 py-2 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-electric-blue appearance-none"
               >
-                <option value="">Newest Arrivals</option>
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
+                <option value="" className="bg-slate-900 text-white">Newest Arrivals</option>
+                <option value="price_asc" className="bg-slate-900 text-white">Price: Low to High</option>
+                <option value="price_desc" className="bg-slate-900 text-white">Price: High to Low</option>
               </select>
             </div>
 
