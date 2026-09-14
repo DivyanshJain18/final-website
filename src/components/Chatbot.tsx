@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Minus, Bot, User, Phone, Mail } from 'lucide-react';
 import { chatbotConfig } from '../config/chatbotConfig';
+import { fetchProducts } from '../services/productService';
 
 type Sender = 'user' | 'bot' | 'system';
 
@@ -19,6 +20,7 @@ export function Chatbot() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [websiteContext, setWebsiteContext] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Initialize greeting popup
@@ -35,6 +37,28 @@ export function Chatbot() {
       clearTimeout(showTimer);
       clearTimeout(hideTimer);
     };
+  }, []);
+
+  // Fetch website context on load
+  useEffect(() => {
+    const loadContext = async () => {
+      try {
+        const products = await fetchProducts();
+        const contextStr = products.map(p => 
+          `Product: ${p.name}\nCategory: ${p.category_name} -> ${p.subcategory_name || ''}\nPrice: ${p.price > 0 ? '₹' + p.price : 'Contact for price'}\nStock: ${p.stock > 0 ? p.stock + ' in Stock' : 'Out of Stock'}\nDescription: ${p.description || 'No description available.'}`
+        ).join('\n\n');
+        
+        const fullContext = `
+Mechafy Global is a technology company offering IT Services, PCs, 3D Printers, and Accessories.
+Here are our available products:
+${contextStr}
+        `;
+        setWebsiteContext(fullContext);
+      } catch (error) {
+        console.error("Failed to load products for chatbot context:", error);
+      }
+    };
+    loadContext();
   }, []);
 
   // Hide greeting if chat is opened
@@ -67,7 +91,7 @@ export function Chatbot() {
     }
   }, [messages, isTyping, isOpen]);
 
-  const handleSendMessage = (text: string) => {
+  const handleSendMessage = async (text: string) => {
     if (!text.trim()) return;
 
     // Add user message
@@ -78,39 +102,90 @@ export function Chatbot() {
       timestamp: new Date()
     };
     
-    setMessages(prev => [...prev, userMsg]);
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setInputValue('');
     setIsTyping(true);
 
-    // TODO: Integrate actual AI backend here
-    // Placeholder response simulation
-    setTimeout(() => {
-      setIsTyping(false);
-      let botText = "I'm currently in training mode! My full knowledge base will be integrated soon to answer your specific questions.";
-      let showOptions = true;
-      let nextOptions = chatbotConfig.quickActions;
+    if (text === "Talk to Mechafy Global Team") {
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            text: `You can reach our team directly via:\nEmail: ${chatbotConfig.supportEmail}\nPhone: ${chatbotConfig.supportPhone}`,
+            sender: 'bot',
+            timestamp: new Date(),
+            isOptions: true,
+            options: ["Back to Menu"]
+          }
+        ]);
+      }, 500);
+      return;
+    } else if (text === "Back to Menu") {
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            text: "How else can I assist you today?",
+            sender: 'bot',
+            timestamp: new Date(),
+            isOptions: true,
+            options: chatbotConfig.quickActions
+          }
+        ]);
+      }, 500);
+      return;
+    }
 
-      if (text === "Talk to Mechafy Global Team") {
-        botText = `You can reach our team directly via:\nEmail: ${chatbotConfig.supportEmail}\nPhone: ${chatbotConfig.supportPhone}`;
-        showOptions = true;
-        nextOptions = ["Back to Menu"];
-      } else if (text === "Back to Menu") {
-        botText = "How else can I assist you today?";
-        showOptions = true;
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: newMessages.map(m => ({ role: m.sender === 'bot' ? 'model' : 'user', text: m.text })),
+          context: websiteContext
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get response');
       }
 
+      const data = await response.json();
+      
       setMessages(prev => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
-          text: botText,
+          text: data.text,
           sender: 'bot',
           timestamp: new Date(),
-          isOptions: showOptions,
-          options: nextOptions
+          isOptions: data.options && data.options.length > 0,
+          options: data.options || []
         }
       ]);
-    }, 1500);
+    } catch (error) {
+      console.error("Chat error:", error);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          text: "I'm having trouble connecting right now. Please try again later or contact our team directly.",
+          sender: 'bot',
+          timestamp: new Date(),
+          isOptions: true,
+          options: ["Talk to Mechafy Global Team"]
+        }
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   const handleOptionClick = (option: string) => {
