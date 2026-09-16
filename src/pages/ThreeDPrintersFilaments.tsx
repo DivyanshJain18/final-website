@@ -3,7 +3,7 @@ import { Layout } from '../components/Layout';
 import { Reveal } from '../components/Reveal';
 import { fetchProducts, Product } from '../services/productService';
 import { Link } from 'react-router-dom';
-import { Layers, Cuboid, Zap, Settings, ArrowRight, ShieldCheck, Truck, Headphones, Star } from 'lucide-react';
+import { Layers, Cuboid, Zap, Settings, ArrowRight, ShieldCheck, Truck, Headphones, Star, ShoppingCart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export default function ThreeDPrintersFilaments() {
