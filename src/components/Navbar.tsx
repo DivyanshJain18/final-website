@@ -120,7 +120,7 @@ export function Navbar() {
               MECHAFY<span className="text-white">GLOBAL</span>
             </Link>
             <div className="hidden md:block">
-              <div className="ml-4 lg:ml-8 flex items-center space-x-4 lg:space-x-6 h-full">
+              <div className="ml-2 md:ml-4 lg:ml-8 flex items-center space-x-2 md:space-x-3 lg:space-x-5 h-full text-xs md:text-[13px] lg:text-sm whitespace-nowrap">
                 <Link to="/" className="nav-link">Home</Link>
                 <Link to="/about" className="nav-link">Company Profile</Link>
                 
@@ -263,7 +263,7 @@ export function Navbar() {
           </div>
 
           <div className="hidden md:block">
-            <div className="ml-2 flex items-center md:ml-4 space-x-2 lg:space-x-4">
+            <div className="ml-2 flex items-center md:ml-4 space-x-2">
               {user && user.role === 'admin' ? (
                 <div className="relative flex items-center space-x-3">
                   <Link to="/admin" className="flex items-center space-x-1 text-sm hover:text-electric-blue transition-colors">
