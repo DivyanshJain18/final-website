@@ -1,9 +1,10 @@
 export const chatbotConfig = {
   welcomeMessage: "Hi there! Welcome to Mechafy Global. How can I help you today?",
   quickActions: [
-    "Product Specs & Availability",
+    "Computer Components",
+    "Robotics Components",
+    "3D Printers & Filaments",
     "IT Services & Development",
-    "Track an Order",
     "Talk to Mechafy Global Team"
   ],
   supportEmail: "info@mechafyglobal.com",

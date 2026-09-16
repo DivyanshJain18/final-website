@@ -13,6 +13,7 @@ import FAQPage from './pages/FAQPage';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import PCBuilder from './pages/PCBuilder';
+import ThreeDPrintersFilaments from './pages/ThreeDPrintersFilaments';
 
 import { Layout } from './components/Layout';
 
@@ -45,6 +46,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/pc-builder" element={<PCBuilder />} />
+            <Route path="/3d-printers-filaments" element={<ThreeDPrintersFilaments />} />
             <Route path="/product/:slug" element={<ProductDetails />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/cart" element={<Cart />} />

@@ -254,6 +254,7 @@ export function Navbar() {
                   )}
                 </div>
 
+                <Link to="/3d-printers-filaments" className="nav-link font-semibold text-blue-400 drop-shadow-[0_0_5px_rgba(59,130,246,0.2)]">3D Printers & Filaments</Link>
                 <Link to="/pc-builder" className="nav-link font-bold text-electric-blue drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">PC Builder</Link>
                 <Link to="/it-services" className="nav-link">IT Services</Link>
                 <Link to="/contact" className="nav-link">Contact Us</Link>
@@ -386,6 +387,7 @@ export function Navbar() {
               </div>
             )}
 
+            <Link to="/3d-printers-filaments" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">3D Printers & Filaments</Link>
             <Link to="/pc-builder" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">PC Builder</Link>
             <Link to="/it-services" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">IT Services</Link>
             <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Contact Us</Link>

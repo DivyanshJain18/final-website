@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Minus, Bot, User, Phone, Mail } from 'lucide-react';
 import { chatbotConfig } from '../config/chatbotConfig';
 import { fetchProducts } from '../services/productService';
+import { useNavigate } from 'react-router-dom';
 
 type Sender = 'user' | 'bot' | 'system';
 
@@ -12,6 +13,10 @@ interface Message {
   timestamp: Date;
   isOptions?: boolean;
   options?: string[];
+  action?: {
+    label: string;
+    url: string;
+  };
 }
 
 export function Chatbot() {
@@ -22,6 +27,7 @@ export function Chatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const [websiteContext, setWebsiteContext] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   // Initialize greeting popup
   useEffect(() => {
@@ -48,29 +54,17 @@ export function Chatbot() {
           `Product: ${p.name}\nCategory: ${p.category_name} -> ${p.subcategory_name || ''}\nPrice: ${p.price > 0 ? '₹' + p.price : 'Contact for price'}\nStock: ${p.stock > 0 ? p.stock + ' in Stock' : 'Out of Stock'}\nDescription: ${p.description || 'No description available.'}`
         ).join('\n\n');
         
-        const fullContext = `
-Mechafy Global is a technology company offering IT Services, PCs, 3D Printers, and Accessories.
-Here are our available products:
-${contextStr}
-        `;
-        setWebsiteContext(fullContext);
-      } catch (error) {
-        console.error("Failed to load products for chatbot context:", error);
+        setWebsiteContext(contextStr);
+      } catch (err) {
+        console.error("Failed to load products context", err);
       }
     };
     loadContext();
   }, []);
 
-  // Hide greeting if chat is opened
+  // Initial welcome message
   useEffect(() => {
-    if (isOpen) {
-      setShowGreeting(false);
-    }
-  }, [isOpen]);
-
-  // Initialize welcome message
-  useEffect(() => {
-    if (messages.length === 0) {
+    if (isOpen && messages.length === 0) {
       setMessages([
         {
           id: Date.now().toString(),
@@ -82,9 +76,9 @@ ${contextStr}
         }
       ]);
     }
-  }, [messages.length]);
+  }, [isOpen]);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -111,19 +105,41 @@ ${contextStr}
     setTimeout(() => {
       setIsTyping(false);
       
-      const inquirySubject = text.length > 60 ? text.substring(0, 60) + "..." : text;
+      let botResponse: Message = {
+        id: (Date.now() + 1).toString(),
+        text: "",
+        sender: 'bot',
+        timestamp: new Date(),
+        isOptions: false,
+        options: []
+      };
+
+      if (text === "Computer Components") {
+        botResponse.text = "We offer a wide range of computer components including Graphics Cards, CPUs, Motherboards, RAM, SSDs, Power Supplies, and PC Cabinets. Discover the perfect parts for your next build.";
+        botResponse.action = { label: "Explore Computer Components", url: "/shop" };
+      } else if (text === "Robotics Components") {
+        botResponse.text = "Build your next project with our premium robotics components. We have microcontrollers, sensors, motors, servos, and various robotics chassis.";
+        botResponse.action = { label: "Explore Robotics Components", url: "/shop" };
+      } else if (text === "3D Printers & Filaments") {
+        botResponse.text = "Step into the future of manufacturing! Explore our premium selection of 3D Printers, high-quality Filaments, and advanced 3D Printing Solutions to bring your digital designs into reality.";
+        botResponse.action = { label: "Explore 3D Printers & Filaments", url: "/3d-printers-filaments" };
+      } else if (text === "IT Services & Development") {
+        botResponse.text = "Our expert team offers custom IT solutions, software development, web applications, and technical consulting. How can we help scale your business?";
+        botResponse.action = { label: "View IT Services", url: "/it-services" };
+      } else if (text === "Talk to Mechafy Global Team") {
+        botResponse.text = `You can reach our team directly via:\n\nEmail: ${chatbotConfig.supportEmail}\nPhone: ${chatbotConfig.supportPhone}`;
+        botResponse.isOptions = true;
+        botResponse.options = ["Back to Menu"];
+      } else if (text === "Back to Menu") {
+        botResponse.text = "How else can I assist you today?";
+        botResponse.isOptions = true;
+        botResponse.options = chatbotConfig.quickActions;
+      } else {
+        const inquirySubject = text.length > 60 ? text.substring(0, 60) + "..." : text;
+        botResponse.text = `Thank you for reaching out to Mechafy Global! \n\nRegarding your inquiry for "${inquirySubject}", we can certainly help you with that.\n\nTo get the most accurate pricing, stock availability, or a custom quote, please contact our team directly:\n\n📞 Phone / WhatsApp: +91-9817056538\n✉️ Email: info@mechafyglobal.com\n\nWe look forward to assisting you!`;
+      }
       
-      setMessages(prev => [
-        ...prev,
-        {
-          id: (Date.now() + 1).toString(),
-          text: `Thank you for reaching out to Mechafy Global! \n\nRegarding your inquiry for "${inquirySubject}", we can certainly help you with that.\n\nTo get the most accurate pricing, stock availability, or a custom quote, please contact our team directly:\n\n📞 Phone / WhatsApp: +91-9817056538\n✉️ Email: info@mechafyglobal.com\n\nWe look forward to assisting you!`,
-          sender: 'bot',
-          timestamp: new Date(),
-          isOptions: false,
-          options: []
-        }
-      ]);
+      setMessages(prev => [...prev, botResponse]);
     }, 1000);
   };
 
@@ -135,11 +151,10 @@ ${contextStr}
     <div className={`fixed right-4 sm:right-6 bottom-4 sm:bottom-6 z-[9999] transition-all duration-300`}>
       {/* Chat Button and Greeting */}
       {!isOpen && (
-        <div className="relative flex flex-col items-end">
-          {/* Greeting Popup */}
+        <div className="relative flex items-end">
+          {/* Greeting Bubble */}
           <div 
-            onClick={() => setIsOpen(true)}
-            className={`absolute right-full bottom-0 mr-4 w-64 bg-white rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 p-4 transition-all duration-500 origin-bottom-right cursor-pointer ${showGreeting ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 translate-x-2 pointer-events-none'}`}
+            className={`absolute bottom-full right-0 mb-4 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 transform origin-bottom-right cursor-pointer ${showGreeting ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 translate-x-2 pointer-events-none'}`}
           >
             <div className="flex items-center gap-2 mb-1">
               <span className="text-slate-800 font-semibold text-sm">Hey there!</span>
@@ -229,14 +244,27 @@ ${contextStr}
                       {msg.text}
                     </div>
 
+                    {/* Action Button (if any) */}
+                    {msg.sender === 'bot' && msg.action && (
+                      <button
+                        onClick={() => {
+                          setIsOpen(false);
+                          navigate(msg.action!.url);
+                        }}
+                        className="mt-1 px-4 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg shadow hover:bg-blue-700 transition-colors self-start"
+                      >
+                        {msg.action.label}
+                      </button>
+                    )}
+
                     {/* Quick Actions (if any) */}
                     {msg.sender === 'bot' && msg.isOptions && msg.options && (
-                      <div className="flex flex-wrap gap-2 mt-1">
+                      <div className="flex flex-col gap-2 mt-1 w-full">
                         {msg.options.map((opt, idx) => (
                           <button
                             key={idx}
                             onClick={() => handleOptionClick(opt)}
-                            className="text-xs px-3 py-1.5 bg-white border border-gray-200 text-blue-700 rounded-full hover:bg-blue-50 hover:border-blue-300 transition-colors text-left shadow-sm"
+                            className="text-xs px-3 py-2.5 bg-white border border-gray-200 text-blue-700 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition-all text-left shadow-sm font-medium w-full"
                           >
                             {opt}
                           </button>

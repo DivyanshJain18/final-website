@@ -133,6 +133,7 @@ export function Layout({ children }: { children: ReactNode }) {
                       </Link>
                     </li>
                   ))}
+                  <li><Link to="/3d-printers-filaments" aria-label="Shop 3D Printers & Filaments" className="hover:text-cyan-400 transition-colors">3D Printers & Filaments</Link></li>
                   <li><Link to="/pc-builder" aria-label="Build a Custom PC" className="hover:text-cyan-400 transition-colors">Custom PC Builder</Link></li>
                 </ul>
               </nav>
