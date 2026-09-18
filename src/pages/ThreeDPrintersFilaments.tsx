@@ -166,7 +166,7 @@ export default function ThreeDPrintersFilaments() {
       </section>
 
       {/* PRINTERS SECTION */}
-      <section id="featured-printers" className="pt-8 pb-16 relative bg-navy-900">
+      <section id="featured-printers" className="pt-8 pb-16 relative overflow-hidden bg-navy-900">
         <div className="absolute top-1/4 -left-32 w-96 h-96 bg-electric-blue/10 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <Reveal>
@@ -240,7 +240,7 @@ export default function ThreeDPrintersFilaments() {
       </section>
 
       {/* FILAMENTS SECTION */}
-      <section id="filaments" className="pt-8 pb-16 relative bg-navy-900 border-t border-white/5">
+      <section id="filaments" className="pt-8 pb-16 relative overflow-hidden bg-navy-900 border-t border-white/5">
         <div className="absolute top-1/3 -right-32 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <Reveal>
@@ -307,7 +307,7 @@ export default function ThreeDPrintersFilaments() {
 
       {/* OTHER ACCESSORIES & PARTS */}
       {!loading && otherProducts.length > 0 && (
-        <section className="pt-8 pb-16 relative bg-navy-900 border-t border-white/5">
+        <section className="pt-8 pb-16 relative overflow-hidden bg-navy-900 border-t border-white/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <Reveal>
               <div className="mb-10 border-b border-white/10 pb-6">

@@ -154,7 +154,7 @@ export function Chatbot() {
         <div className="relative flex items-end">
           {/* Greeting Bubble */}
           <div 
-            className={`absolute bottom-full right-0 mb-4 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 transform origin-bottom-right cursor-pointer ${showGreeting ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 translate-x-2 pointer-events-none'}`}
+            className={`absolute right-full top-1/2 -translate-y-1/2 mr-4 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-4 transform origin-right cursor-pointer ${showGreeting ? 'opacity-100 scale-100 translate-x-0' : 'opacity-0 scale-95 translate-x-2 pointer-events-none'}`}
           >
             <div className="flex items-center gap-2 mb-1">
               <span className="text-slate-800 font-semibold text-sm">Hey there!</span>
