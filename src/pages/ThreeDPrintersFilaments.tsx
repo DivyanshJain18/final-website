@@ -5,9 +5,7 @@ import { fetchProducts, Product } from '../services/productService';
 import { Link } from 'react-router-dom';
 import { Layers, Cuboid, Zap, Settings, ArrowRight, ShieldCheck, Headphones, ShoppingCart, Scan, Wrench } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import heroPrinterImg from '../assets/images/hero_3d_printer_1790421433256.jpg';
-import heroScannerImg from '../assets/images/hero_3d_scanner_1790421450094.jpg';
-import heroFilamentImg from '../assets/images/hero_3d_filament_1790421463904.jpg';
+import { HERO_3D_PRINTER_IMG, HERO_3D_SCANNER_IMG, HERO_3D_FILAMENT_IMG } from '../assets/heroImagesData';
 
 export default function ThreeDPrintersFilaments() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -22,15 +20,15 @@ export default function ThreeDPrintersFilaments() {
 
   const HERO_SLIDES = [
     {
-      image: heroPrinterImg,
+      image: HERO_3D_PRINTER_IMG,
       title: "Industrial 3D Printers"
     },
     {
-      image: heroScannerImg,
+      image: HERO_3D_SCANNER_IMG,
       title: "High-Precision 3D Scanners"
     },
     {
-      image: heroFilamentImg,
+      image: HERO_3D_FILAMENT_IMG,
       title: "Engineering Filaments"
     }
   ];
