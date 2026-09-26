@@ -3,17 +3,18 @@ import { Layout } from '../components/Layout';
 import { Reveal } from '../components/Reveal';
 import { fetchProducts, Product } from '../services/productService';
 import { Link } from 'react-router-dom';
-import { Layers, Cuboid, Zap, Settings, ArrowRight, ShieldCheck, Headphones, ShoppingCart } from 'lucide-react';
+import { Layers, Cuboid, Zap, Settings, ArrowRight, ShieldCheck, Headphones, ShoppingCart, Scan } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export default function ThreeDPrintersFilaments() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const { addItem } = useCart();
+  const { addToCart } = useCart();
   const [currentSlide, setCurrentSlide] = useState(0);
   
   const [showAllPrinters, setShowAllPrinters] = useState(false);
   const [showAllFilaments, setShowAllFilaments] = useState(false);
+  const [showAllScanners, setShowAllScanners] = useState(false);
 
   const HERO_SLIDES = [
     "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80&w=1920", // Industrial / Engineering
@@ -33,15 +34,20 @@ export default function ThreeDPrintersFilaments() {
       try {
         const allProducts = await fetchProducts();
         
-        // Filter products for 3D Printers, Filaments, or related categories
+        // Filter products for 3D Printers, Filaments, 3D Scanners, or related categories
         const filtered = allProducts.filter(p => {
           const cat = (p.category_name || '').toLowerCase();
           const sub = (p.subcategory_name || '').toLowerCase();
           const subsub = (p.subsubcategory_name || '').toLowerCase();
           const nested = (p.nested_subcategory_name || '').toLowerCase();
+          const name = (p.name || '').toLowerCase();
+          const desc = (p.description || '').toLowerCase();
           
           return cat.includes('3d') || sub.includes('3d') || subsub.includes('3d') || nested.includes('3d')
-                 || cat.includes('filament') || sub.includes('filament');
+                 || cat.includes('filament') || sub.includes('filament')
+                 || cat.includes('scanner') || sub.includes('scanner') || subsub.includes('scanner') || nested.includes('scanner')
+                 || name.includes('scanner') || name.includes('3d')
+                 || desc.includes('3d scanner') || desc.includes('laser scanner') || desc.includes('handheld scanner');
         });
         
         setProducts(filtered);
@@ -55,9 +61,52 @@ export default function ThreeDPrintersFilaments() {
     loadProducts();
   }, []);
 
-  const printers = products.filter(p => (p.category_name || '').toLowerCase().includes('printer') || (p.subcategory_name || '').toLowerCase().includes('printer'));
-  const filaments = products.filter(p => (p.category_name || '').toLowerCase().includes('filament') || (p.subcategory_name || '').toLowerCase().includes('filament'));
-  const otherProducts = products.filter(p => !printers.includes(p) && !filaments.includes(p));
+  const isScanner = (p: Product) => {
+    const fields = [
+      p.category_name,
+      p.subcategory_name,
+      p.subsubcategory_name,
+      p.nested_subcategory_name,
+      p.name
+    ].map(f => (f || '').toLowerCase());
+
+    const hasScannerField = fields.some(f => f.includes('scanner') || f.includes('3d scan'));
+    if (hasScannerField) return true;
+
+    const desc = (p.description || '').toLowerCase();
+    return desc.includes('3d scanner') || desc.includes('laser scanner') || desc.includes('handheld scanner');
+  };
+
+  const isPrinter = (p: Product) => {
+    if (isScanner(p)) return false;
+    const fields = [
+      p.category_name,
+      p.subcategory_name,
+      p.subsubcategory_name,
+      p.nested_subcategory_name,
+      p.name
+    ].map(f => (f || '').toLowerCase());
+
+    return fields.some(f => f.includes('printer'));
+  };
+
+  const isFilament = (p: Product) => {
+    if (isScanner(p) || isPrinter(p)) return false;
+    const fields = [
+      p.category_name,
+      p.subcategory_name,
+      p.subsubcategory_name,
+      p.nested_subcategory_name,
+      p.name
+    ].map(f => (f || '').toLowerCase());
+
+    return fields.some(f => f.includes('filament') || f.includes('resin'));
+  };
+
+  const printers = products.filter(isPrinter);
+  const filaments = products.filter(isFilament);
+  const scanners = products.filter(isScanner);
+  const otherProducts = products.filter(p => !isPrinter(p) && !isFilament(p) && !isScanner(p));
 
   return (
     <Layout>
@@ -108,6 +157,8 @@ export default function ThreeDPrintersFilaments() {
                 <div className="hidden sm:block text-slate-600">•</div>
                 <div className="flex items-center gap-2"><Layers className="h-5 w-5 text-purple-400" /> Premium Filaments</div>
                 <div className="hidden sm:block text-slate-600">•</div>
+                <div className="flex items-center gap-2"><Scan className="h-5 w-5 text-cyan-400" /> 3D Scanners</div>
+                <div className="hidden sm:block text-slate-600">•</div>
                 <div className="flex items-center gap-2"><Headphones className="h-5 w-5 text-electric-blue" /> Expert Support</div>
               </div>
             </Reveal>
@@ -119,6 +170,9 @@ export default function ThreeDPrintersFilaments() {
                 </a>
                 <a href="#filaments" className="px-8 py-4 rounded-lg font-semibold text-white border border-white/20 hover:bg-white/10 transition-colors backdrop-blur-sm shadow-[0_0_15px_rgba(168,85,247,0.15)] hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] text-center w-full sm:w-auto">
                   View Filaments
+                </a>
+                <a href="#3d-scanners" className="px-8 py-4 rounded-lg font-semibold text-white border border-white/20 hover:bg-white/10 transition-colors backdrop-blur-sm shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] text-center w-full sm:w-auto">
+                  3D Scanners
                 </a>
               </div>
             </Reveal>
@@ -214,7 +268,7 @@ export default function ThreeDPrintersFilaments() {
                           <span className="text-xl font-bold text-white">₹{product.price.toFixed(2)}</span>
                         </div>
                         <button 
-                          onClick={() => addItem(product)}
+                          onClick={() => addToCart(product)}
                           disabled={product.stock <= 0}
                           className="p-2.5 bg-white/5 hover:bg-electric-blue text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-white/10 hover:border-electric-blue"
                         >
@@ -283,7 +337,7 @@ export default function ThreeDPrintersFilaments() {
                       <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10 shrink-0">
                         <span className="text-lg font-bold text-white">₹{product.price.toFixed(2)}</span>
                         <button 
-                          onClick={() => addItem(product)}
+                          onClick={() => addToCart(product)}
                           disabled={product.stock <= 0}
                           className="p-2.5 bg-white/5 hover:bg-purple-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-white/10 hover:border-purple-500"
                         >
@@ -300,6 +354,81 @@ export default function ThreeDPrintersFilaments() {
               <Layers className="mx-auto h-16 w-16 text-slate-500 mb-6" />
               <h3 className="text-2xl font-bold text-white mb-3">Expanding Our Materials</h3>
               <p className="text-slate-400 max-w-md mx-auto">Our filament catalog is currently being updated with new colors and materials.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* 3D SCANNERS SECTION */}
+      <section id="3d-scanners" className="pt-8 pb-16 relative overflow-hidden bg-navy-900 border-t border-white/5">
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <Reveal>
+            <div className="flex justify-between items-end mb-10 border-b border-white/10 pb-6">
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">High-Precision 3D Scanners</h2>
+                <p className="text-slate-400">Desktop and handheld 3D digitizers for reverse engineering, prototyping, and inspection.</p>
+              </div>
+              {!showAllScanners && scanners.length > 4 && (
+                <button onClick={() => setShowAllScanners(true)} className="flex items-center text-cyan-400 hover:text-cyan-300 transition-colors font-semibold cursor-pointer">
+                  View All <ArrowRight className="ml-2 h-4 w-4" />
+                </button>
+              )}
+            </div>
+          </Reveal>
+
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-400"></div>
+            </div>
+          ) : scanners.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {scanners.slice(0, showAllScanners ? scanners.length : 4).map((product, index) => (
+                <Reveal key={product.id} delay={index * 0.05}>
+                  <div className="glass-panel group flex flex-col h-full overflow-hidden hover:border-cyan-400/50 transition-all duration-300">
+                    <Link to={`/product/${product.slug}`} className="block relative h-56 bg-white/5 p-6 overflow-hidden shrink-0">
+                      <img 
+                        src={product.image_url} 
+                        alt={product.name} 
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+                        referrerPolicy="no-referrer"
+                      />
+                    </Link>
+                    <div className="p-5 flex flex-col flex-grow">
+                      <Link to={`/product/${product.slug}`} className="text-lg font-bold text-white mb-2 hover:text-cyan-400 line-clamp-2 transition-colors min-h-[3.5rem]">
+                        {product.name}
+                      </Link>
+                      <p className="text-sm text-slate-400 mb-4 line-clamp-3 flex-grow">{product.description}</p>
+                      
+                      <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10 shrink-0">
+                        <div className="flex items-center">
+                          {product.originalPrice && product.originalPrice > product.price && (
+                            <span className="text-xs line-through text-slate-500 mr-2">₹{product.originalPrice.toFixed(2)}</span>
+                          )}
+                          <span className="text-xl font-bold text-white">₹{product.price.toFixed(2)}</span>
+                        </div>
+                        <button 
+                          onClick={() => addToCart(product)}
+                          disabled={product.stock <= 0}
+                          className="p-2.5 bg-white/5 hover:bg-cyan-500 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-white/10 hover:border-cyan-500"
+                          title="Add to Cart"
+                        >
+                          <ShoppingCart className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 bg-navy-900/50 rounded-2xl border border-dashed border-white/20">
+              <Scan className="mx-auto h-16 w-16 text-cyan-400 mb-6" />
+              <h3 className="text-2xl font-bold text-white mb-3">Expanding Our 3D Scanner Catalog</h3>
+              <p className="text-slate-400 max-w-md mx-auto">We are continuously updating our selection of high-accuracy handheld and desktop 3D scanners. Contact our team for customized industrial scanning equipment.</p>
+              <Link to="/contact" className="inline-block mt-8 px-6 py-3 rounded-lg font-semibold text-white border border-white/20 hover:bg-white/10 transition-colors">
+                Inquire About 3D Scanners
+              </Link>
             </div>
           )}
         </div>
