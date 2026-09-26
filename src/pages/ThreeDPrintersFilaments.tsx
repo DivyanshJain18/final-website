@@ -1,316 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { Reveal } from '../components/Reveal';
-import { fetchProducts, Product, CURATED_3D_PARTS_AND_ACCESSORIES } from '../services/productService';
+import { fetchProducts, Product } from '../services/productService';
 import { Link } from 'react-router-dom';
-import { Layers, Cuboid, Zap, Settings, ArrowRight, ShieldCheck, Headphones, ShoppingCart, Scan, Wrench } from 'lucide-react';
+import { Layers, Cuboid, Zap, Settings, ArrowRight, ShieldCheck, Headphones, ShoppingCart, Scan } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-
-// Helper to strictly identify computer hardware and PC motherboards so they never appear in 3D section
-export const isComputerComponentOrMotherboard = (p: Product): boolean => {
-  const name = (p.name || '').toLowerCase();
-  const desc = (p.description || '').toLowerCase();
-  const cat = (p.category_name || '').toLowerCase();
-  const sub = (p.subcategory_name || '').toLowerCase();
-  const subsub = (p.subsubcategory_name || '').toLowerCase();
-  const nested = (p.nested_subcategory_name || '').toLowerCase();
-
-  const allText = `${name} ${desc} ${cat} ${sub} ${subsub} ${nested}`;
-  const catHierarchy = `${cat} ${sub} ${subsub} ${nested}`;
-
-  // Explicit PC / Computer motherboard indicators
-  const pcMotherboardKeywords = [
-    'motherboard',
-    'motherboared',
-    'mainboard',
-    'mobo',
-    'lga1700',
-    'lga1200',
-    'lga1151',
-    'am4',
-    'am5',
-    'b650',
-    'b550',
-    'b760',
-    'b450',
-    'z790',
-    'z690',
-    'x670',
-    'h610',
-    'a620',
-    'atx motherboard',
-    'matx',
-    'micro-atx',
-    'mini-itx',
-    'pc motherboard',
-    'computer motherboard',
-    'desktop motherboard',
-    'gaming motherboard'
-  ];
-
-  // Specific check: if product text contains computer motherboard keywords, it's a computer motherboard
-  const matchesMotherboard = pcMotherboardKeywords.some(kw => allText.includes(kw));
-  if (matchesMotherboard) {
-    return true;
-  }
-
-  // Check if categorized under Computer Components
-  const isComputerCat = 
-    catHierarchy.includes('computer') ||
-    catHierarchy.includes('pc component') ||
-    catHierarchy.includes('processor') ||
-    catHierarchy.includes('cpu') ||
-    catHierarchy.includes('memory') ||
-    catHierarchy.includes('ram') ||
-    catHierarchy.includes('graphics card') ||
-    catHierarchy.includes('gpu') ||
-    catHierarchy.includes('smps') ||
-    catHierarchy.includes('power supply') ||
-    catHierarchy.includes('cabinet');
-
-  if (isComputerCat) {
-    return true;
-  }
-
-  // Check for general PC hardware keywords
-  const computerPartsKeywords = [
-    'intel core',
-    'ryzen',
-    'ddr4 ram',
-    'ddr5 ram',
-    'geforce rtx',
-    'radeon rx',
-    'atx power supply',
-    'pc cabinet',
-    'desktop ram'
-  ];
-  if (computerPartsKeywords.some(kw => allText.includes(kw))) {
-    return true;
-  }
-
-  return false;
-};
-
-// Check if product is an actual 3D scanner machine (not an accessory)
-export const isScannerMachine = (p: Product): boolean => {
-  if (isComputerComponentOrMotherboard(p)) return false;
-
-  const name = (p.name || '').toLowerCase();
-  const desc = (p.description || '').toLowerCase();
-  const cat = (p.category_name || '').toLowerCase();
-  const sub = (p.subcategory_name || '').toLowerCase();
-
-  // Exclude scanner accessories
-  const isAccessory = 
-    name.includes('turntable') ||
-    name.includes('spray') ||
-    name.includes('marker') ||
-    name.includes('target') ||
-    name.includes('calibration') ||
-    name.includes('tripod') ||
-    name.includes('cable') ||
-    name.includes('bracket') ||
-    name.includes('grip') ||
-    name.includes('dot') ||
-    name.includes('point');
-
-  if (isAccessory) return false;
-
-  return (
-    name.includes('scanner') ||
-    name.includes('digitizer') ||
-    cat.includes('scanner') ||
-    sub.includes('scanner') ||
-    desc.includes('3d scanner') ||
-    desc.includes('handheld 3d') ||
-    desc.includes('laser 3d scanner')
-  );
-};
-
-// Check if product is an actual 3D printer machine (not a part/accessory)
-export const isPrinterMachine = (p: Product): boolean => {
-  if (isComputerComponentOrMotherboard(p)) return false;
-  if (isScannerMachine(p)) return false;
-
-  const name = (p.name || '').toLowerCase();
-  const desc = (p.description || '').toLowerCase();
-  const cat = (p.category_name || '').toLowerCase();
-  const sub = (p.subcategory_name || '').toLowerCase();
-
-  // Exclude parts and accessories
-  const isPartOrAcc = 
-    name.includes('nozzle') ||
-    name.includes('hotend') ||
-    name.includes('hot end') ||
-    name.includes('extruder') ||
-    name.includes('build plate') ||
-    name.includes('pei') ||
-    name.includes('bed level') ||
-    name.includes('bltouch') ||
-    name.includes('cr touch') ||
-    name.includes('thermistor') ||
-    name.includes('ptfe') ||
-    name.includes('timing belt') ||
-    name.includes('pulley') ||
-    name.includes('silicone sock') ||
-    name.includes('vat') ||
-    name.includes('fep') ||
-    name.includes('part') ||
-    name.includes('accessory') ||
-    name.includes('accessories');
-
-  if (isPartOrAcc) return false;
-
-  return (
-    name.includes('printer') ||
-    cat.includes('printer') ||
-    sub.includes('printer') ||
-    desc.includes('3d printer') ||
-    desc.includes('fdm printer') ||
-    desc.includes('resin 3d printer')
-  );
-};
-
-// Check if product is printing filament or resin
-export const isFilamentOrResin = (p: Product): boolean => {
-  if (isComputerComponentOrMotherboard(p)) return false;
-  if (isPrinterMachine(p) || isScannerMachine(p)) return false;
-
-  const name = (p.name || '').toLowerCase();
-  const desc = (p.description || '').toLowerCase();
-  const cat = (p.category_name || '').toLowerCase();
-  const sub = (p.subcategory_name || '').toLowerCase();
-
-  return (
-    name.includes('filament') ||
-    name.includes('pla ') ||
-    name.includes('pla+') ||
-    name.includes('abs ') ||
-    name.includes('petg') ||
-    name.includes('tpu ') ||
-    name.includes('uv resin') ||
-    name.includes('photopolymer resin') ||
-    cat.includes('filament') ||
-    cat.includes('resin') ||
-    sub.includes('filament') ||
-    sub.includes('resin') ||
-    desc.includes('3d printing filament')
-  );
-};
-
-// Check if product is specifically a 3D Printer Part or Accessory
-export const is3DPrinterPartOrAccessory = (p: Product): boolean => {
-  if (isComputerComponentOrMotherboard(p)) return false;
-  if (isPrinterMachine(p) || isFilamentOrResin(p) || isScannerMachine(p)) return false;
-
-  const name = (p.name || '').toLowerCase();
-  const desc = (p.description || '').toLowerCase();
-  const cat = (p.category_name || '').toLowerCase();
-  const sub = (p.subcategory_name || '').toLowerCase();
-  const allText = `${name} ${desc} ${cat} ${sub}`;
-
-  const printerPartKeywords = [
-    'nozzle',
-    'hotend',
-    'hot end',
-    'heatblock',
-    'heat block',
-    'heatbreak',
-    'heat break',
-    'extruder',
-    'build plate',
-    'pei sheet',
-    'pei bed',
-    'magnetic bed',
-    'spring steel',
-    'glass bed',
-    'bltouch',
-    'cr touch',
-    'cr-touch',
-    'bed level',
-    'leveling sensor',
-    'thermistor',
-    'heater cartridge',
-    'heating cartridge',
-    'ptfe tube',
-    'bowden tube',
-    'capricorn',
-    'pc4-m6',
-    'pc4-m10',
-    'pneumatic fitting',
-    'pneumatic coupler',
-    'silicone sock',
-    'lead screw',
-    'anti-backlash',
-    'timing belt',
-    'gt2',
-    'pulley',
-    'fep film',
-    'resin vat',
-    'curing station',
-    'wash and cure',
-    'cleaning needle',
-    'nozzle cleaner',
-    'print scraper',
-    '3d printer part',
-    '3d printer accessory',
-    'printer accessory',
-    'printer part'
-  ];
-
-  const matchesKeyword = printerPartKeywords.some(kw => allText.includes(kw));
-  const matchesCat = (cat.includes('3d') || sub.includes('3d')) && 
-                     (allText.includes('part') || allText.includes('accessori') || allText.includes('spare'));
-
-  return matchesKeyword || matchesCat;
-};
-
-// Check if product is specifically a 3D Scanner Part or Accessory
-export const is3DScannerPartOrAccessory = (p: Product): boolean => {
-  if (isComputerComponentOrMotherboard(p)) return false;
-  if (isScannerMachine(p) || isPrinterMachine(p) || isFilamentOrResin(p)) return false;
-
-  const name = (p.name || '').toLowerCase();
-  const desc = (p.description || '').toLowerCase();
-  const cat = (p.category_name || '').toLowerCase();
-  const sub = (p.subcategory_name || '').toLowerCase();
-  const allText = `${name} ${desc} ${cat} ${sub}`;
-
-  const scannerPartKeywords = [
-    'turntable',
-    'scanning table',
-    'rotary table',
-    'spray',
-    'aesub',
-    'marker',
-    'reflective marker',
-    'marker points',
-    'tracking dot',
-    'tracking point',
-    'scanning target',
-    'calibration plate',
-    'calibration board',
-    'calibration grid',
-    'scanner tripod',
-    'scanner stand',
-    'scanner cable',
-    'scanner mount',
-    'scanner bracket',
-    'scanner grip',
-    'scanner battery',
-    'scanner accessory',
-    'scanner accessories',
-    'scanner part',
-    '3d scanner accessory',
-    '3d scanner part'
-  ];
-
-  const matchesKeyword = scannerPartKeywords.some(kw => allText.includes(kw));
-  const matchesCat = (cat.includes('scanner') || sub.includes('scanner')) && 
-                     (allText.includes('part') || allText.includes('accessori') || allText.includes('spare'));
-
-  return matchesKeyword || matchesCat;
-};
 
 export default function ThreeDPrintersFilaments() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -321,8 +15,6 @@ export default function ThreeDPrintersFilaments() {
   const [showAllPrinters, setShowAllPrinters] = useState(false);
   const [showAllFilaments, setShowAllFilaments] = useState(false);
   const [showAllScanners, setShowAllScanners] = useState(false);
-  const [showAllParts, setShowAllParts] = useState(false);
-  const [partFilter, setPartFilter] = useState<'all' | 'printer' | 'scanner'>('all');
 
   const HERO_SLIDES = [
     "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&q=80&w=1920", // Industrial / Engineering
@@ -342,20 +34,20 @@ export default function ThreeDPrintersFilaments() {
       try {
         const allProducts = await fetchProducts();
         
-        // Strict filter: Exclude any computer motherboards and general PC hardware!
-        // Only keep genuine 3D Printers, Filaments, 3D Scanners, and 3D Printer / Scanner Parts & Accessories
+        // Filter products for 3D Printers, Filaments, 3D Scanners, or related categories
         const filtered = allProducts.filter(p => {
-          if (isComputerComponentOrMotherboard(p)) {
-            return false;
-          }
+          const cat = (p.category_name || '').toLowerCase();
+          const sub = (p.subcategory_name || '').toLowerCase();
+          const subsub = (p.subsubcategory_name || '').toLowerCase();
+          const nested = (p.nested_subcategory_name || '').toLowerCase();
+          const name = (p.name || '').toLowerCase();
+          const desc = (p.description || '').toLowerCase();
           
-          return (
-            isPrinterMachine(p) ||
-            isFilamentOrResin(p) ||
-            isScannerMachine(p) ||
-            is3DPrinterPartOrAccessory(p) ||
-            is3DScannerPartOrAccessory(p)
-          );
+          return cat.includes('3d') || sub.includes('3d') || subsub.includes('3d') || nested.includes('3d')
+                 || cat.includes('filament') || sub.includes('filament')
+                 || cat.includes('scanner') || sub.includes('scanner') || subsub.includes('scanner') || nested.includes('scanner')
+                 || name.includes('scanner') || name.includes('3d')
+                 || desc.includes('3d scanner') || desc.includes('laser scanner') || desc.includes('handheld scanner');
         });
         
         setProducts(filtered);
@@ -369,27 +61,52 @@ export default function ThreeDPrintersFilaments() {
     loadProducts();
   }, []);
 
-  const printers = products.filter(isPrinterMachine);
-  const filaments = products.filter(isFilamentOrResin);
-  const scanners = products.filter(isScannerMachine);
+  const isScanner = (p: Product) => {
+    const fields = [
+      p.category_name,
+      p.subcategory_name,
+      p.subsubcategory_name,
+      p.nested_subcategory_name,
+      p.name
+    ].map(f => (f || '').toLowerCase());
 
-  // Filter ONLY authentic 3D printer & 3D scanner parts & accessories from DB
-  const dbParts = products.filter(p => is3DPrinterPartOrAccessory(p) || is3DScannerPartOrAccessory(p));
+    const hasScannerField = fields.some(f => f.includes('scanner') || f.includes('3d scan'));
+    if (hasScannerField) return true;
 
-  // Combine DB parts with curated authentic 3D parts ensuring no duplicates
-  const allPartsAndAccessories = [
-    ...dbParts,
-    ...CURATED_3D_PARTS_AND_ACCESSORIES.filter(c => !dbParts.some(d => d.slug === c.slug))
-  ];
+    const desc = (p.description || '').toLowerCase();
+    return desc.includes('3d scanner') || desc.includes('laser scanner') || desc.includes('handheld scanner');
+  };
 
-  const printerPartsCount = allPartsAndAccessories.filter(is3DPrinterPartOrAccessory).length;
-  const scannerPartsCount = allPartsAndAccessories.filter(is3DScannerPartOrAccessory).length;
+  const isPrinter = (p: Product) => {
+    if (isScanner(p)) return false;
+    const fields = [
+      p.category_name,
+      p.subcategory_name,
+      p.subsubcategory_name,
+      p.nested_subcategory_name,
+      p.name
+    ].map(f => (f || '').toLowerCase());
 
-  const displayedParts = allPartsAndAccessories.filter(p => {
-    if (partFilter === 'printer') return is3DPrinterPartOrAccessory(p);
-    if (partFilter === 'scanner') return is3DScannerPartOrAccessory(p);
-    return true;
-  });
+    return fields.some(f => f.includes('printer'));
+  };
+
+  const isFilament = (p: Product) => {
+    if (isScanner(p) || isPrinter(p)) return false;
+    const fields = [
+      p.category_name,
+      p.subcategory_name,
+      p.subsubcategory_name,
+      p.nested_subcategory_name,
+      p.name
+    ].map(f => (f || '').toLowerCase());
+
+    return fields.some(f => f.includes('filament') || f.includes('resin'));
+  };
+
+  const printers = products.filter(isPrinter);
+  const filaments = products.filter(isFilament);
+  const scanners = products.filter(isScanner);
+  const otherProducts = products.filter(p => !isPrinter(p) && !isFilament(p) && !isScanner(p));
 
   return (
     <Layout>
@@ -456,9 +173,6 @@ export default function ThreeDPrintersFilaments() {
                 </a>
                 <a href="#3d-scanners" className="px-8 py-4 rounded-lg font-semibold text-white border border-white/20 hover:bg-white/10 transition-colors backdrop-blur-sm shadow-[0_0_15px_rgba(6,182,212,0.15)] hover:shadow-[0_0_20px_rgba(6,182,212,0.3)] text-center w-full sm:w-auto">
                   3D Scanners
-                </a>
-                <a href="#parts-accessories" className="px-8 py-4 rounded-lg font-semibold text-white border border-white/20 hover:bg-white/10 transition-colors backdrop-blur-sm shadow-[0_0_15px_rgba(59,130,246,0.15)] hover:shadow-[0_0_20px_rgba(59,130,246,0.3)] text-center w-full sm:w-auto">
-                  Parts & Accessories
                 </a>
               </div>
             </Reveal>
@@ -720,141 +434,37 @@ export default function ThreeDPrintersFilaments() {
         </div>
       </section>
 
-      {/* 3D PRINTER & SCANNER PARTS & ACCESSORIES */}
-      <section id="parts-accessories" className="pt-8 pb-16 relative overflow-hidden bg-navy-900 border-t border-white/5">
-        <div className="absolute top-1/4 -right-32 w-96 h-96 bg-electric-blue/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <Reveal>
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-white/10 pb-6 gap-4">
-              <div>
-                <div className="flex items-center gap-2 text-electric-blue text-sm font-semibold tracking-wider uppercase mb-1">
-                  <Settings className="h-4 w-4" />
-                  3D Hardware Ecosystem
-                </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">3D Printer & Scanner Parts & Accessories</h2>
-                <p className="text-slate-400 max-w-2xl">
-                  Dedicated accessories and genuine replacements for 3D printers and 3D optical digitizers. No unrelated computer components.
-                </p>
+      {/* OTHER ACCESSORIES & PARTS */}
+      {!loading && otherProducts.length > 0 && (
+        <section className="pt-8 pb-16 relative overflow-hidden bg-navy-900 border-t border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <Reveal>
+              <div className="mb-10 border-b border-white/10 pb-6">
+                <h2 className="text-3xl font-bold text-white mb-2">Parts & Accessories</h2>
+                <p className="text-slate-400">Enhance and maintain your 3D printing setup.</p>
               </div>
+            </Reveal>
 
-              {/* Sub-Category Filter Buttons */}
-              <div className="flex items-center gap-2 p-1.5 bg-navy-950/80 rounded-xl border border-white/10 self-start md:self-auto shrink-0 shadow-lg">
-                <button
-                  onClick={() => setPartFilter('all')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    partFilter === 'all'
-                      ? 'bg-electric-blue text-navy-950 shadow-md font-bold'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  All ({allPartsAndAccessories.length})
-                </button>
-                <button
-                  onClick={() => setPartFilter('printer')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    partFilter === 'printer'
-                      ? 'bg-blue-600 text-white shadow-md font-bold'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  3D Printer Parts ({printerPartsCount})
-                </button>
-                <button
-                  onClick={() => setPartFilter('scanner')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    partFilter === 'scanner'
-                      ? 'bg-cyan-500 text-navy-950 shadow-md font-bold'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  Scanner Accessories ({scannerPartsCount})
-                </button>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {otherProducts.slice(0, 4).map((product, index) => (
+                <Reveal key={product.id} delay={index * 0.1}>
+                   <div className="glass-panel p-4 flex items-center gap-4 hover:border-electric-blue/50 transition-colors h-full">
+                     <div className="w-20 h-20 bg-white/5 rounded-lg overflow-hidden shrink-0 p-2">
+                       <img src={product.image_url} alt={product.name} className="w-full h-full object-contain" referrerPolicy="no-referrer" />
+                     </div>
+                     <div className="flex flex-col flex-grow">
+                       <Link to={`/product/${product.slug}`} className="text-sm font-bold text-white hover:text-electric-blue line-clamp-2 min-h-[2.5rem]">
+                         {product.name}
+                       </Link>
+                       <div className="text-electric-blue font-bold text-sm mt-1">₹{product.price.toFixed(2)}</div>
+                     </div>
+                   </div>
+                </Reveal>
+              ))}
             </div>
-          </Reveal>
-
-          {loading ? (
-            <div className="flex justify-center py-20">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-electric-blue"></div>
-            </div>
-          ) : displayedParts.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {displayedParts.slice(0, showAllParts ? displayedParts.length : 8).map((product, index) => {
-                  const isScanAcc = is3DScannerPartOrAccessory(product);
-                  return (
-                    <Reveal key={product.id} delay={index * 0.05}>
-                      <div className="glass-panel group flex flex-col h-full overflow-hidden hover:border-electric-blue/50 transition-all duration-300 bg-white/5">
-                        <Link to={`/product/${product.slug}`} className="block relative h-52 bg-white/5 p-4 overflow-hidden shrink-0">
-                          <img 
-                            src={product.image_url} 
-                            alt={product.name} 
-                            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-                            referrerPolicy="no-referrer"
-                          />
-                          <span className={`absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border backdrop-blur-md ${
-                            isScanAcc 
-                              ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40' 
-                              : 'bg-blue-950/80 text-blue-300 border-blue-500/40'
-                          }`}>
-                            {isScanAcc ? '3D Scanner Accessory' : '3D Printer Part'}
-                          </span>
-                        </Link>
-                        <div className="p-5 flex flex-col flex-grow">
-                          <Link to={`/product/${product.slug}`} className="text-base font-bold text-white mb-2 hover:text-electric-blue line-clamp-2 transition-colors min-h-[3rem]">
-                            {product.name}
-                          </Link>
-                          <p className="text-xs text-slate-400 mb-4 line-clamp-2 flex-grow">{product.description}</p>
-                          
-                          <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/10 shrink-0">
-                            <div className="flex items-center">
-                              {product.originalPrice && product.originalPrice > product.price && (
-                                <span className="text-xs line-through text-slate-500 mr-2">₹{product.originalPrice.toFixed(2)}</span>
-                              )}
-                              <span className="text-lg font-bold text-white">₹{product.price.toFixed(2)}</span>
-                            </div>
-                            <button 
-                              onClick={() => addToCart(product)}
-                              disabled={product.stock <= 0}
-                              className="p-2.5 bg-white/5 hover:bg-electric-blue text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-white/10 hover:border-electric-blue cursor-pointer"
-                              title="Add to Cart"
-                            >
-                              <ShoppingCart className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </Reveal>
-                  );
-                })}
-              </div>
-
-              {!showAllParts && displayedParts.length > 8 && (
-                <div className="text-center mt-10">
-                  <button 
-                    onClick={() => setShowAllParts(true)}
-                    className="inline-flex items-center px-6 py-3 rounded-lg font-semibold text-white bg-white/5 hover:bg-white/10 border border-white/20 hover:border-electric-blue transition-colors cursor-pointer"
-                  >
-                    View All Parts & Accessories ({displayedParts.length}) <ArrowRight className="ml-2 h-4 w-4" />
-                  </button>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="text-center py-20 bg-navy-900/50 rounded-2xl border border-dashed border-white/20">
-              <Wrench className="mx-auto h-16 w-16 text-slate-500 mb-6" />
-              <h3 className="text-2xl font-bold text-white mb-3">Expanding Our 3D Parts Catalog</h3>
-              <p className="text-slate-400 max-w-md mx-auto">This section exclusively features replacement parts and accessories for 3D printers and 3D scanners.</p>
-              <button 
-                onClick={() => setPartFilter('all')}
-                className="mt-6 px-6 py-2.5 rounded-lg text-sm font-semibold text-electric-blue bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
-              >
-                Reset Filter
-              </button>
-            </div>
-          )}
-        </div>
-      </section>
+          </div>
+        </section>
+      )}
 
       {/* CTA SECTION */}
       <section className="py-20 relative overflow-hidden bg-gradient-to-b from-navy-900 to-navy-950 border-t border-electric-blue/10">
