@@ -6,6 +6,8 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'motion/react';
 import { Cpu, HardDrive, Fan, Monitor, Cpu as GpuIcon, Box, Zap, MemoryStick, Send, Mail, X, CheckCircle, Smartphone } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
+import { SEO } from '../components/SEO';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 interface BuilderCategory {
   id: string;
@@ -276,7 +278,25 @@ export default function PCBuilder() {
 
   return (
     <Layout>
+      <SEO 
+        title="Custom PC Builder | Configurator & Compatibility Checker"
+        description="Design and configure your custom gaming or workstation PC. Select CPUs, GPUs, motherboards, RAM, storage & power supplies with verified compatibility and bulk quotes."
+        canonicalPath="/pc-builder"
+        keywords={['Custom PC Builder India', 'PC compatibility checker', 'Gaming rig configurator', 'Workstation builder']}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'Mechafy Custom PC Builder',
+          applicationCategory: 'ShoppingApplication',
+          operatingSystem: 'All',
+          description: 'Custom PC configurator and pricing calculator for gaming and workstation hardware.'
+        }}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="mb-4">
+          <Breadcrumb items={[{ name: 'PC Builder' }]} />
+        </div>
         <Reveal>
           <div className="text-center max-w-3xl mx-auto mb-8 lg:mb-12">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white mb-4">

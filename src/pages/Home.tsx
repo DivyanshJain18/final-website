@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
 import { ArrowRight, Cpu, Zap, PenTool } from 'lucide-react';
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useRef } from 'react';
 import { Reveal } from '../components/Reveal';
-import { fetchProducts, Product } from '../services/productService';
+import { fetchProducts, Product, getProductPath } from '../services/productService';
+import { RecentlyViewed } from '../components/RecentlyViewed';
+import { SEO } from '../components/SEO';
 
 const PROMO_SLIDES = [
   {
@@ -34,24 +36,114 @@ const PROMO_SLIDES = [
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchStartYRef = useRef<number | null>(null);
+  const mouseStartXRef = useRef<number | null>(null);
+  const isDraggingRef = useRef<boolean>(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  const resetTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % PROMO_SLIDES.length);
     }, 10000);
-    return () => clearInterval(interval);
+  };
+
+  useEffect(() => {
+    resetTimer();
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, []);
+
+  const nextSlide = () => {
+    setCurrentSlide(prev => (prev + 1) % PROMO_SLIDES.length);
+    resetTimer();
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide(prev => (prev - 1 + PROMO_SLIDES.length) % PROMO_SLIDES.length);
+    resetTimer();
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+    touchStartYRef.current = e.touches[0].clientY;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchStartXRef.current - touchEndX;
+    const diffY = (touchStartYRef.current || 0) - touchEndY;
+    // ensure horizontal swipe dominates vertical scroll
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
+      if (diffX > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    }
+    touchStartXRef.current = null;
+    touchStartYRef.current = null;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    mouseStartXRef.current = e.clientX;
+    isDraggingRef.current = true;
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isDraggingRef.current || mouseStartXRef.current === null) return;
+    const diffX = mouseStartXRef.current - e.clientX;
+    if (Math.abs(diffX) > 50) {
+      if (diffX > 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    }
+    isDraggingRef.current = false;
+    mouseStartXRef.current = null;
+  };
 
   return (
     <Layout>
+      <SEO 
+        title="Mechafy Global | Robotics, 3D Printers & PC Hardware Store"
+        description="Shop robotics microcontrollers, 3D printers, filaments, and PC gaming hardware. Mechafy Global delivers cutting-edge hardware and B2B IT engineering services."
+        canonicalPath="/"
+        keywords={['Robotics store India', '3D printers online', 'Filament supplier', 'PC components', 'Mechafy Global']}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'WebSite',
+          name: 'Mechafy Global',
+          url: 'https://www.mechafyglobal.com',
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: 'https://www.mechafyglobal.com/search?q={search_term_string}',
+            'query-input': 'required name=search_term_string'
+          }
+        }}
+      />
       {/* Hero Section */}
       <Reveal>
-        <section className="relative glass-panel rounded-3xl overflow-hidden mb-16 h-[600px] md:h-[500px]">
+        <section 
+          className="relative glass-panel rounded-3xl overflow-hidden mb-16 h-[600px] md:h-[500px] select-none cursor-grab active:cursor-grabbing"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={() => { isDraggingRef.current = false; mouseStartXRef.current = null; }}
+          aria-roledescription="carousel"
+          aria-label="Mechafy Global Highlights"
+        >
           {/* Background Slides */}
           {PROMO_SLIDES.map((slide, index) => (
             <div
               key={slide.id}
-              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ${
+              className={`absolute inset-0 bg-cover bg-center transition-opacity duration-1000 pointer-events-none ${
                 index === currentSlide ? 'opacity-40' : 'opacity-0'
               }`}
               style={{ backgroundImage: `url('${slide.image}')` }}
@@ -59,7 +151,7 @@ export default function Home() {
           ))}
           
           {/* Main Dark Gradient Overlay for Readability */}
-          <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-navy-900/90"></div>
+          <div className="absolute inset-0 bg-gradient-to-b md:bg-gradient-to-r from-navy-900/95 via-navy-900/70 to-navy-900/90 pointer-events-none"></div>
           
           {/* Content Container */}
           <div className="absolute inset-0 flex flex-col justify-center items-center md:items-start text-center md:text-left px-6 py-12 md:px-16 max-w-7xl mx-auto w-full">
@@ -99,33 +191,19 @@ export default function Home() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center md:justify-start relative z-10">
-              <Link to="/shop" className="w-full sm:w-48">
-                <button className="bg-electric-blue hover:bg-cyan-400 transition-colors flex items-center justify-center px-4 py-3 text-base font-medium rounded-full text-navy-900 w-full shadow-lg">
-                  Shop Now <ArrowRight className="ml-2 h-5 w-5 flex-shrink-0" />
-                </button>
+            <div className="flex flex-col sm:flex-row gap-3.5 w-full sm:w-auto justify-center md:justify-start relative z-10">
+              <Link to="/shop" className="inline-flex">
+                <span className="btn-glow px-7 py-3 text-sm font-bold flex items-center justify-center gap-2 w-full sm:w-auto">
+                  Shop Hardware <ArrowRight className="h-4 w-4 shrink-0" />
+                </span>
               </Link>
-              <Link to="/it-services" className="w-full sm:w-48">
-                <button className="bg-white/10 hover:bg-white/20 border border-white/20 transition-colors flex items-center justify-center px-4 py-3 text-base font-medium rounded-full text-white w-full backdrop-blur-sm shadow-sm">
-                  IT Services <ArrowRight className="ml-2 h-5 w-5 flex-shrink-0" />
-                </button>
+              <Link to="/it-services" className="inline-flex">
+                <span className="btn-secondary px-7 py-3 text-sm font-bold flex items-center justify-center gap-2 w-full sm:w-auto">
+                  IT Services & Custom Solutions <ArrowRight className="h-4 w-4 shrink-0" />
+                </span>
               </Link>
             </div>
 
-          </div>
-
-          {/* Navigation Controls at bottom center */}
-          <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
-            {PROMO_SLIDES.map((_, idx) => (
-              <button 
-                key={idx}
-                onClick={() => setCurrentSlide(idx)}
-                className={`h-1.5 rounded-full transition-all duration-300 ${
-                  idx === currentSlide ? 'w-8 bg-electric-blue' : 'w-2 bg-white/40 hover:bg-white/70'
-                }`}
-                aria-label={`Go to slide ${idx + 1}`}
-              />
-            ))}
           </div>
         </section>
       </Reveal>
@@ -162,7 +240,7 @@ export default function Home() {
 
       {/* Featured Products */}
       <Reveal delay={0.4}>
-        <section>
+        <section className="mb-16">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-3xl font-bold text-white">Featured Products</h2>
             <Link to="/shop" className="text-electric-blue hover:text-blue-400 font-medium flex items-center group">
@@ -172,6 +250,13 @@ export default function Home() {
           <FeaturedProductsGrid />
         </section>
       </Reveal>
+
+      {/* Recently Viewed Products */}
+      <RecentlyViewed 
+        title="Recently Viewed" 
+        subtitle="Continue where you left off" 
+        limit={6} 
+      />
     </Layout>
   );
 }
@@ -209,28 +294,42 @@ function FeaturedProductsGrid() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {products.map((product, index) => (
+      {products.map((product) => (
         <div 
           key={product.id} 
-          className="glass-card rounded-xl overflow-hidden flex flex-col group"
+          className="glass-card rounded-2xl overflow-hidden flex flex-col group border border-white/10 hover:border-blue-500/40"
         >
-          <Link to={`/product/${product.slug}`} className="h-48 bg-white/5 flex items-center justify-center overflow-hidden relative">
+          <Link to={getProductPath(product)} className="h-52 bg-white/[0.02] flex items-center justify-center p-4 overflow-hidden relative border-b border-white/5">
             <img 
               src={product.image_url} 
               alt={product.name} 
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
               referrerPolicy="no-referrer"
+              loading="lazy"
             />
-            <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-              <span className="btn-glow transform scale-90 group-hover:scale-100 transition-transform">View Details</span>
-            </div>
           </Link>
-          <div className="p-4 flex flex-col flex-grow">
-            <h3 className="font-semibold text-white mb-1 line-clamp-1 group-hover:text-electric-blue transition-colors">{product.name}</h3>
-            <p className="text-slate-400 text-sm mb-3 line-clamp-2 flex-grow">{product.description}</p>
-            <div className="flex items-center justify-between mt-auto">
-              <span className="font-bold text-white">₹{product.price.toFixed(2)}</span>
-              <Link to={`/product/${product.slug}`} className="text-sm text-electric-blue hover:text-blue-400 font-medium flex items-center group-hover:translate-x-1 transition-transform">View <ArrowRight className="ml-1 w-4 h-4" /></Link>
+          <div className="p-5 flex flex-col flex-grow">
+            <div className="text-[11px] font-semibold text-blue-400 uppercase tracking-wider mb-1.5 truncate">
+              {product.category_name || 'Hardware'}
+            </div>
+            <h3 className="font-bold text-white text-base mb-1.5 line-clamp-1 group-hover:text-blue-400 transition-colors">
+              <Link to={getProductPath(product)}>{product.name}</Link>
+            </h3>
+            <p className="text-slate-400 text-xs mb-4 line-clamp-2 leading-relaxed flex-grow">
+              {product.description}
+            </p>
+            <div className="flex items-center justify-between mt-auto pt-3 border-t border-white/10">
+              <div>
+                <span className="text-xs text-slate-500 block leading-none mb-1">Price</span>
+                <span className="font-bold text-white text-lg font-mono tabular-nums">₹{product.price.toFixed(2)}</span>
+              </div>
+              <Link 
+                to={getProductPath(product)} 
+                className="text-xs px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 transition-all font-semibold flex items-center gap-1 group/btn"
+              >
+                <span>View</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+              </Link>
             </div>
           </div>
         </div>

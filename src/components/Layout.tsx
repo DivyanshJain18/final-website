@@ -8,8 +8,15 @@ import { fetchCategories, Category } from '../services/productService';
 import { CookieConsent } from './CookieConsent';
 import { WhatsAppButton } from './WhatsAppButton';
 import { Chatbot } from './Chatbot';
+import { AnnouncementBar } from './AnnouncementBar';
 
-export function Layout({ children }: { children: ReactNode }) {
+export function Layout({ 
+  children, 
+  showAnnouncement = false 
+}: { 
+  children: ReactNode; 
+  showAnnouncement?: boolean; 
+}) {
   const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
@@ -69,6 +76,7 @@ export function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-screen text-slate-200 flex flex-col">
       <header>
         <Navbar />
+        {showAnnouncement && <AnnouncementBar />}
       </header>
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -99,66 +107,202 @@ export function Layout({ children }: { children: ReactNode }) {
         </div>
       </section>
 
-      <footer className="bg-navy-900/80 backdrop-blur-md text-slate-400 py-12 border-t border-white/10">
+      <footer className="bg-navy-950/95 backdrop-blur-md text-slate-400 pt-16 pb-12 border-t border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Brand Introduction Row */}
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between pb-10 mb-10 border-b border-white/10 gap-6">
+            <div className="flex items-center">
+              <img 
+                src="https://raw.githubusercontent.com/DivyanshJain18/Mechafy-assets/main/Mechafy%20Logo.jpg" 
+                alt="Mechafy Global Official Logo - Robotics Hardware and B2B IT Services Provider" 
+                className="h-12 w-auto object-contain rounded mr-4 border border-white/10"
+                referrerPolicy="no-referrer"
+                loading="lazy"
+                width="48"
+                height="48"
+              />
+              <div>
+                <div className="text-white text-xl font-bold tracking-tight">Mechafy Global</div>
+                <p className="text-xs text-electric-blue font-medium">(A Unit of Shanti Food Industries)</p>
+              </div>
+            </div>
+            <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
+              India's premier engineering ecosystem for robotics hardware, 3D printing machinery, high-performance PC components, and enterprise custom IT software solutions.
+            </p>
+          </div>
+
           <Reveal width="100%" direction="up" delay={0.1}>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <article>
-                <div className="flex items-center mb-4">
-                  <img 
-                    src="https://raw.githubusercontent.com/DivyanshJain18/Mechafy-assets/main/Mechafy%20Logo.jpg" 
-                    alt="Mechafy Global Official Logo - Robotics Hardware and B2B IT Services Provider" 
-                    className="h-12 w-auto object-contain rounded mr-4"
-                    referrerPolicy="no-referrer"
-                    loading="lazy"
-                    width="48"
-                    height="48"
-                  />
-                  <div>
-                    <div className="text-white text-lg font-bold">Mechafy Global</div>
-                    <p className="text-xs text-slate-400">(A Unit of Shanti Food Industries)</p>
-                  </div>
-                </div>
-                <p className="text-sm leading-relaxed">The ultimate hub for robotics, hardware, and digital excellence. Whether you need high-end components or expert services in custom software development, website building, and digital marketing, Mechafy Global delivers the tools and tech you need to succeed.</p>
-              </article>
+            {/* 5 Distinct Sections */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-6">
               
+              {/* 1. Shop */}
               <nav aria-label="Shop Navigation">
-                <h2 className="text-white text-lg font-bold mb-4">Shop Hardware</h2>
-                <ul className="space-y-2 text-sm">
-                  <li><Link to="/shop" aria-label="View all robotics and PC products" className="hover:text-cyan-400 transition-colors">All Products</Link></li>
-                  {categories.map((category) => (
-                    <li key={category.id}>
-                      <Link to={`/shop?category=${category.slug}`} aria-label={`Shop ${category.name}`} className="hover:text-cyan-400 transition-colors">
-                        {category.name}
-                      </Link>
-                    </li>
-                  ))}
-                  <li><Link to="/3d-printers-filaments" aria-label="Shop 3D Printers & Filaments" className="hover:text-cyan-400 transition-colors">3D Printers & Filaments</Link></li>
-                  <li><Link to="/pc-builder" aria-label="Build a Custom PC" className="hover:text-cyan-400 transition-colors">Custom PC Builder</Link></li>
+                <h2 className="text-white text-sm font-bold uppercase tracking-wider mb-4 border-l-2 border-electric-blue pl-2.5">
+                  Shop
+                </h2>
+                <ul className="space-y-2.5 text-sm">
+                  <li>
+                    <Link to="/shop?category=computer-components" className="hover:text-electric-blue transition-colors">
+                      PC Hardware
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/shop?category=robotic-components" className="hover:text-electric-blue transition-colors">
+                      Robotics
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/3d-printers-filaments#featured-printers" className="hover:text-electric-blue transition-colors">
+                      3D Printers
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/3d-printers-filaments#filaments" className="hover:text-electric-blue transition-colors">
+                      Filaments
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/pc-builder" className="hover:text-electric-blue transition-colors">
+                      Custom PC Builder
+                    </Link>
+                  </li>
                 </ul>
               </nav>
 
-              <nav aria-label="Company Links">
-                <h2 className="text-white text-lg font-bold mb-4">Support</h2>
-                <ul className="space-y-2 text-sm">
-                  <li><Link to="/contact" aria-label="Contact our support team" className="hover:text-cyan-400 transition-colors">Contact Us</Link></li>
-                  <li><Link to="/faq" aria-label="Frequently Asked Questions" className="hover:text-cyan-400 transition-colors">FAQ</Link></li>
-                  <li><Link to="/privacy-policy" aria-label="Privacy Policy" className="hover:text-cyan-400 transition-colors">Privacy Policy</Link></li>
-                  <li><Link to="/terms-conditions" aria-label="Terms & Conditions" className="hover:text-cyan-400 transition-colors">Terms & Conditions</Link></li>
+              {/* 2. Customer Support */}
+              <nav aria-label="Customer Support Navigation">
+                <h2 className="text-white text-sm font-bold uppercase tracking-wider mb-4 border-l-2 border-emerald-400 pl-2.5">
+                  Customer Support
+                </h2>
+                <ul className="space-y-2.5 text-sm">
+                  <li>
+                    <Link to="/contact" className="hover:text-emerald-400 transition-colors">
+                      Contact Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/terms-conditions#warranty" className="hover:text-emerald-400 transition-colors">
+                      Warranty
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/faq" className="hover:text-emerald-400 transition-colors">
+                      FAQ
+                    </Link>
+                  </li>
                 </ul>
               </nav>
-              
-              <address className="not-italic">
-                <h2 className="text-white text-lg font-bold mb-4">Contact Information</h2>
-                <ul className="space-y-2 text-sm">
-                  <li>Email: <a href="mailto:info@mechafyglobal.com" target="_blank" rel="noopener noreferrer" aria-label="Email Mechafy Global" className="hover:text-cyan-400 transition-colors">info@mechafyglobal.com</a></li>
-                  <li>Phone: <a href="tel:+919817056538" aria-label="Call Mechafy Global" className="hover:text-cyan-400 transition-colors">+91 9817056538</a></li>
-                  <li>Address: 582, HSIIDC Industrial Area, Rai, Sonipat, Haryana 131029, IN</li>
+
+              {/* 3. Business */}
+              <nav aria-label="Business Inquiries Navigation">
+                <h2 className="text-white text-sm font-bold uppercase tracking-wider mb-4 border-l-2 border-amber-400 pl-2.5">
+                  Business
+                </h2>
+                <ul className="space-y-2.5 text-sm">
+                  <li>
+                    <Link to="/contact?subject=B2B%20%2F%20Wholesale%20Inquiry" className="hover:text-amber-400 transition-colors">
+                      B2B / Wholesale
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/contact?subject=Bulk%20Order%20Inquiry" className="hover:text-amber-400 transition-colors">
+                      Bulk Orders
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/become-a-reseller" className="hover:text-amber-400 transition-colors">
+                      Become a Reseller
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/contact?subject=Request%20a%20Quote" className="hover:text-amber-400 transition-colors">
+                      Request a Quote
+                    </Link>
+                  </li>
                 </ul>
+              </nav>
+
+              {/* 4. Company */}
+              <nav aria-label="Company Navigation">
+                <h2 className="text-white text-sm font-bold uppercase tracking-wider mb-4 border-l-2 border-purple-400 pl-2.5">
+                  Company
+                </h2>
+                <ul className="space-y-2.5 text-sm">
+                  <li>
+                    <Link to="/about" className="hover:text-purple-400 transition-colors">
+                      About Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/careers" className="hover:text-purple-400 transition-colors">
+                      Careers
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/blog" className="hover:text-purple-400 transition-colors font-medium">
+                      Blog
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/privacy-policy" className="hover:text-purple-400 transition-colors">
+                      Privacy Policy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/terms-conditions" className="hover:text-purple-400 transition-colors">
+                      Terms & Conditions
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
+
+              {/* 5. Contact */}
+              <address className="not-italic col-span-2 md:col-span-1">
+                <h2 className="text-white text-sm font-bold uppercase tracking-wider mb-4 border-l-2 border-cyan-400 pl-2.5">
+                  Contact
+                </h2>
+                <div className="space-y-2.5 text-sm">
+                  <div className="text-xs text-slate-300 leading-relaxed">
+                    582, HSIIDC Industrial Area, Rai, Sonipat, Haryana 131029, IN
+                  </div>
+                  <div>
+                    <a href="tel:+919817056538" className="hover:text-cyan-400 transition-colors flex items-center gap-1.5">
+                      +91 9817056538
+                    </a>
+                  </div>
+                  <div>
+                    <a href="mailto:info@mechafyglobal.com" className="hover:text-cyan-400 transition-colors truncate block">
+                      info@mechafyglobal.com
+                    </a>
+                  </div>
+                  <div className="pt-1">
+                    <a 
+                      href="https://wa.me/919817056538" 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#25D366] hover:underline"
+                    >
+                      <span>WhatsApp Support &rarr;</span>
+                    </a>
+                  </div>
+                </div>
               </address>
+
             </div>
-            <div className="mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500">
-              Copyright &copy; 2026 Mechafy Global – All Rights Reserved.
+
+            <div className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+              <div>
+                Copyright &copy; 2026 Mechafy Global (Unit of Shanti Food Industries) – All Rights Reserved.
+              </div>
+              <div className="flex items-center gap-4 text-slate-400">
+                <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
+                <span>•</span>
+                <Link to="/terms-conditions" className="hover:text-white transition-colors">Terms</Link>
+                <span>•</span>
+                <Link to="/faq" className="hover:text-white transition-colors">FAQ</Link>
+                <span>•</span>
+                <Link to="/blog" className="hover:text-white transition-colors">Blog</Link>
+              </div>
             </div>
           </Reveal>
         </div>

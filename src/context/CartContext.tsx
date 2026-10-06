@@ -1,8 +1,9 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 export interface CartItem {
-  id: number;
+  id: number | string;
   name: string;
+  sku?: string;
   price: number;
   image_url: string;
   quantity: number;
@@ -10,9 +11,9 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (product: any) => void;
-  removeFromCart: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  addToCart: (product: any, quantity?: number) => void;
+  removeFromCart: (id: number | string) => void;
+  updateQuantity: (id: number | string, quantity: number) => void;
   clearCart: () => void;
   total: number;
 }
@@ -39,29 +40,31 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('cart', JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (product: any) => {
+  const addToCart = (product: any, quantity: number = 1) => {
+    const qtyToAdd = Math.max(1, quantity);
     setItems(prev => {
       const existing = prev.find(item => item.id === product.id);
       if (existing) {
         return prev.map(item => 
-          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+          item.id === product.id ? { ...item, quantity: item.quantity + qtyToAdd } : item
         );
       }
       return [...prev, { 
         id: product.id, 
         name: product.name, 
+        sku: product.sku,
         price: product.price, 
         image_url: product.image_url, 
-        quantity: 1 
+        quantity: qtyToAdd 
       }];
     });
   };
 
-  const removeFromCart = (id: number) => {
+  const removeFromCart = (id: number | string) => {
     setItems(prev => prev.filter(item => item.id !== id));
   };
 
-  const updateQuantity = (id: number, quantity: number) => {
+  const updateQuantity = (id: number | string, quantity: number) => {
     if (quantity < 1) return;
     setItems(prev => prev.map(item => item.id === id ? { ...item, quantity } : item));
   };

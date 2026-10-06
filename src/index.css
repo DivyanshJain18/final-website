@@ -1,25 +1,31 @@
 @import "tailwindcss";
 
 @theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  
+  --color-navy-950: #060A12;
   --color-navy-900: #0B1120;
   --color-slate-800: #1E293B;
   --color-electric-blue: #3B82F6;
+  --color-brand-blue: #2563EB;
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+html {
+  font-family: var(--font-sans);
+  color-scheme: dark;
+  scroll-behavior: smooth;
 }
 
 body {
-  @apply min-h-screen text-white overflow-x-hidden;
-  background-color: #0a0a0a;
+  @apply min-h-screen text-slate-100 overflow-x-hidden antialiased;
+  background-color: #070B14;
   background-attachment: fixed;
   position: relative;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Circuit board pattern overlay */
+/* Subtle, high-precision engineering grid overlay (restrained, non-distracting) */
 body::before {
   content: '';
   position: fixed;
@@ -27,49 +33,90 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M10 10 L 30 10 L 40 20 L 40 40 L 60 40 L 70 50 L 90 50' fill='none' stroke='rgba(255,255,255,0.02)' stroke-width='1'/%3E%3Ccircle cx='10' cy='10' r='1.5' fill='rgba(255,255,255,0.02)'/%3E%3Ccircle cx='90' cy='50' r='1.5' fill='rgba(255,255,255,0.02)'/%3E%3Cpath d='M 20 80 L 40 80 L 50 70 L 50 50' fill='none' stroke='rgba(255,255,255,0.02)' stroke-width='1'/%3E%3Ccircle cx='20' cy='80' r='1.5' fill='rgba(255,255,255,0.02)'/%3E%3C/svg%3E");
-  background-size: 120px 120px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
   pointer-events: none;
   z-index: -2;
 }
 
-/* Animated glowing signals */
+/* Very subtle ambient lighting gradient at top of viewport */
 body::after {
   content: '';
   position: fixed;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cstyle%3E@keyframes signalTravel { 0% { stroke-dashoffset: 150; opacity: 0; } 10% { opacity: 0.8; } 90% { opacity: 0.8; } 100% { stroke-dashoffset: -150; opacity: 0; } } .signal1 { animation: signalTravel 6s ease-in-out infinite; } .signal2 { animation: signalTravel 5s ease-in-out infinite 2s; }%3C/style%3E%3Cpath class='signal1' d='M10 10 L 30 10 L 40 20 L 40 40 L 60 40 L 70 50 L 90 50' fill='none' stroke='rgba(59, 130, 246, 0.4)' stroke-width='1' stroke-dasharray='15 150' stroke-dashoffset='150'/%3E%3Cpath class='signal2' d='M 20 80 L 40 80 L 50 70 L 50 50' fill='none' stroke='rgba(59, 130, 246, 0.4)' stroke-width='1' stroke-dasharray='15 150' stroke-dashoffset='150'/%3E%3C/svg%3E");
-  background-size: 120px 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1000px;
+  height: 350px;
+  background: radial-gradient(ellipse at top, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0) 70%);
   pointer-events: none;
   z-index: -1;
-  opacity: 0.4;
 }
 
-/* Glassmorphism utilities */
+/* ========================================================
+   PREMIUM MECHAFY DESIGN SYSTEM UTILITIES
+   ======================================================== */
+
+/* Surface Panels */
 .glass-panel {
-  @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-lg;
+  @apply bg-navy-900/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl;
 }
 
 .glass-card {
-  @apply bg-white/5 backdrop-blur-sm border border-white/10 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)] hover:border-electric-blue/30;
+  @apply bg-white/[0.04] backdrop-blur-sm border border-white/10 rounded-2xl shadow-md transition-all duration-200 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/5;
 }
 
+/* Primary Refined Brand Button */
 .btn-glow {
-  @apply bg-electric-blue text-white px-4 py-2 lg:px-6 rounded-full font-medium transition-all duration-300 shadow-[0_0_15px_rgba(59,130,246,0.4)] hover:shadow-[0_0_25px_rgba(59,130,246,0.7)] hover:bg-blue-400;
+  @apply bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-[0_2px_12px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.45)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-navy-950 cursor-pointer text-sm;
 }
 
+/* Secondary Button */
+.btn-secondary {
+  @apply bg-white/5 hover:bg-white/10 active:bg-white/15 text-slate-200 hover:text-white border border-white/15 px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 cursor-pointer text-sm;
+}
+
+/* Navigation Links */
 .nav-link {
-  @apply relative text-slate-300 hover:text-white transition-colors py-2 text-[10px] lg:text-xs xl:text-sm font-bold uppercase tracking-wider whitespace-nowrap;
+  @apply relative text-slate-300 hover:text-white transition-colors py-2 text-xs lg:text-[13px] font-semibold tracking-wide whitespace-nowrap;
 }
 
 .nav-link::after {
   content: '';
-  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-electric-blue transition-all duration-300 shadow-[0_0_8px_rgba(59,130,246,0.8)];
+  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-200;
 }
 
 .nav-link:hover::after {
   @apply w-full;
+}
+
+/* Form Inputs */
+.input-tech {
+  @apply w-full px-4 py-2.5 bg-navy-950/80 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500 transition-all;
+}
+
+/* Tabular Numerals for prices & metrics */
+.tabular-numbers {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #060A12;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }

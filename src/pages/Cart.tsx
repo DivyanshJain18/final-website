@@ -27,6 +27,7 @@ export default function Cart() {
           items: items.map(item => ({
             product_id: item.id,
             name: item.name,
+            sku: item.sku || null,
             quantity: item.quantity,
             price: item.price
           })),
@@ -38,7 +39,7 @@ export default function Cart() {
         // Send email via Web3Forms
         const web3formsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
         if (web3formsAccessKey) {
-          const itemsList = items.map(item => `- ${item.name} (Qty: ${item.quantity})`).join('\n');
+          const itemsList = items.map(item => `- ${item.name} ${item.sku ? `[SKU: ${item.sku}]` : ''} (Qty: ${item.quantity})`).join('\n');
           const response = await fetch('https://api.web3forms.com/submit', {
             method: 'POST',
             headers: {
@@ -102,51 +103,66 @@ export default function Cart() {
       <h1 className="text-3xl font-bold text-white mb-8">Shopping Cart</h1>
 
       {items.length === 0 ? (
-        <div className="text-center py-16 glass-panel">
-          <p className="text-slate-400 text-lg mb-6">Your cart is empty.</p>
-          <Link to="/shop" className="btn-glow inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-full text-white transition-colors">
-            Start Shopping <ArrowRight className="ml-2 h-5 w-5" />
+        <div className="text-center py-20 glass-panel rounded-2xl max-w-xl mx-auto">
+          <div className="w-16 h-16 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto mb-4">
+            <ArrowRight className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Your Cart is Empty</h2>
+          <p className="text-slate-400 text-sm mb-6 max-w-sm mx-auto">
+            You haven't added any products to your cart yet. Explore our wide collection of hardware and components.
+          </p>
+          <Link to="/shop" className="btn-glow inline-flex items-center justify-center gap-2 px-6 py-2.5">
+            <span>Browse Products</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       ) : (
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Cart Items */}
           <div className="flex-grow space-y-4">
-            <StaggerContainer className="space-y-4" staggerDelay={0.1}>
+            <StaggerContainer className="space-y-4" staggerDelay={0.08}>
               {items.map(item => (
                 <StaggerItem key={item.id}>
                   <div 
-                    className="glass-panel p-4 flex items-center gap-4 hover:border-electric-blue/30 transition-colors hover:scale-[1.01] duration-200"
+                    className="glass-panel p-4 flex items-center gap-4 hover:border-blue-500/30 transition-all rounded-2xl"
                   >
-                    <img src={item.image_url} alt={item.name} className="w-20 h-20 object-cover rounded-lg bg-white/5" referrerPolicy="no-referrer" />
+                    <div className="w-20 h-20 shrink-0 bg-white/[0.03] border border-white/10 rounded-xl p-2 flex items-center justify-center">
+                      <img src={item.image_url} alt={item.name} className="max-w-full max-h-full object-contain" referrerPolicy="no-referrer" />
+                    </div>
                     
-                    <div className="flex-grow">
-                      <h3 className="font-bold text-white text-lg">{item.name}</h3>
-                      <p className="text-electric-blue font-medium">₹{item.price.toFixed(2)}</p>
+                    <div className="flex-grow min-w-0">
+                      <h3 className="font-bold text-white text-base truncate">{item.name}</h3>
+                      {item.sku && (
+                        <p className="text-xs font-mono text-slate-400 mt-0.5">SKU: {item.sku}</p>
+                      )}
+                      <p className="text-blue-400 font-bold font-mono tabular-nums text-sm mt-1">₹{item.price.toFixed(2)}</p>
                     </div>
 
-                    <div className="flex items-center gap-3 bg-white/5 border border-white/10 rounded-full px-3 py-1">
+                    <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-2 py-1 shrink-0">
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                        className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
                         disabled={item.quantity <= 1}
+                        aria-label="Decrease quantity"
                       >
-                        <Minus className="h-4 w-4" />
+                        <Minus className="h-3.5 w-3.5" />
                       </button>
-                      <span className="w-8 text-center font-bold text-white">{item.quantity}</span>
+                      <span className="w-7 text-center font-bold text-white font-mono text-sm">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1 rounded-full hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
+                        className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                        aria-label="Increase quantity"
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-3.5 w-3.5" />
                       </button>
                     </div>
 
                     <button 
                       onClick={() => removeFromCart(item.id)}
-                      className="p-2 text-red-400 hover:bg-red-900/20 hover:text-red-300 rounded-full transition-colors ml-2"
+                      className="p-2 text-rose-400 hover:bg-rose-500/15 rounded-xl transition-colors shrink-0 cursor-pointer"
+                      aria-label="Remove item"
                     >
-                      <Trash2 className="h-5 w-5" />
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </StaggerItem>
@@ -157,34 +173,34 @@ export default function Cart() {
           {/* Summary */}
           <div className="w-full lg:w-80 flex-shrink-0">
             <Reveal width="100%" delay={0.2}>
-              <div className="glass-panel p-6 sticky top-24">
-                <h2 className="text-xl font-bold text-white mb-4">Order Summary</h2>
+              <div className="glass-panel p-6 sticky top-24 rounded-2xl">
+                <h2 className="text-lg font-bold text-white mb-4">Order Summary</h2>
                 
-                <div className="space-y-2 mb-4 text-sm text-slate-400">
+                <div className="space-y-2.5 mb-5 text-sm text-slate-400">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>₹{total.toFixed(2)}</span>
+                    <span className="text-white font-mono tabular-nums">₹{total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tax (Est.)</span>
-                    <span>₹{(total * 0.08).toFixed(2)}</span>
+                    <span className="text-white font-mono tabular-nums">₹{(total * 0.08).toFixed(2)}</span>
                   </div>
-                  <div className="border-t border-white/10 pt-2 flex justify-between font-bold text-white text-lg">
+                  <div className="border-t border-white/10 pt-3 flex justify-between font-bold text-white text-base">
                     <span>Total</span>
-                    <span>₹{(total * 1.08).toFixed(2)}</span>
+                    <span className="text-blue-400 font-mono tabular-nums text-lg">₹{(total * 1.08).toFixed(2)}</span>
                   </div>
                 </div>
 
                 <button
                   onClick={handleRequestQuote}
                   disabled={isSubmitting}
-                  className="btn-glow w-full text-white py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-glow w-full text-white py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
-                  {isSubmitting ? 'Processing...' : 'Request Quote'}
+                  {isSubmitting ? 'Processing...' : 'Request Official Quote'}
                 </button>
                 
-                <p className="mt-4 text-xs text-slate-500 text-center">
-                  Quotes are reviewed within 24 hours. No payment required at this stage.
+                <p className="mt-3.5 text-[11px] text-slate-400 text-center leading-relaxed">
+                  Verified quotations with GST invoice issued within 24 hours. No payment required upfront.
                 </p>
               </div>
             </Reveal>

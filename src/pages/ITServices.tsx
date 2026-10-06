@@ -1,6 +1,8 @@
 import { Layout } from '../components/Layout';
 import { Reveal } from '../components/Reveal';
 import { Globe, LayoutTemplate, ShoppingCart, Server, Code, Wrench, Terminal, PenTool, TrendingUp } from 'lucide-react';
+import { SEO } from '../components/SEO';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 export default function ITServices() {
   const services = [
@@ -53,7 +55,28 @@ export default function ITServices() {
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <SEO 
+        title="B2B IT Services | Custom Software, Web Apps & Hosting"
+        description="Comprehensive enterprise software solutions, bespoke website development, cloud hosting, and e-commerce architectures engineered by Mechafy Global."
+        canonicalPath="/it-services"
+        keywords={['B2B IT services India', 'Custom web app development', 'Enterprise software Sonipat', 'Cloud hosting solutions']}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'Service',
+          name: 'Mechafy IT & Software Engineering Services',
+          provider: {
+            '@type': 'Organization',
+            name: 'Mechafy Global'
+          },
+          serviceType: 'Software Development & IT Infrastructure',
+          areaServed: 'IN'
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+        <div className="mb-4">
+          <Breadcrumb items={[{ name: 'IT Services' }]} />
+        </div>
         <Reveal width="100%">
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">

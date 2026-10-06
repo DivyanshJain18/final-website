@@ -16,6 +16,7 @@ const AdminProducts: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
+    sku: '',
     description: '',
     price: '',
     originalPrice: '',
@@ -28,6 +29,27 @@ const AdminProducts: React.FC = () => {
     nested_subcategory_id: '',
     image_url: ''
   });
+
+  const generateDeterministicSKU = (categoryId: string, currentCategoryList: Category[], existingProducts: Product[]): string => {
+    const cat = currentCategoryList.find(c => c.id === categoryId);
+    const catSlug = (cat?.slug || '').toLowerCase();
+    let prefix = 'MFG-GEN';
+    if (catSlug.includes('robot')) prefix = 'MFG-ROB';
+    else if (catSlug.includes('3d') || catSlug.includes('print')) prefix = 'MFG-3DP';
+    else if (catSlug.includes('comput') || catSlug.includes('pc') || catSlug.includes('hardw')) prefix = 'MFG-CMP';
+
+    // Find existing numbers with this prefix
+    const nums = existingProducts
+      .map(p => (p.sku || '').trim().toUpperCase())
+      .filter(sku => sku.startsWith(prefix + '-'))
+      .map(sku => {
+        const parts = sku.split('-');
+        const n = parseInt(parts[parts.length - 1], 10);
+        return isNaN(n) ? 0 : n;
+      });
+    const nextNum = (nums.length > 0 ? Math.max(...nums) : 0) + 1;
+    return `${prefix}-${String(nextNum).padStart(5, '0')}`;
+  };
 
   useEffect(() => {
     loadData();
@@ -55,6 +77,7 @@ const AdminProducts: React.FC = () => {
       setFormData({
         name: product.name,
         slug: product.slug,
+        sku: product.sku || '',
         description: product.description || '',
         price: product.price.toString(),
         originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
@@ -72,6 +95,7 @@ const AdminProducts: React.FC = () => {
       setFormData({
         name: '',
         slug: '',
+        sku: '',
         description: '',
         price: '',
         originalPrice: '',
@@ -91,9 +115,24 @@ const AdminProducts: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      let finalSku = formData.sku.trim().toUpperCase();
+      if (!finalSku) {
+        finalSku = generateDeterministicSKU(formData.category_id, categories, products);
+      }
+
+      // Ensure duplicate SKUs are prevented
+      const isDuplicate = products.some(
+        p => (p.sku || '').trim().toUpperCase() === finalSku && p.id !== currentProduct?.id
+      );
+      if (isDuplicate) {
+        alert(`Duplicate SKU error: SKU "${finalSku}" is already assigned to another product. Each product must have a unique SKU.`);
+        return;
+      }
+
       const payload: any = {
         name: formData.name,
         slug: formData.slug,
+        sku: finalSku,
         description: formData.description,
         price: parseFloat(formData.price),
         unit: formData.unit,
@@ -219,7 +258,16 @@ const AdminProducts: React.FC = () => {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 font-medium text-white">{product.name}</td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-white">{product.name}</div>
+                      <div className="text-xs font-mono mt-0.5">
+                        {product.sku ? (
+                          <span className="text-slate-400">SKU: <span className="text-slate-200 font-semibold">{product.sku}</span></span>
+                        ) : (
+                          <span className="text-amber-400/90 italic">No SKU assigned</span>
+                        )}
+                      </div>
+                    </td>
                     <td className="px-6 py-4">
                       <span className="px-2 py-1 rounded-full bg-electric-blue/10 text-electric-blue text-xs border border-electric-blue/20">
                         {product.category_name}
@@ -312,6 +360,30 @@ const AdminProducts: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                       className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
                       required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-sm font-medium text-slate-300">Product SKU</label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const generated = generateDeterministicSKU(formData.category_id, categories, products);
+                          setFormData(prev => ({ ...prev, sku: generated }));
+                        }}
+                        className="text-xs text-electric-blue hover:underline cursor-pointer"
+                        title="Generate unique deterministic SKU based on category"
+                      >
+                        Auto-Generate SKU
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.sku}
+                      onChange={(e) => setFormData({ ...formData, sku: e.target.value.toUpperCase() })}
+                      placeholder="e.g. MFG-ROB-00001 (Leave blank to auto-generate)"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white font-mono focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
                     />
                   </div>
                   

@@ -6,7 +6,12 @@ import { useCart } from '../context/CartContext';
 import { Search, Filter, ArrowRight, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
-import { fetchProducts, fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Product, Category, Subcategory, Subsubcategory, NestedSubcategory } from '../services/productService';
+import { SearchBar } from '../components/SearchBar';
+import { WishlistButton } from '../components/WishlistButton';
+import { fetchProducts, fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Product, Category, Subcategory, Subsubcategory, NestedSubcategory, getProductPath } from '../services/productService';
+import { RecentlyViewed } from '../components/RecentlyViewed';
+import { SEO } from '../components/SEO';
+import { Breadcrumb, generateBreadcrumbSchema, BreadcrumbItem } from '../components/Breadcrumb';
 
 export default function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -147,16 +152,39 @@ export default function Shop() {
   };
 
   return (
-    <Layout>
-      {/* Announcement Bar */}
-      <motion.div 
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="w-screen relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] bg-white/5 backdrop-blur-md border-b border-white/10 text-slate-300 text-center text-[13px] py-[10px] px-4 -mt-8 mb-8 z-10"
-      >
-        Leading Importer & Wholesale Supplier: Our online catalog is currently being updated. We supply all varieties of robotics and computer components—please <a href="mailto:sales@mechafyglobal.com?subject=Quote%20Request%20-%20Mechafy%20Global" target="_blank" rel="noopener noreferrer" className="text-electric-blue hover:text-blue-400 hover:underline font-semibold transition-colors">REQUEST A QUOTE VIA EMAIL</a> for items not yet listed.
-      </motion.div>
+    <Layout showAnnouncement={true}>
+      {/* Dynamic SEO & Breadcrumbs */}
+      {(() => {
+        const pageTitle = currentCategoryName 
+          ? `${currentCategoryName} | Buy Online at Best Price`
+          : 'Hardware Catalogue | Robotics, 3D Printers & PC Parts';
+        const pageDesc = currentCategoryName
+          ? `Explore verified ${currentCategoryName} at Mechafy Global. Industry-grade components, fast delivery across India, and competitive pricing.`
+          : 'Browse our full catalogue of authentic robotics hardware, microcontrollers, 3D printers, filaments, and high-performance PC components.';
+
+        const breadcrumbItems: BreadcrumbItem[] = [
+          { name: 'Shop', url: '/shop' },
+          ...(activeCategory ? [{ name: activeCategory.name, url: `/shop?category=${encodeURIComponent(activeCategory.slug)}` }] : []),
+          ...(activeSubcategory ? [{ name: activeSubcategory.name, url: `/shop?subcategory=${encodeURIComponent(activeSubcategory.slug)}` }] : []),
+          ...(activeSubsubcategory ? [{ name: activeSubsubcategory.name, url: `/shop?subsubcategory=${encodeURIComponent(activeSubsubcategory.slug)}` }] : []),
+          ...(activeNestedSubcategory ? [{ name: activeNestedSubcategory.name }] : [])
+        ];
+
+        return (
+          <>
+            <SEO 
+              title={pageTitle}
+              description={pageDesc}
+              canonicalPath="/shop"
+              keywords={[currentCategoryName || '', 'Robotics parts', 'Computer hardware', '3D printer supply India', 'Mechafy Global'].filter(Boolean)}
+              structuredData={generateBreadcrumbSchema(breadcrumbItems)}
+            />
+            <div className="mb-6">
+              <Breadcrumb items={breadcrumbItems.slice(1)} />
+            </div>
+          </>
+        );
+      })()}
 
       <div className="flex flex-col md:flex-row gap-8">
         {/* Sidebar Filters */}
@@ -277,16 +305,22 @@ export default function Shop() {
 
             {/* Toolbar */}
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-              <form onSubmit={handleSearch} className="relative w-full sm:w-96">
-                <input 
-                  type="text" 
-                  name="search" 
-                  defaultValue={searchQuery}
-                  placeholder="Search products..." 
-                  className="w-full pl-10 pr-4 py-2 rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-electric-blue focus:border-transparent placeholder-slate-500"
+              <div className="w-full sm:w-96">
+                <SearchBar 
+                  initialQuery={searchQuery}
+                  placeholder="Search products..."
+                  onSearchSubmit={(q) => {
+                    setSearchParams(prev => {
+                      if (q) {
+                        prev.set('search', q);
+                      } else {
+                        prev.delete('search');
+                      }
+                      return prev;
+                    });
+                  }}
                 />
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-slate-500" />
-              </form>
+              </div>
               
               <select 
                 value={sortOption} 
@@ -312,64 +346,64 @@ export default function Shop() {
                   {currentProducts.map(product => (
                     <StaggerItem key={product.id}>
                     <div 
-                      className="glass-card rounded-xl overflow-hidden flex flex-col h-full group"
+                      className="glass-card rounded-2xl overflow-hidden flex flex-col h-full group relative border border-white/10 hover:border-blue-500/40"
                     >
-                      <Link to={`/product/${product.slug}`} className="block relative h-48 bg-white/5 overflow-hidden">
-                        <img 
-                          src={product.image_url} 
-                          alt={product.name} 
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                          referrerPolicy="no-referrer"
-                        />
-                        <div className="absolute inset-0 bg-navy-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                          <span className="btn-glow transform scale-90 group-hover:scale-100 transition-transform">View Details</span>
+                      <div className="relative h-52 bg-white/[0.02] flex items-center justify-center p-4 overflow-hidden border-b border-white/5">
+                        <Link to={getProductPath(product)} className="flex items-center justify-center w-full h-full">
+                          <img 
+                            src={product.image_url} 
+                            alt={product.name} 
+                            className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                            referrerPolicy="no-referrer"
+                            loading="lazy"
+                          />
+                        </Link>
+                        
+                        {/* Wishlist Button */}
+                        <div className="absolute top-2.5 right-2.5 z-10">
+                          <WishlistButton product={product} variant="card" />
                         </div>
-                      </Link>
-                      <div className="p-4 flex flex-col flex-grow">
-                        <div className="text-xs font-semibold mb-1 uppercase tracking-wide flex flex-wrap gap-1">
-                          <span className="text-electric-blue">{product.category_name}</span>
+                      </div>
+                      <div className="p-5 flex flex-col flex-grow">
+                        <div className="text-[11px] font-medium text-slate-400 mb-1.5 flex flex-wrap items-center gap-1.5">
+                          <span className="text-blue-400 font-semibold">{product.category_name}</span>
                           {product.subcategory_name && (
                             <>
-                              <span className="text-slate-500">•</span>
-                              <span className="text-purple-400">{product.subcategory_name}</span>
+                              <span className="text-slate-600">·</span>
+                              <span className="text-slate-300">{product.subcategory_name}</span>
                             </>
                           )}
                           {product.subsubcategory_name && (
                             <>
-                              <span className="text-slate-500">•</span>
-                              <span className="text-pink-400">{product.subsubcategory_name}</span>
-                            </>
-                          )}
-                          {product.nested_subcategory_name && (
-                            <>
-                              <span className="text-slate-500">•</span>
-                              <span className="text-amber-400">{product.nested_subcategory_name}</span>
+                              <span className="text-slate-600">·</span>
+                              <span className="text-slate-400">{product.subsubcategory_name}</span>
                             </>
                           )}
                         </div>
-                        <Link to={`/product/${product.slug}`} className="text-lg font-bold text-white mb-2 hover:text-electric-blue line-clamp-2 transition-colors">
+                        <Link to={getProductPath(product)} className="text-base font-bold text-white mb-2 hover:text-blue-400 line-clamp-2 transition-colors">
                           {product.name}
                         </Link>
-                        <p className="text-slate-400 text-sm mb-4 line-clamp-2 flex-grow">{product.description}</p>
-                        <div className="flex flex-col mt-auto pt-4 border-t border-white/10">
+                        <p className="text-slate-400 text-xs mb-4 line-clamp-2 leading-relaxed flex-grow">{product.description}</p>
+                        <div className="flex flex-col mt-auto pt-3 border-t border-white/10">
                           {product.originalPrice && product.originalPrice > product.price && (
                             <div className="flex items-center gap-2 mb-1">
-                              <span className="text-sm line-through text-slate-500">₹{product.originalPrice.toFixed(2)}</span>
-                              <span className="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded">
-                                SAVE RS. {(product.originalPrice - product.price).toFixed(2)}
+                              <span className="text-xs line-through text-slate-500 font-mono">₹{product.originalPrice.toFixed(2)}</span>
+                              <span className="bg-emerald-500/15 text-emerald-400 text-[10px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/20">
+                                Save ₹{(product.originalPrice - product.price).toFixed(2)}
                               </span>
                             </div>
                           )}
                           <div className="flex items-end justify-between">
                             <div>
-                              <span className="text-xl font-bold text-white">₹{product.price.toFixed(2)}</span>
+                              <span className="text-lg font-bold text-white font-mono tabular-nums">₹{product.price.toFixed(2)}</span>
                               {product.unit && <span className="text-xs text-slate-400 ml-1">/ {product.unit}</span>}
                             </div>
                             <Link 
                               to={`/product/${product.slug}`}
-                              className="text-sm text-electric-blue hover:text-blue-400 font-medium flex items-center group-hover:translate-x-1 transition-transform"
+                              className="text-xs px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 font-semibold transition-all flex items-center gap-1 group/btn"
                             >
-                              Buy Now <ArrowRight className="ml-1 w-4 h-4" />
+                              <span>View Product</span>
+                              <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
                             </Link>
                           </div>
                           {product.taxText && (
@@ -500,7 +534,7 @@ export default function Shop() {
             
             <button 
               onClick={() => setIsSeoExpanded(!isSeoExpanded)}
-              className="mt-6 text-electric-blue hover:text-cyan-400 font-medium flex items-center gap-2 transition-colors mx-auto bg-white/5 hover:bg-white/10 px-6 py-2 rounded-full border border-white/10"
+              className="mt-6 text-electric-blue hover:text-cyan-400 font-medium flex items-center gap-2 transition-colors mx-auto bg-white/5 hover:bg-white/10 px-6 py-2 rounded-full border border-white/10 cursor-pointer"
             >
               {isSeoExpanded ? 'Read Less' : 'Read More'}
               <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${isSeoExpanded ? 'rotate-180' : ''}`} />
@@ -508,6 +542,13 @@ export default function Shop() {
           </div>
         </section>
       </Reveal>
+
+      {/* Recently Viewed Products */}
+      <RecentlyViewed 
+        title="Recently Viewed" 
+        subtitle="Continue where you left off" 
+        limit={6} 
+      />
     </Layout>
   );
 }

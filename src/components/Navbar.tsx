@@ -1,14 +1,16 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight } from 'lucide-react';
+import { ShoppingCart, Menu, X, User, LogOut, Package, ChevronDown, ChevronRight, Search } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import { fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Category, Subcategory, Subsubcategory, NestedSubcategory } from '../services/productService';
+import { SearchBar } from './SearchBar';
 
 export function Navbar() {
   const { user, logout } = useAuth();
   const { items } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProductsOpen, setIsProductsOpen] = useState(false);
   const [isMobileProductsOpen, setIsMobileProductsOpen] = useState(false);
   const [expandedMobileCategories, setExpandedMobileCategories] = useState<Record<string, boolean>>({});
@@ -254,7 +256,7 @@ export function Navbar() {
                   )}
                 </div>
 
-                <Link to="/3d-printers-filaments" className="nav-link font-semibold text-blue-400 drop-shadow-[0_0_5px_rgba(59,130,246,0.2)]">3D Printers & Filaments</Link>
+                <Link to="/3d-printers-filaments" className="nav-link font-semibold text-blue-400 drop-shadow-[0_0_5px_rgba(59,130,246,0.2)]">MECHAFY 3D</Link>
                 <Link to="/pc-builder" className="nav-link font-bold text-electric-blue drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">PC Builder</Link>
                 <Link to="/it-services" className="nav-link">IT Services</Link>
                 <Link to="/contact" className="nav-link">Contact Us</Link>
@@ -262,8 +264,14 @@ export function Navbar() {
             </div>
           </div>
 
-          <div className="hidden md:block">
-            <div className="ml-2 flex items-center md:ml-4 space-x-2">
+          {/* Desktop Search & User Actions */}
+          <div className="hidden md:flex items-center space-x-3">
+            {/* Desktop Search Bar */}
+            <div className="w-44 lg:w-56 xl:w-64">
+              <SearchBar compact={true} placeholder="Search catalogue..." />
+            </div>
+
+            <div className="ml-1 flex items-center space-x-2">
               {user && user.role === 'admin' ? (
                 <div className="relative flex items-center space-x-3">
                   <Link to="/admin" className="flex items-center space-x-1 text-sm hover:text-electric-blue transition-colors">
@@ -281,10 +289,26 @@ export function Navbar() {
               )}
             </div>
           </div>
-          <div className="-mr-2 flex md:hidden">
+
+          {/* Mobile Right Controls: Search button & Hamburger */}
+          <div className="-mr-2 flex items-center md:hidden space-x-1">
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => {
+                setIsSearchOpen(!isSearchOpen);
+                if (isMenuOpen) setIsMenuOpen(false);
+              }}
+              className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none transition-colors"
+              aria-label="Toggle search"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => {
+                setIsMenuOpen(!isMenuOpen);
+                if (isSearchOpen) setIsSearchOpen(false);
+              }}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none transition-colors"
+              aria-label="Toggle menu"
             >
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
@@ -292,10 +316,22 @@ export function Navbar() {
         </div>
       </div>
 
+      {/* Mobile Search Overlay Bar */}
+      {isSearchOpen && (
+        <div className="md:hidden bg-navy-950/98 backdrop-blur-md px-4 py-3 border-b border-white/10 animate-in fade-in slide-in-from-top-2 duration-150">
+          <SearchBar autoFocus={true} onCloseMobile={() => setIsSearchOpen(false)} />
+        </div>
+      )}
+
       {isMenuOpen && (
         <div
           className="md:hidden bg-navy-900/95 backdrop-blur-md border-b border-white/10"
         >
+          {/* Quick Search inside Mobile Menu */}
+          <div className="px-3 pt-3 pb-1">
+            <SearchBar compact={true} onCloseMobile={() => setIsMenuOpen(false)} />
+          </div>
+
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 max-h-[80vh] overflow-y-auto">
             <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Home</Link>
             <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Company Profile</Link>
@@ -387,7 +423,7 @@ export function Navbar() {
               </div>
             )}
 
-            <Link to="/3d-printers-filaments" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">3D Printers & Filaments</Link>
+            <Link to="/3d-printers-filaments" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">MECHAFY 3D</Link>
             <Link to="/pc-builder" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">PC Builder</Link>
             <Link to="/it-services" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">IT Services</Link>
             <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Contact Us</Link>

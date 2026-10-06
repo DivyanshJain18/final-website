@@ -2,6 +2,8 @@ import { Layout } from '../components/Layout';
 import { Reveal } from '../components/Reveal';
 import { ArrowRight, CheckCircle, Globe, Truck, Users, Cpu, ShieldCheck, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { SEO } from '../components/SEO';
+import { Breadcrumb } from '../components/Breadcrumb';
 
 export default function About() {
   const scrollToAbout = () => {
@@ -13,6 +15,23 @@ export default function About() {
 
   return (
     <Layout>
+      <SEO 
+        title="About Us | Engineering Ecosystem & Robotics Partner"
+        description="Learn about Mechafy Global (A Unit of Shanti Food Industries). Based in Sonipat, Haryana, delivering enterprise robotics, 3D printing machinery & custom IT services across India."
+        canonicalPath="/about"
+        keywords={['About Mechafy Global', 'Shanti Food Industries', 'Robotics hardware company', 'Sonipat industrial area']}
+        structuredData={{
+          '@context': 'https://schema.org',
+          '@type': 'AboutPage',
+          name: 'About Mechafy Global',
+          description: 'Official corporate overview of Mechafy Global engineering ecosystem.'
+        }}
+      />
+
+      <div className="mb-4">
+        <Breadcrumb items={[{ name: 'About Us' }]} />
+      </div>
+
       {/* 1. Hero Banner */}
       <Reveal width="100%">
         <section className="relative glass-panel rounded-3xl overflow-hidden mb-16 h-[500px] flex items-center group">
@@ -197,6 +216,54 @@ export default function About() {
                 <h3 className="text-white font-medium">{client}</h3>
               </div>
             ))}
+          </div>
+        </section>
+      </Reveal>
+
+      {/* Careers Section */}
+      <Reveal width="100%">
+        <section id="careers" className="mb-20 glass-panel p-8 md:p-12 relative overflow-hidden scroll-mt-24">
+          <div className="text-center mb-10">
+            <span className="text-xs font-bold text-electric-blue uppercase tracking-wider">Join Our Team</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mt-1 mb-3">Careers at Mechafy Global</h2>
+            <p className="text-slate-400 max-w-2xl mx-auto text-sm">
+              We are expanding our engineering, logistics, and embedded hardware team. Build the future of robotics and advanced tech manufacturing with us.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="glass-card p-6 rounded-2xl border border-white/10 hover:border-electric-blue/40 transition-all">
+              <span className="text-xs font-semibold text-emerald-400">Open Role</span>
+              <h3 className="text-lg font-bold text-white mt-1 mb-2">Robotics & Embedded Systems Engineer</h3>
+              <p className="text-xs text-slate-300 mb-4">Firmware development, sensor integration, microcontrollers (ESP32/STM32) and stepper motor actuation.</p>
+              <span className="text-xs text-slate-400">Full-Time • Sonipat / Delhi NCR</span>
+            </div>
+
+            <div className="glass-card p-6 rounded-2xl border border-white/10 hover:border-electric-blue/40 transition-all">
+              <span className="text-xs font-semibold text-emerald-400">Open Role</span>
+              <h3 className="text-lg font-bold text-white mt-1 mb-2">3D Printing & Materials Technician</h3>
+              <p className="text-xs text-slate-300 mb-4">FDM & SLA machine calibration, high-temp nozzle testing, and quality control of engineering polymers.</p>
+              <span className="text-xs text-slate-400">Full-Time • Onsite Lab</span>
+            </div>
+
+            <div className="glass-card p-6 rounded-2xl border border-white/10 hover:border-electric-blue/40 transition-all">
+              <span className="text-xs font-semibold text-emerald-400">Open Role</span>
+              <h3 className="text-lg font-bold text-white mt-1 mb-2">Technical Sales & B2B Solutions Lead</h3>
+              <p className="text-xs text-slate-300 mb-4">Institutional hardware procurement for universities, research labs, and industrial automation clients.</p>
+              <span className="text-xs text-slate-400">Full-Time • Hybrid</span>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <p className="text-xs text-slate-400 mb-4">
+              Interested in joining us? Send your portfolio or resume to{' '}
+              <a href="mailto:careers@mechafyglobal.com" className="text-electric-blue font-bold hover:underline">
+                careers@mechafyglobal.com
+              </a>
+            </p>
+            <Link to="/contact?subject=Career%20Inquiry" className="btn-secondary px-6 py-2.5 rounded-full text-xs font-bold text-white inline-flex items-center gap-2">
+              Apply or Inquire Directly <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
         </section>
       </Reveal>
