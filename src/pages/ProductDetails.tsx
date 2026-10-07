@@ -409,18 +409,45 @@ export default function ProductDetails() {
 
                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">{product.name}</h1>
 
-                {/* SKU Display */}
-                <div className="flex items-center gap-2 text-sm text-slate-400 mb-4">
-                  <span className="font-semibold text-slate-300">SKU:</span>
-                  {product.sku ? (
-                    <span className="font-mono text-white bg-white/5 px-2.5 py-0.5 rounded border border-white/10 text-xs font-semibold">
-                      {product.sku}
-                    </span>
-                  ) : (
-                    <span className="text-amber-400 text-xs font-medium italic">
-                      Unavailable (Pending Admin Assignment)
+                {/* SKU, Brand, Condition & Warranty Display */}
+                <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400 mb-5">
+                  {/* Condition Badge - Never hidden */}
+                  <span className={`text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded border ${
+                    (product.condition || 'New') === 'New'
+                      ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                      : (product.condition === 'Open Box')
+                      ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                      : (product.condition === 'Refurbished')
+                      ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/30'
+                      : 'bg-slate-500/10 text-slate-300 border-slate-500/30'
+                  }`}>
+                    Condition: {product.condition || 'New'}
+                  </span>
+
+                  {product.brand && (
+                    <span className="text-xs font-medium text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded">
+                      Brand: <strong className="text-white">{product.brand}</strong>
                     </span>
                   )}
+
+                  {product.warranty && (
+                    <span className="text-xs font-medium text-slate-300 bg-white/5 border border-white/10 px-2.5 py-1 rounded">
+                      Warranty: <strong className="text-electric-blue">{product.warranty}</strong>
+                    </span>
+                  )}
+
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="font-semibold text-slate-400">SKU:</span>
+                    {product.sku ? (
+                      <span className="font-mono text-white bg-white/5 px-2 py-0.5 rounded border border-white/10 font-semibold">
+                        {product.sku}
+                      </span>
+                    ) : (
+                      <span className="text-amber-400 font-medium italic">
+                        MFG-GEN
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mb-6">

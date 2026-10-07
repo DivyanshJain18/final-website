@@ -67,30 +67,24 @@ export const WishlistButton: React.FC<WishlistButtonProps> = ({
     );
   }
 
-  // Default 'card' variant: button visible on cards with label and icon
+  // Default 'card' variant: clean, compact heart icon button without text overlay
   return (
     <button
       type="button"
       onClick={handleClick}
       aria-label={active ? 'Remove from Wishlist' : 'Add to Wishlist'}
       title={active ? 'Added to Wishlist' : 'Add to Wishlist'}
-      className={`group/wish text-[11px] font-medium px-2.5 py-1.5 rounded-lg border backdrop-blur-md transition-all duration-200 flex items-center gap-1.5 ${
+      className={`group/wish p-2 rounded-lg border backdrop-blur-md transition-all duration-200 flex items-center justify-center ${
         active
-          ? 'bg-pink-500/20 border-pink-500/40 text-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.2)]'
-          : 'bg-navy-950/80 border-white/15 text-slate-300 hover:text-pink-300 hover:border-pink-500/30'
+          ? 'bg-pink-500/25 border-pink-500/50 text-pink-400 shadow-[0_0_12px_rgba(236,72,153,0.35)]'
+          : 'bg-navy-950/85 border-white/15 text-slate-400 hover:text-pink-400 hover:bg-pink-500/10 hover:border-pink-500/30 shadow-sm'
       } ${className}`}
     >
       <Heart
-        className={`w-3.5 h-3.5 transition-transform duration-200 group-hover/wish:scale-110 ${
+        className={`w-4 h-4 transition-transform duration-200 group-hover/wish:scale-110 ${
           active ? 'fill-pink-500 text-pink-500' : 'text-slate-400 group-hover/wish:text-pink-400'
         }`}
       />
-      <span className="hidden sm:inline">
-        {active ? '♥ Added to Wishlist' : '♡ Add to Wishlist'}
-      </span>
-      <span className="sm:hidden">
-        {active ? '♥ Added' : '♡ Wishlist'}
-      </span>
     </button>
   );
 };

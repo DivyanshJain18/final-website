@@ -122,7 +122,7 @@ export default function BlogPost() {
         canonicalPath={`/blog/${article.slug}`}
         type="article"
         image={article.coverImage}
-        keywords={[article.category, ...article.tags, 'Mechafy Global', 'Hardware Guide']}
+        keywords={[article.category, ...(article.tags || []), 'Mechafy Global', 'Hardware Guide']}
         structuredData={combinedStructuredData}
       />
 

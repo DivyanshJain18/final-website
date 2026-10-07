@@ -1,13 +1,16 @@
 import { Layout } from '../components/Layout';
-import { Reveal } from '../components/Reveal';
-import { ArrowRight, CheckCircle, Globe, Truck, Users, Cpu, ShieldCheck, Zap } from 'lucide-react';
+import { 
+  ArrowRight, CheckCircle, Globe, Truck, Users, Cpu, ShieldCheck, Zap, 
+  Building2, Award, Target, Compass, Sparkles, MapPin, Phone, Mail, 
+  ExternalLink, Layers, Microscope, HardDrive, Check
+} from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { SEO } from '../components/SEO';
 import { Breadcrumb } from '../components/Breadcrumb';
 
 export default function About() {
-  const scrollToAbout = () => {
-    const element = document.getElementById('about-section');
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
@@ -16,279 +19,330 @@ export default function About() {
   return (
     <Layout>
       <SEO 
-        title="About Us | Engineering Ecosystem & Robotics Partner"
-        description="Learn about Mechafy Global (A Unit of Shanti Food Industries). Based in Sonipat, Haryana, delivering enterprise robotics, 3D printing machinery & custom IT services across India."
+        title="About Mechafy Global | Corporate Overview & Leadership"
+        description="Learn about Mechafy Global (A Unit of Shanti Food Industries, sister venture of Kailash Chemicals). Based in Sonipat, Haryana, delivering enterprise robotics, 3D printing machinery, PC hardware & custom IT solutions."
         canonicalPath="/about"
-        keywords={['About Mechafy Global', 'Shanti Food Industries', 'Robotics hardware company', 'Sonipat industrial area']}
+        keywords={['About Mechafy Global', 'Divyansh Jain', 'Director Mechafy', 'Shanti Food Industries', 'Kailash Chemicals', 'Sonipat Industrial Area', 'Robotics Supplier India']}
         structuredData={{
           '@context': 'https://schema.org',
           '@type': 'AboutPage',
           name: 'About Mechafy Global',
-          description: 'Official corporate overview of Mechafy Global engineering ecosystem.'
+          description: 'Official corporate overview, mission, facility, and leadership of Mechafy Global.'
         }}
       />
 
-      <div className="mb-4">
-        <Breadcrumb items={[{ name: 'About Us' }]} />
+      <div className="mb-6">
+        <Breadcrumb items={[{ name: 'About Mechafy Global' }]} />
       </div>
 
-      {/* 1. Hero Banner */}
-      <Reveal width="100%">
-        <section className="relative glass-panel rounded-3xl overflow-hidden mb-16 h-[500px] flex items-center group">
-          <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1952&q=80')] bg-cover bg-center opacity-30 group-hover:scale-105 transition-transform duration-1000"></div>
-          <div className="absolute inset-0 bg-gradient-to-r from-navy-900 via-navy-900/80 to-transparent"></div>
-          <div className="relative z-10 px-8 md:px-16 max-w-4xl">
-            <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight leading-tight">
-              Transform Your Business with <span className="text-electric-blue">Mechafy Global</span>
+      {/* 1. HERO — EDITORIAL & REAL CORPORATE PRESENCE */}
+      <section className="mb-20 pt-4">
+        <div className="border border-white/10 bg-navy-950/80 p-8 sm:p-14 text-left relative overflow-hidden rounded-2xl shadow-xl">
+          <div className="max-w-3xl space-y-5 relative z-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/15 text-xs uppercase tracking-widest text-electric-blue font-mono rounded-full">
+              Corporate Overview & Engineering Heritage
+            </div>
+
+            <h1 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              Pioneering High-Precision Hardware <br />
+              <span className="text-electric-blue">& Enterprise Computing for India.</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-2xl">
-              Your trusted partner for premium robotics, electronics, and computing solutions.
-            </p>
-            <button 
-              onClick={scrollToAbout}
-              className="btn-glow inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full text-white"
-            >
-              Find Out More <ArrowRight className="ml-2 h-5 w-5" />
-            </button>
-          </div>
-        </section>
-      </Reveal>
 
-      {/* 2. About Mechafy Global */}
-      <section id="about-section" className="mb-20 scroll-mt-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <Reveal width="100%">
-            <div className="glass-panel overflow-hidden h-full min-h-[400px] group">
-              <img 
-                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-                alt="Industrial Robotics Equipment" 
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                referrerPolicy="no-referrer"
-              />
+            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-light">
+              Mechafy Global is an engineering procurement, additive manufacturing, and institutional hardware partner headquartered in Sonipat, Haryana. We bridge the critical supply gap between international component manufacturers and Indian engineers, businesses, and universities.
+            </p>
+
+            <div className="flex flex-wrap gap-4 pt-3">
+              <button
+                onClick={() => scrollToSection('leadership')}
+                className="px-6 py-3 bg-electric-blue hover:bg-blue-400 text-black font-bold text-xs uppercase tracking-wider transition-all rounded-xl shadow-[0_2px_12px_rgba(59,130,246,0.3)] hover:shadow-[0_4px_20px_rgba(59,130,246,0.45)] cursor-pointer"
+              >
+                Meet Leadership
+              </button>
+              <button
+                onClick={() => scrollToSection('facility')}
+                className="px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/15 text-white font-semibold text-xs uppercase tracking-wider transition-all rounded-xl cursor-pointer"
+              >
+                Explore Facility & Hub
+              </button>
             </div>
-          </Reveal>
-          
-          <Reveal width="100%" delay={0.2}>
-            <div>
-              <div className="flex items-start mb-6">
-                <img 
-                  src="https://raw.githubusercontent.com/DivyanshJain18/Mechafy-assets/main/Mechafy%20Logo.jpg" 
-                  alt="Mechafy Global Logo" 
-                  className="h-16 w-auto object-contain rounded mr-4 mt-1"
-                  referrerPolicy="no-referrer"
-                />
-                <div>
-                  <h2 className="text-sm font-bold text-electric-blue uppercase tracking-wider mb-2">Who We Are</h2>
-                  <h3 className="text-3xl md:text-4xl font-bold text-white">About Mechafy Global</h3>
-                </div>
-              </div>
-              <div className="space-y-4 text-slate-300 leading-relaxed">
-                <p>
-                  Mechafy Global is a premier global wholesale supplier dedicated to powering the future of technology. We specialize in providing high-quality robotics systems, advanced electronic components, and robust computer hardware to a diverse clientele worldwide.
-                </p>
-                <div className="p-4 bg-white/5 border-l-4 border-electric-blue rounded-r-lg my-6 backdrop-blur-sm">
-                  <p className="text-white italic">
-                    "Mechafy Global is a proud new venture of our parent company, <a href="https://www.kailashchemicals.com" target="_blank" rel="noopener noreferrer" className="text-electric-blue font-bold hover:underline">Kailash Chemicals</a>, which has been a trusted leader in the export and import of Food and Pharmaceutical Chemicals for the past 15 years."
-                  </p>
-                </div>
-                <p>
-                  Our mission is to bridge the gap between innovation and accessibility. Whether you are scaling an industrial operation or equipping an educational institution, we provide reliable products, competitive pricing, and scalable supply solutions tailored to your specific needs.
-                </p>
-                <p>
-                  With a commitment to excellence and a deep understanding of the tech landscape, Mechafy Global stands as a pillar of support for businesses and innovators looking to push the boundaries of what's possible.
-                </p>
-              </div>
-            </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 
-      {/* 3. Our Services */}
-      <Reveal width="100%">
-        <section className="mb-20 glass-panel p-8 md:p-12 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-electric-blue/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
-          
-          <div className="relative z-10 text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Our Services</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">
-              Comprehensive solutions designed to streamline your supply chain and empower your projects.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
-            {[
-              { title: 'Wholesale Supply', icon: Cpu, desc: 'Direct access to a vast inventory of robotics systems, electronic components, and computing hardware at unbeatable wholesale rates.' },
-              { title: 'Global Shipping', icon: Globe, desc: 'Efficient and reliable logistics network ensuring your components reach you anywhere in the world, on time and in perfect condition.' },
-              { title: 'Dedicated Support', icon: Users, desc: 'Personalized sales assistance and technical guidance from our team of experts to help you select the right components for your needs.' }
-            ].map((service, index) => (
-              <div 
-                key={index}
-                className="glass-card p-8 rounded-2xl hover:border-electric-blue/50 transition-all duration-300 hover:-translate-y-2 group"
-              >
-                <div className="w-14 h-14 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center mb-6 text-electric-blue group-hover:bg-electric-blue/20 transition-colors">
-                  <service.icon className="h-8 w-8" />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-3">{service.title}</h3>
-                <p className="text-slate-400">
-                  {service.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </Reveal>
-
-      {/* 4. Why Choose Us */}
+      {/* 2. OUR STORY & ROOTS */}
       <section className="mb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <Reveal width="100%">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">Why Choose Us?</h2>
-              <div className="space-y-6">
-                {[
-                  { title: 'Genuine & Quality Products', desc: 'We source directly from trusted manufacturers to ensure authenticity and performance.', icon: ShieldCheck },
-                  { title: 'Competitive Pricing', desc: 'Best-in-market rates designed to maximize your profit margins and project budget.', icon: Zap },
-                  { title: 'Technical Support', desc: 'Expert advice and troubleshooting to keep your operations running smoothly.', icon: Cpu },
-                  { title: 'Fast Delivery', desc: 'Optimized logistics for quick turnaround times on all orders.', icon: Truck },
-                  { title: 'Bulk & Institutional Supply', desc: 'Specialized programs for schools, universities, and large-scale enterprises.', icon: Users },
-                ].map((item, index) => (
-                  <div 
-                    key={index} 
-                    className="flex items-start group"
-                  >
-                    <div className="flex-shrink-0 mt-1 p-1 bg-white/5 border border-white/10 rounded-full group-hover:bg-electric-blue/20 transition-colors">
-                      <CheckCircle className="h-6 w-6 text-electric-blue" />
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-bold text-white group-hover:text-blue-300 transition-colors">{item.title}</h3>
-                      <p className="text-slate-400 text-sm">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div className="lg:col-span-6 space-y-5 text-left">
+            <span className="text-xs font-mono uppercase tracking-widest text-electric-blue">15 Years Industrial Legacy</span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+              Our Story
+            </h2>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-light">
+              Mechafy Global represents the technology & automation arm of our parent company, <a href="https://www.kailashchemicals.com" target="_blank" rel="noopener noreferrer" className="text-electric-blue font-bold hover:underline inline-flex items-center gap-1">Kailash Chemicals <ExternalLink className="w-3 h-3" /></a> (operating through Shanti Food Industries), which has operated with distinction in global import, export, and industrial supply for over 15 years.
+            </p>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-light">
+              Recognizing the acute friction faced by Indian researchers, tech startups, and industrial units when attempting to source genuine electronics, reliable 3D printing components, and commercial-grade microcontrollers, Mechafy Global was founded to bring direct manufacturer relationships, strict quality bench-testing, and transparent GST invoicing to the domestic tech landscape.
+            </p>
+            <div className="p-4 bg-white/5 border-l-2 border-electric-blue text-xs text-slate-300 leading-relaxed rounded-r-xl">
+              Operating out of Phase 1, HSIIDC Industrial Estate in Rai, Sonipat, our infrastructure allows rapid road and air dispatches across North India and all major national metro hubs.
             </div>
-          </Reveal>
-          
-          <Reveal width="100%" delay={0.2}>
-            <div className="relative">
-              <div className="absolute inset-0 bg-electric-blue blur-[100px] opacity-20 rounded-full animate-pulse"></div>
-              <div 
-                className="relative glass-panel p-8 hover:scale-[1.02] transition-transform duration-500"
-              >
-                <img 
-                  src="https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
-                  alt="Team working on electronics" 
-                  className="rounded-xl w-full object-cover h-80 mb-6"
-                  referrerPolicy="no-referrer"
+          </div>
+
+          <div className="lg:col-span-6">
+            <div className="border border-white/10 bg-navy-950 p-2.5 rounded-2xl shadow-xl">
+              <div className="aspect-[4/3] overflow-hidden bg-navy-900 rounded-xl">
+                <img
+                  src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80"
+                  alt="High Precision Electronics and Automated Hardware Bench Testing at Mechafy Global"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
-                <div className="text-center">
-                  <p className="text-4xl font-bold text-white mb-2">
-                    1000+
-                  </p>
-                  <p className="text-slate-400 text-sm uppercase tracking-wider">Happy Clients Worldwide</p>
-                </div>
               </div>
             </div>
-          </Reveal>
+          </div>
         </div>
       </section>
 
-      {/* 5. Who We Serve */}
-      <Reveal width="100%">
-        <section className="mb-20">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-10 text-center">Who We Serve</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {[
-              "Engineering Students",
-              "Robotics Enthusiasts",
-              "Schools & Colleges",
-              "Tech Startups",
-              "Computer Repair Shops"
-            ].map((client, index) => (
-              <div 
-                key={index} 
-                className="glass-card p-6 rounded-xl text-center hover:bg-white/10 transition-all group cursor-default hover:-translate-y-1 hover:border-electric-blue/50"
-              >
-                <div className="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-electric-blue/20 transition-colors group-hover:scale-110 duration-300">
-                  <span className="text-electric-blue font-bold text-lg">{index + 1}</span>
-                </div>
-                <h3 className="text-white font-medium">{client}</h3>
+      {/* 3. MISSION & VISION (Split Editorial Layout) */}
+      <section className="mb-20 py-12 border-y border-white/10 bg-white/[0.01]">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+          <div className="p-8 border border-white/10 bg-navy-950/80 space-y-3">
+            <div className="flex items-center gap-3 text-electric-blue">
+              <Target className="w-6 h-6" />
+              <h3 className="text-xl font-bold text-white uppercase tracking-wider">Our Mission</h3>
+            </div>
+            <p className="text-sm text-slate-300 leading-relaxed font-light">
+              To eliminate hardware procurement latency for Indian innovators by providing dependable access to verified robotics silicon, high-grade additive materials, precision tooling, and custom compute platforms backed by transparent technical specifications and domestic support.
+            </p>
+          </div>
+
+          <div className="p-8 border border-white/10 bg-navy-950/80 space-y-3">
+            <div className="flex items-center gap-3 text-emerald-400">
+              <Compass className="w-6 h-6" />
+              <h3 className="text-xl font-bold text-white uppercase tracking-wider">Our Vision</h3>
+            </div>
+            <p className="text-sm text-slate-300 leading-relaxed font-light">
+              To be recognized as India's most trustworthy B2B hardware distribution ecosystem — empowering schools, university research centers, industrial automation facilities, and enterprise developers with zero counterfeit compromises.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. WHAT WE DO & TECHNOLOGY AREAS */}
+      <section className="mb-20 text-left">
+        <div className="max-w-2xl mb-10">
+          <span className="text-xs font-mono uppercase tracking-widest text-electric-blue">Capability Spectrum</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mt-1">
+            What We Do & Technology Areas
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            Multi-disciplinary hardware coverage paired with digital execution.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 border border-white/10 bg-navy-950/70">
+            <Cpu className="w-6 h-6 text-electric-blue mb-3" />
+            <h3 className="text-base font-bold text-white mb-2">Robotics & Microcontrollers</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Industrial sensors, motor drivers, ESP32, STM32, Arduino, Raspberry Pi, step motors, and precision wiring harnesses for embedded automation.
+            </p>
+          </div>
+
+          <div className="p-6 border border-white/10 bg-navy-950/70">
+            <Layers className="w-6 h-6 text-purple-400 mb-3" />
+            <h3 className="text-base font-bold text-white mb-2">3D Printing & Materials</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Bambu Lab, Creality, Anycubic 3D printers, specialized engineering filaments (Carbon Fiber, PETG, TPU, PLA+), 3D optical scanners, and hardened nozzles.
+            </p>
+          </div>
+
+          <div className="p-6 border border-white/10 bg-navy-950/70">
+            <HardDrive className="w-6 h-6 text-yellow-400 mb-3" />
+            <h3 className="text-base font-bold text-white mb-2">Computer Architecture & PC Builds</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              High-performance workstation CPUs, motherboards, GPUs, DDR4/DDR5 memory, NVMe SSD arrays, power supplies, and turnkey custom rigs.
+            </p>
+          </div>
+
+          <div className="p-6 border border-white/10 bg-navy-950/70">
+            <Microscope className="w-6 h-6 text-cyan-400 mb-3" />
+            <h3 className="text-base font-bold text-white mb-2">Lab Tooling & Instruments</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Precision multimeters, oscilloscopes, variable DC bench power supplies, temperature-controlled soldering stations, and inspection gear.
+            </p>
+          </div>
+
+          <div className="p-6 border border-white/10 bg-navy-950/70">
+            <Sparkles className="w-6 h-6 text-emerald-400 mb-3" />
+            <h3 className="text-base font-bold text-white mb-2">Enterprise IT Services</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Full-stack software engineering, bespoke corporate websites, portal development, cloud hosting, and data management solutions.
+            </p>
+          </div>
+
+          <div className="p-6 border border-white/10 bg-navy-950/70">
+            <Building2 className="w-6 h-6 text-pink-400 mb-3" />
+            <h3 className="text-base font-bold text-white mb-2">Institutional Procurement</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Consolidated tender fulfillment, rate contracts, bulk packing, and dedicated account management for educational and government bodies.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. INDUSTRIES WE SERVE */}
+      <section className="mb-20 text-left">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-8">
+          Industries Served
+        </h2>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { name: 'Higher Education & Research', desc: 'Robotics labs, incubation centers, and university engineering departments.' },
+            { name: 'Industrial Automation', desc: 'Assembly line retrofitting, sensor integrations, and predictive maintenance.' },
+            { name: 'Additive Manufacturing Labs', desc: 'Rapid prototyping studios, architectural models, and small-batch production.' },
+            { name: 'Commercial IT & Software', desc: 'Compute infrastructure, web applications, and corporate cloud architecture.' }
+          ].map((ind, i) => (
+            <div key={i} className="p-5 border border-white/10 bg-navy-950/60">
+              <span className="text-xs font-mono font-bold text-electric-blue block mb-2">0{i+1}</span>
+              <h3 className="text-sm font-bold text-white mb-1">{ind.name}</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">{ind.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. FACILITY & LOGISTICS HUB */}
+      <section id="facility" className="mb-20 py-12 border-y border-white/10 bg-white/[0.01] text-left scroll-mt-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-7 space-y-4">
+            <span className="text-xs font-mono uppercase tracking-widest text-electric-blue">Physical Operational Hub</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Warehouse & Testing Facility
+            </h2>
+            <p className="text-sm text-slate-300 leading-relaxed font-light">
+              Unlike broker services or drop-shippers, Mechafy Global maintains direct physical stock in our warehouse and inspection lab situated at Plot 582, HSIIDC Industrial Area, Rai, Sonipat, Haryana (PIN: 131029).
+            </p>
+            <div className="grid grid-cols-2 gap-4 pt-2 font-mono text-xs">
+              <div className="p-3 bg-white/5 border border-white/10">
+                <span className="text-slate-400 block">Hub Location:</span>
+                <span className="text-white font-bold">Rai, Sonipat, Haryana</span>
               </div>
-            ))}
-          </div>
-        </section>
-      </Reveal>
-
-      {/* Careers Section */}
-      <Reveal width="100%">
-        <section id="careers" className="mb-20 glass-panel p-8 md:p-12 relative overflow-hidden scroll-mt-24">
-          <div className="text-center mb-10">
-            <span className="text-xs font-bold text-electric-blue uppercase tracking-wider">Join Our Team</span>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mt-1 mb-3">Careers at Mechafy Global</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto text-sm">
-              We are expanding our engineering, logistics, and embedded hardware team. Build the future of robotics and advanced tech manufacturing with us.
+              <div className="p-3 bg-white/5 border border-white/10">
+                <span className="text-slate-400 block">Transit Speed:</span>
+                <span className="text-white font-bold">24-48 Hours Express Cargo</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 pt-2">
+              Every incoming batch undergoes rigorous voltage tolerance checks, stepper motor torque test benches, and packaging reinforcement before dispatch.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="glass-card p-6 rounded-2xl border border-white/10 hover:border-electric-blue/40 transition-all">
-              <span className="text-xs font-semibold text-emerald-400">Open Role</span>
-              <h3 className="text-lg font-bold text-white mt-1 mb-2">Robotics & Embedded Systems Engineer</h3>
-              <p className="text-xs text-slate-300 mb-4">Firmware development, sensor integration, microcontrollers (ESP32/STM32) and stepper motor actuation.</p>
-              <span className="text-xs text-slate-400">Full-Time • Sonipat / Delhi NCR</span>
+          <div className="lg:col-span-5">
+            <div className="border border-white/10 bg-navy-950 p-2.5 rounded-2xl shadow-xl">
+              <div className="aspect-[4/3] overflow-hidden bg-navy-900 rounded-xl">
+                <img
+                  src="https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=1200&q=80"
+                  alt="Mechafy Global Inspection and Distribution Hub Facilities"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                />
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="glass-card p-6 rounded-2xl border border-white/10 hover:border-electric-blue/40 transition-all">
-              <span className="text-xs font-semibold text-emerald-400">Open Role</span>
-              <h3 className="text-lg font-bold text-white mt-1 mb-2">3D Printing & Materials Technician</h3>
-              <p className="text-xs text-slate-300 mb-4">FDM & SLA machine calibration, high-temp nozzle testing, and quality control of engineering polymers.</p>
-              <span className="text-xs text-slate-400">Full-Time • Onsite Lab</span>
+      {/* PHASE 15 — LEADERSHIP (DIRECTOR: DIVYANSH JAIN) */}
+      <section id="leadership" className="mb-20 text-left scroll-mt-24">
+        <div className="max-w-3xl space-y-4">
+          <span className="text-xs font-mono uppercase tracking-widest text-electric-blue">Executive Management</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+            Leadership
+          </h2>
+
+          <div className="pt-2">
+            <h3 className="text-2xl font-bold text-white tracking-tight">
+              Divyansh Jain
+            </h3>
+            <p className="text-sm font-mono text-electric-blue font-semibold mt-0.5">
+              Director — Mechafy Global
+            </p>
+          </div>
+
+          <div className="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed font-light pt-2">
+            <p>
+              Divyansh Jain leads the strategic direction, international partnerships, and operational governance at Mechafy Global. Anchored in technology, engineering entrepreneurship, and global trade dynamics, his focus centers on developing reliable tech supply ecosystems that accelerate high-impact R&D across India.
+            </p>
+            <p>
+              Under his guidance, Mechafy Global expanded from core component distribution into dedicated additive manufacturing supply, industrial robotics, custom compute integration, and bespoke enterprise software solutions. His leadership emphasizes transparency, uncompromising component authenticity, and institutional-grade fulfillment standards.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* WHY MECHAFY GLOBAL (Checklist Table) */}
+      <section className="mb-20 text-left">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight mb-8">
+          Why Work With Mechafy Global?
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            { title: 'Zero Counterfeit Guarantee', desc: 'Direct authorized factory sourcing. Every integrated circuit, microcontroller, and sensor is 100% genuine.' },
+            { title: 'Transparent Condition Disclosures', desc: 'Every product clearly marked: New, Open Box, Refurbished, or Used. We never disguise product condition.' },
+            { title: 'Compliant Invoicing & ITC', desc: 'Complete GST tax invoices provided on every retail and wholesale transaction for immediate input tax credits.' },
+            { title: 'Engineer-Led Guidance', desc: 'Direct consultations with tech specialists who understand pinouts, power ratings, and firmware architectures.' },
+            { title: 'Fast Logistics & Insured Transit', desc: 'Dispatched directly from our Northern distribution hub with shockproof packaging and cargo coverage.' },
+            { title: 'Specialized Institutional Programs', desc: 'Volume price breaks, purchase order payment terms, and consolidated tender deliveries.' }
+          ].map((item, idx) => (
+            <div key={idx} className="p-4 border border-white/10 bg-navy-950/70 flex items-start gap-3">
+              <Check className="w-5 h-5 text-electric-blue shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-bold text-white mb-1">{item.title}</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">{item.desc}</p>
+              </div>
             </div>
+          ))}
+        </div>
+      </section>
 
-            <div className="glass-card p-6 rounded-2xl border border-white/10 hover:border-electric-blue/40 transition-all">
-              <span className="text-xs font-semibold text-emerald-400">Open Role</span>
-              <h3 className="text-lg font-bold text-white mt-1 mb-2">Technical Sales & B2B Solutions Lead</h3>
-              <p className="text-xs text-slate-300 mb-4">Institutional hardware procurement for universities, research labs, and industrial automation clients.</p>
-              <span className="text-xs text-slate-400">Full-Time • Hybrid</span>
+      {/* CONTACT & OFFICIAL REGISTRATION DETAILS */}
+      <section className="mb-16 border border-white/10 bg-navy-950 p-8 sm:p-12 text-left">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+          <div className="md:col-span-8 space-y-3">
+            <span className="text-xs font-mono uppercase tracking-widest text-electric-blue">Connect With Our Team</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white">Ready to Discuss Your Project?</h2>
+            <p className="text-xs sm:text-sm text-slate-300 font-light leading-relaxed">
+              Whether you need 1,000 microcontrollers for industrial assembly, custom 3D printer calibration filaments, or an enterprise IT deployment, our team is ready to assist.
+            </p>
+            <div className="flex flex-wrap gap-4 pt-3 text-xs font-mono text-slate-300">
+              <div className="flex items-center gap-1.5">
+                <MapPin className="w-4 h-4 text-electric-blue" />
+                <span>582, HSIIDC Industrial Area, Rai, Sonipat, Haryana 131029</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Phone className="w-4 h-4 text-emerald-400" />
+                <span>+91 9817056538</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Mail className="w-4 h-4 text-yellow-400" />
+                <span>info@mechafyglobal.com</span>
+              </div>
             </div>
           </div>
 
-          <div className="text-center">
-            <p className="text-xs text-slate-400 mb-4">
-              Interested in joining us? Send your portfolio or resume to{' '}
-              <a href="mailto:careers@mechafyglobal.com" className="text-electric-blue font-bold hover:underline">
-                careers@mechafyglobal.com
-              </a>
-            </p>
-            <Link to="/contact?subject=Career%20Inquiry" className="btn-secondary px-6 py-2.5 rounded-full text-xs font-bold text-white inline-flex items-center gap-2">
-              Apply or Inquire Directly <ArrowRight className="w-3.5 h-3.5" />
+          <div className="md:col-span-4 flex justify-start md:justify-end">
+            <Link
+              to="/contact"
+              className="px-6 py-3.5 bg-electric-blue hover:bg-blue-400 text-black font-bold text-xs uppercase tracking-wider transition-all inline-flex items-center gap-2"
+            >
+              <span>Contact Sales & Support</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-        </section>
-      </Reveal>
-
-      {/* 6. Our Vision */}
-      <Reveal width="100%">
-        <section className="relative glass-panel bg-gradient-to-r from-electric-blue/10 to-blue-900/20 p-12 md:p-20 text-center overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 group-hover:opacity-20 transition-opacity duration-700"></div>
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Our Vision</h2>
-            <p className="text-xl md:text-2xl text-slate-200 font-light leading-relaxed italic">
-              "To become the leading global supplier of robotics and computing components, empowering the next generation of innovators with the tools they need to build the future."
-            </p>
-            <div className="mt-10">
-              <Link to="/contact">
-                <button
-                  className="btn-glow inline-flex items-center justify-center px-8 py-3 text-base font-medium rounded-full text-white"
-                >
-                  Partner With Us
-                </button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      </Reveal>
+        </div>
+      </section>
     </Layout>
   );
 }

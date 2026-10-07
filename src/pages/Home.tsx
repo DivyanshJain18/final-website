@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Layout } from '../components/Layout';
-import { ArrowRight, Cpu, Zap, PenTool } from 'lucide-react';
+import { ArrowRight, Cpu, Zap, PenTool, Bot, Printer, Code2, Star } from 'lucide-react';
 import { ReactNode, useState, useEffect, useRef } from 'react';
 import { Reveal } from '../components/Reveal';
 import { fetchProducts, Product, getProductPath } from '../services/productService';
@@ -168,7 +168,8 @@ export default function Home() {
 
             {/* Main Headline */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 md:mb-8 tracking-tight drop-shadow-lg relative z-10">
-              Build the Future with <span className="text-electric-blue">Mechafy</span>
+              <span className="block text-white">Engineering Technology.</span>
+              <span className="block text-electric-blue">Built for What's Next.</span>
             </h1>
             
             {/* Rotating Category Text */}
@@ -208,32 +209,107 @@ export default function Home() {
         </section>
       </Reveal>
 
-      {/* Categories Grid */}
+      {/* Categories Grid (2x2 on desktop) */}
       <Reveal delay={0.2}>
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-white mb-8">Popular Categories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CategoryCard 
-              title="Robotic Components" 
-              icon={<Cpu className="h-8 w-8 text-electric-blue" />} 
-              description="Motors, sensors, and components for your next bot."
-              link="/shop?category=robotic-components"
-              delay={0}
-            />
-            <CategoryCard 
-              title="Computer Components" 
-              icon={<Zap className="h-8 w-8 text-yellow-500" />} 
-              description="Processors, memory, and high-performance hardware."
+              title="Computer Hardware" 
+              icon={<Cpu className="h-7 w-7 text-electric-blue" />} 
+              description="Enterprise motherboards, processors (Intel & AMD), workstation memory, NVMe arrays, GPUs, and high-wattage SMPS."
               link="/shop?category=computer-components"
-              delay={0.1}
+              linkText="Browse Components →"
+              accentColor="blue"
             />
             <CategoryCard 
-              title="Tools & Equipment" 
-              icon={<PenTool className="h-8 w-8 text-red-500" />} 
-              description="Soldering stations, multimeters, and precision tools."
-              link="/shop?category=tools"
-              delay={0.2}
+              title="Robotics & Sensors" 
+              icon={<Bot className="h-7 w-7 text-amber-400" />} 
+              description="Microcontrollers (ESP32, STM32, Arduino), industrial sensors, stepper/servo motors, motor drivers, and lab test tools."
+              link="/shop?category=robotic-components"
+              linkText="Explore Robotics →"
+              accentColor="yellow"
             />
+            <CategoryCard 
+              title="3D Printing & Additive" 
+              icon={<Printer className="h-7 w-7 text-purple-400" />} 
+              description="Bambu Lab, Creality, Anycubic 3D printers, engineering polymers (PLA+, PETG, Carbon Fiber, TPU), 3D scanners, and nozzles."
+              link="/3d-printers-filaments"
+              linkText="Visit MECHAFY 3D →"
+              accentColor="purple"
+            />
+            <CategoryCard 
+              title="IT & Software Services" 
+              icon={<Code2 className="h-7 w-7 text-emerald-400" />} 
+              description="Full-stack software engineering, bespoke web platforms, secure corporate hosting, and B2B cloud infrastructure."
+              link="/it-services"
+              linkText="Explore IT Services →"
+              accentColor="green"
+            />
+          </div>
+        </section>
+      </Reveal>
+
+      {/* Fulfillment Lifecycle — From Requirement to Delivery (Before Featured Products) */}
+      <Reveal delay={0.3}>
+        <section className="mb-16">
+          <div className="mb-8 text-left">
+            <span className="text-xs font-mono uppercase tracking-widest text-electric-blue block mb-2 font-semibold">
+              FULFILLMENT LIFECYCLE
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2.5">
+              From Requirement to Delivery.
+            </h2>
+            <p className="text-slate-400 text-sm md:text-base max-w-3xl leading-relaxed">
+              Transparent, accountable, and SLA-driven hardware distribution for labs, factories, and tech teams.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5">
+            {[
+              {
+                step: '01',
+                title: 'Tell Us Your Requirement',
+                desc: 'Share your exact bill-of-materials, specifications, or engineering goals.'
+              },
+              {
+                step: '02',
+                title: 'We Recommend the Solution',
+                desc: 'Our technical specialists review component compatibility and volume requirements.'
+              },
+              {
+                step: '03',
+                title: 'Receive Your Quote',
+                desc: 'Get competitive GST-inclusive wholesale rates with clear delivery timelines.'
+              },
+              {
+                step: '04',
+                title: 'Confirm Your Order',
+                desc: 'Lock in pricing via bank transfer, purchase order, or secure payment channel.'
+              },
+              {
+                step: '05',
+                title: 'Dispatch & Delivery',
+                desc: 'Inspected, shock-packed, and shipped insured cargo with live tracking.'
+              }
+            ].map((item) => (
+              <div 
+                key={item.step}
+                className="group border border-white/10 bg-navy-950/80 p-5 rounded-2xl flex flex-col justify-between h-full hover:border-blue-500/40 hover:-translate-y-1 transition-all duration-300 relative overflow-hidden"
+              >
+                <div>
+                  <div className="text-2xl md:text-3xl font-extrabold text-electric-blue font-mono mb-4 tracking-wider">
+                    {item.step}
+                  </div>
+                  <h3 className="text-base font-bold text-white mb-2 leading-snug group-hover:text-blue-300 transition-colors">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs md:text-sm text-slate-300 leading-relaxed font-light">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </section>
       </Reveal>
@@ -248,6 +324,67 @@ export default function Home() {
             </Link>
           </div>
           <FeaturedProductsGrid />
+        </section>
+      </Reveal>
+
+      {/* Testimonials Section (After Featured Products) */}
+      <Reveal delay={0.5}>
+        <section className="mb-16 text-left">
+          <div className="mb-8">
+            <span className="text-xs font-mono uppercase tracking-widest text-electric-blue block mb-2 font-semibold">
+              CLIENT TESTIMONIALS
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-2.5">
+              Trusted by Engineering Teams & Labs
+            </h2>
+            <p className="text-slate-400 text-sm md:text-base max-w-3xl leading-relaxed">
+              Real feedback from technical directors, robotics researchers, and hardware builders partnering with Mechafy Global.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                quote: "Mechafy Global supplied our entire robotics lab with genuine STM32 dev boards, sensors, and actuators within 48 hours. Proper GST invoices, shockproof packaging, and zero counterfeit risk.",
+                author: "Dr. Arvind Rao",
+                role: "Head of Robotics Lab"
+              },
+              {
+                quote: "The additive manufacturing hardware and engineering carbon-fiber filaments we procured from Mechafy 3D perform flawlessly under heavy duty cycle testing. Their technical team truly knows hardware.",
+                author: "Rohan Mehta",
+                role: "Technical Director"
+              },
+              {
+                quote: "From enterprise server motherboards to custom web platform engineering, Mechafy delivered with precision and strict SLA compliance. A dependable B2B partner for growing tech firms.",
+                author: "Pooja Sharma",
+                role: "VP Engineering"
+              }
+            ].map((testimonial, idx) => (
+              <div 
+                key={idx}
+                className="border border-white/10 bg-navy-950/80 p-6 md:p-7 rounded-2xl flex flex-col justify-between hover:border-blue-500/30 transition-all duration-300 relative group"
+              >
+                <div>
+                  <div className="flex items-center gap-1 text-amber-400 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                    ))}
+                  </div>
+                  <p className="text-slate-300 text-sm leading-relaxed mb-6 font-light italic">
+                    "{testimonial.quote}"
+                  </p>
+                </div>
+                <div className="pt-4 border-t border-white/10">
+                  <h4 className="text-white font-bold text-sm tracking-tight">
+                    {testimonial.author}
+                  </h4>
+                  <p className="text-xs text-electric-blue font-medium mt-0.5">
+                    {testimonial.role}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
       </Reveal>
 
@@ -338,17 +475,62 @@ function FeaturedProductsGrid() {
   );
 }
 
-function CategoryCard({ title, icon, description, link, delay }: { title: string, icon: ReactNode, description: string, link: string, delay: number }) {
+interface CategoryCardProps {
+  title: string;
+  icon: ReactNode;
+  description: string;
+  link: string;
+  linkText: string;
+  accentColor: 'blue' | 'yellow' | 'purple' | 'green';
+}
+
+function CategoryCard({ title, icon, description, link, linkText, accentColor }: CategoryCardProps) {
+  const accentStyles = {
+    blue: {
+      border: 'hover:border-blue-500/40',
+      iconBg: 'bg-blue-500/10 border-blue-500/20 text-electric-blue group-hover:bg-blue-500/20',
+      titleHover: 'group-hover:text-electric-blue',
+      link: 'text-electric-blue group-hover:text-blue-300',
+    },
+    yellow: {
+      border: 'hover:border-amber-500/40',
+      iconBg: 'bg-amber-500/10 border-amber-500/20 text-amber-400 group-hover:bg-amber-500/20',
+      titleHover: 'group-hover:text-amber-400',
+      link: 'text-amber-400 group-hover:text-amber-300',
+    },
+    purple: {
+      border: 'hover:border-purple-500/40',
+      iconBg: 'bg-purple-500/10 border-purple-500/20 text-purple-400 group-hover:bg-purple-500/20',
+      titleHover: 'group-hover:text-purple-400',
+      link: 'text-purple-400 group-hover:text-purple-300',
+    },
+    green: {
+      border: 'hover:border-emerald-500/40',
+      iconBg: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 group-hover:bg-emerald-500/20',
+      titleHover: 'group-hover:text-emerald-400',
+      link: 'text-emerald-400 group-hover:text-emerald-300',
+    },
+  }[accentColor];
+
   return (
     <Link to={link} className="block group h-full">
       <div 
-        className="glass-card p-6 rounded-2xl h-full"
+        className={`glass-card p-6 md:p-8 rounded-2xl h-full flex flex-col justify-between border border-white/10 ${accentStyles.border} transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 bg-navy-950/70`}
       >
-        <div className="mb-4 bg-white/5 w-14 h-14 rounded-full flex items-center justify-center group-hover:bg-electric-blue/20 transition-colors group-hover:scale-110 duration-300 border border-white/10">
-          {icon}
+        <div>
+          <div className={`mb-5 w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 border ${accentStyles.iconBg}`}>
+            {icon}
+          </div>
+          <h3 className={`text-xl font-bold text-white mb-2.5 transition-colors ${accentStyles.titleHover}`}>
+            {title}
+          </h3>
+          <p className="text-slate-400 text-sm md:text-base leading-relaxed mb-6 font-light">
+            {description}
+          </p>
         </div>
-        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-electric-blue transition-colors">{title}</h3>
-        <p className="text-slate-400">{description}</p>
+        <div className={`font-semibold text-sm flex items-center gap-1.5 transition-colors ${accentStyles.link}`}>
+          <span>{linkText}</span>
+        </div>
       </div>
     </Link>
   );

@@ -264,14 +264,9 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Desktop Search & User Actions */}
+          {/* Desktop Right User Actions */}
           <div className="hidden md:flex items-center space-x-3">
-            {/* Desktop Search Bar */}
-            <div className="w-44 lg:w-56 xl:w-64">
-              <SearchBar compact={true} placeholder="Search catalogue..." />
-            </div>
-
-            <div className="ml-1 flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
               {user && user.role === 'admin' ? (
                 <div className="relative flex items-center space-x-3">
                   <Link to="/admin" className="flex items-center space-x-1 text-sm hover:text-electric-blue transition-colors">
@@ -290,23 +285,10 @@ export function Navbar() {
             </div>
           </div>
 
-          {/* Mobile Right Controls: Search button & Hamburger */}
+          {/* Mobile Right Controls: Hamburger */}
           <div className="-mr-2 flex items-center md:hidden space-x-1">
             <button
-              onClick={() => {
-                setIsSearchOpen(!isSearchOpen);
-                if (isMenuOpen) setIsMenuOpen(false);
-              }}
-              className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none transition-colors"
-              aria-label="Toggle search"
-            >
-              <Search className="h-5 w-5" />
-            </button>
-            <button
-              onClick={() => {
-                setIsMenuOpen(!isMenuOpen);
-                if (isSearchOpen) setIsSearchOpen(false);
-              }}
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none transition-colors"
               aria-label="Toggle menu"
             >
@@ -316,22 +298,10 @@ export function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Search Overlay Bar */}
-      {isSearchOpen && (
-        <div className="md:hidden bg-navy-950/98 backdrop-blur-md px-4 py-3 border-b border-white/10 animate-in fade-in slide-in-from-top-2 duration-150">
-          <SearchBar autoFocus={true} onCloseMobile={() => setIsSearchOpen(false)} />
-        </div>
-      )}
-
       {isMenuOpen && (
         <div
           className="md:hidden bg-navy-900/95 backdrop-blur-md border-b border-white/10"
         >
-          {/* Quick Search inside Mobile Menu */}
-          <div className="px-3 pt-3 pb-1">
-            <SearchBar compact={true} onCloseMobile={() => setIsMenuOpen(false)} />
-          </div>
-
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 max-h-[80vh] overflow-y-auto">
             <Link to="/" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Home</Link>
             <Link to="/about" onClick={() => setIsMenuOpen(false)} className="text-gray-300 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors">Company Profile</Link>

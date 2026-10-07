@@ -22,6 +22,7 @@ import {
 import { Product, Category, fetchAllProductsEnriched, fetchCategories, getProductPath } from '../services/productService';
 import { executeSearch } from '../services/searchService';
 import { WishlistButton } from '../components/WishlistButton';
+import { ProductCard } from '../components/ProductCard';
 import { SEO } from '../components/SEO';
 import { Breadcrumb } from '../components/Breadcrumb';
 
@@ -369,101 +370,7 @@ export default function SearchResults() {
                 <StaggerContainer key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.06}>
                   {currentProducts.map(product => (
                     <StaggerItem key={product.id || product.slug}>
-                      <div className="glass-card rounded-2xl overflow-hidden flex flex-col h-full group hover:border-electric-blue/40 transition-all duration-300">
-                        {/* Image */}
-                        <div className="relative h-52 bg-white/[0.02] border-b border-white/5 p-4 flex items-center justify-center overflow-hidden">
-                          <Link to={getProductPath(product)} className="flex items-center justify-center w-full h-full">
-                            {product.image_url ? (
-                              <img 
-                                src={product.image_url} 
-                                alt={product.name} 
-                                className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                                referrerPolicy="no-referrer"
-                                loading="lazy"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-slate-600">
-                                <Box className="w-12 h-12" />
-                              </div>
-                            )}
-                          </Link>
-
-                          {/* In Stock / Out of Stock Badge */}
-                          <div className="absolute top-3 left-3">
-                            {product.stock > 0 ? (
-                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 backdrop-blur-md">
-                                In Stock
-                              </span>
-                            ) : (
-                              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-950/80 text-rose-300 border border-rose-500/30 backdrop-blur-md">
-                                Out of Stock
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Wishlist Button */}
-                          <div className="absolute top-2.5 right-2.5 z-10">
-                            <WishlistButton product={product} variant="card" />
-                          </div>
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-5 flex flex-col flex-grow">
-                          <div className="text-xs font-semibold mb-1 uppercase tracking-wide flex flex-wrap gap-1 items-center">
-                            <span className="text-electric-blue">{product.category_name || 'Component'}</span>
-                            {product.subcategory_name && (
-                              <>
-                                <span className="text-slate-600">•</span>
-                                <span className="text-purple-400">{product.subcategory_name}</span>
-                              </>
-                            )}
-                          </div>
-
-                          <Link 
-                            to={getProductPath(product)} 
-                            className="text-base font-bold text-white mb-2 hover:text-electric-blue line-clamp-2 transition-colors"
-                          >
-                            {product.name}
-                          </Link>
-
-                          {(product.brand || product.model || product.sku) && (
-                            <div className="text-[11px] text-slate-400 mb-2 flex items-center gap-2">
-                              {product.brand && <span>Brand: <strong className="text-slate-200">{product.brand}</strong></span>}
-                              {product.model && <span>Model: <strong className="text-slate-200">{product.model}</strong></span>}
-                              {product.sku && <span className="font-mono text-slate-500">#{product.sku}</span>}
-                            </div>
-                          )}
-
-                          <p className="text-slate-400 text-xs mb-4 line-clamp-2 flex-grow leading-relaxed">
-                            {product.description}
-                          </p>
-
-                          {/* Price & Action */}
-                          <div className="flex flex-col mt-auto pt-4 border-t border-white/10">
-                            {product.originalPrice && product.originalPrice > product.price && (
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs line-through text-slate-500">₹{product.originalPrice.toFixed(2)}</span>
-                                <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded">
-                                  SAVE ₹{(product.originalPrice - product.price).toFixed(2)}
-                                </span>
-                              </div>
-                            )}
-
-                            <div className="flex items-end justify-between">
-                              <div>
-                                <span className="text-lg font-bold text-white">₹{product.price.toFixed(2)}</span>
-                                {product.unit && <span className="text-[11px] text-slate-400 ml-1">/ {product.unit}</span>}
-                              </div>
-                              <Link 
-                                to={`/product/${product.slug}`}
-                                className="text-xs text-electric-blue hover:text-blue-300 font-semibold flex items-center group-hover:translate-x-0.5 transition-transform"
-                              >
-                                View Details <ArrowRight className="ml-1 w-3.5 h-3.5" />
-                              </Link>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      <ProductCard product={product} className="h-full" />
                     </StaggerItem>
                   ))}
                 </StaggerContainer>

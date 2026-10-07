@@ -8,6 +8,7 @@ import { Reveal } from '../components/Reveal';
 import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
 import { SearchBar } from '../components/SearchBar';
 import { WishlistButton } from '../components/WishlistButton';
+import { ProductCard } from '../components/ProductCard';
 import { fetchProducts, fetchCategories, fetchSubcategories, fetchSubsubcategories, fetchNestedSubcategories, Product, Category, Subcategory, Subsubcategory, NestedSubcategory, getProductPath } from '../services/productService';
 import { RecentlyViewed } from '../components/RecentlyViewed';
 import { SEO } from '../components/SEO';
@@ -345,75 +346,9 @@ export default function Shop() {
                 <StaggerContainer key={currentPage} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" staggerDelay={0.08}>
                   {currentProducts.map(product => (
                     <StaggerItem key={product.id}>
-                    <div 
-                      className="glass-card rounded-2xl overflow-hidden flex flex-col h-full group relative border border-white/10 hover:border-blue-500/40"
-                    >
-                      <div className="relative h-52 bg-white/[0.02] flex items-center justify-center p-4 overflow-hidden border-b border-white/5">
-                        <Link to={getProductPath(product)} className="flex items-center justify-center w-full h-full">
-                          <img 
-                            src={product.image_url} 
-                            alt={product.name} 
-                            className="max-w-full max-h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                            referrerPolicy="no-referrer"
-                            loading="lazy"
-                          />
-                        </Link>
-                        
-                        {/* Wishlist Button */}
-                        <div className="absolute top-2.5 right-2.5 z-10">
-                          <WishlistButton product={product} variant="card" />
-                        </div>
-                      </div>
-                      <div className="p-5 flex flex-col flex-grow">
-                        <div className="text-[11px] font-medium text-slate-400 mb-1.5 flex flex-wrap items-center gap-1.5">
-                          <span className="text-blue-400 font-semibold">{product.category_name}</span>
-                          {product.subcategory_name && (
-                            <>
-                              <span className="text-slate-600">·</span>
-                              <span className="text-slate-300">{product.subcategory_name}</span>
-                            </>
-                          )}
-                          {product.subsubcategory_name && (
-                            <>
-                              <span className="text-slate-600">·</span>
-                              <span className="text-slate-400">{product.subsubcategory_name}</span>
-                            </>
-                          )}
-                        </div>
-                        <Link to={getProductPath(product)} className="text-base font-bold text-white mb-2 hover:text-blue-400 line-clamp-2 transition-colors">
-                          {product.name}
-                        </Link>
-                        <p className="text-slate-400 text-xs mb-4 line-clamp-2 leading-relaxed flex-grow">{product.description}</p>
-                        <div className="flex flex-col mt-auto pt-3 border-t border-white/10">
-                          {product.originalPrice && product.originalPrice > product.price && (
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs line-through text-slate-500 font-mono">₹{product.originalPrice.toFixed(2)}</span>
-                              <span className="bg-emerald-500/15 text-emerald-400 text-[10px] font-bold px-1.5 py-0.5 rounded border border-emerald-500/20">
-                                Save ₹{(product.originalPrice - product.price).toFixed(2)}
-                              </span>
-                            </div>
-                          )}
-                          <div className="flex items-end justify-between">
-                            <div>
-                              <span className="text-lg font-bold text-white font-mono tabular-nums">₹{product.price.toFixed(2)}</span>
-                              {product.unit && <span className="text-xs text-slate-400 ml-1">/ {product.unit}</span>}
-                            </div>
-                            <Link 
-                              to={`/product/${product.slug}`}
-                              className="text-xs px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600 text-blue-300 hover:text-white border border-blue-500/30 font-semibold transition-all flex items-center gap-1 group/btn"
-                            >
-                              <span>View Product</span>
-                              <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-                            </Link>
-                          </div>
-                          {product.taxText && (
-                            <p className="text-[10px] text-slate-500 mt-1">{product.taxText}</p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </StaggerItem>
-                ))}
+                      <ProductCard product={product} className="h-full" />
+                    </StaggerItem>
+                  ))}
                 </StaggerContainer>
 
                 {/* Pagination Controls */}

@@ -17,6 +17,10 @@ const AdminProducts: React.FC = () => {
     name: '',
     slug: '',
     sku: '',
+    brand: '',
+    model: '',
+    condition: 'New' as 'New' | 'Open Box' | 'Refurbished' | 'Used',
+    warranty: '',
     description: '',
     price: '',
     originalPrice: '',
@@ -78,6 +82,10 @@ const AdminProducts: React.FC = () => {
         name: product.name,
         slug: product.slug,
         sku: product.sku || '',
+        brand: product.brand || '',
+        model: product.model || '',
+        condition: (product.condition as any) || 'New',
+        warranty: product.warranty || '',
         description: product.description || '',
         price: product.price.toString(),
         originalPrice: product.originalPrice ? product.originalPrice.toString() : '',
@@ -96,6 +104,10 @@ const AdminProducts: React.FC = () => {
         name: '',
         slug: '',
         sku: '',
+        brand: '',
+        model: '',
+        condition: 'New',
+        warranty: '',
         description: '',
         price: '',
         originalPrice: '',
@@ -133,6 +145,10 @@ const AdminProducts: React.FC = () => {
         name: formData.name,
         slug: formData.slug,
         sku: finalSku,
+        brand: formData.brand.trim() || null,
+        model: formData.model.trim() || null,
+        condition: formData.condition || 'New',
+        warranty: formData.warranty.trim() || null,
         description: formData.description,
         price: parseFloat(formData.price),
         unit: formData.unit,
@@ -259,7 +275,22 @@ const AdminProducts: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-medium text-white">{product.name}</div>
+                      <div className="font-medium text-white flex items-center gap-2">
+                        <span>{product.name}</span>
+                        {product.condition && (
+                          <span className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded border ${
+                            product.condition === 'New'
+                              ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+                              : product.condition === 'Open Box'
+                              ? 'bg-amber-500/10 text-amber-300 border-amber-500/20'
+                              : product.condition === 'Refurbished'
+                              ? 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20'
+                              : 'bg-slate-500/10 text-slate-300 border-slate-500/20'
+                          }`}>
+                            {product.condition}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs font-mono mt-0.5">
                         {product.sku ? (
                           <span className="text-slate-400">SKU: <span className="text-slate-200 font-semibold">{product.sku}</span></span>
@@ -449,6 +480,43 @@ const AdminProducts: React.FC = () => {
                     </select>
                   </div>
                   
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Brand (e.g. Bambu Lab, NVIDIA, ZOTAC)</label>
+                    <input
+                      type="text"
+                      value={formData.brand}
+                      onChange={(e) => setFormData({ ...formData, brand: e.target.value })}
+                      placeholder="e.g. Bambu Lab"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Product Condition *</label>
+                    <select
+                      value={formData.condition}
+                      onChange={(e) => setFormData({ ...formData, condition: e.target.value as any })}
+                      className="w-full bg-zinc-800 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none appearance-none"
+                      required
+                    >
+                      <option value="New">New (Brand New Factory Sealed)</option>
+                      <option value="Open Box">Open Box (Verified & Tested)</option>
+                      <option value="Refurbished">Refurbished (Certified Working)</option>
+                      <option value="Used">Used (Good Condition)</option>
+                    </select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-300">Warranty (e.g. 1 Year Official / 3 Years Manufacturer)</label>
+                    <input
+                      type="text"
+                      value={formData.warranty}
+                      onChange={(e) => setFormData({ ...formData, warranty: e.target.value })}
+                      placeholder="e.g. 1 Year Manufacturer Warranty"
+                      className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-white focus:border-electric-blue focus:ring-1 focus:ring-electric-blue outline-none"
+                    />
+                  </div>
+
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-300">Stock Quantity</label>
                     <input

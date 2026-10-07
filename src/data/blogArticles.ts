@@ -12,6 +12,7 @@ export interface BlogArticle {
   };
   coverImage: string;
   excerpt: string;
+  tags?: string[];
   keyTakeaways: string[];
   sections: {
     heading: string;
