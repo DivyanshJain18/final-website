@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Building2, CheckCircle, Send, ShieldCheck, Truck, Percent, Phone, Mail, FileText, ArrowRight } from 'lucide-react';
 import { MECHAFY_WHATSAPP_NUMBER } from '../services/whatsappService';
+import { submitToWeb3Forms } from '../services/emailService';
 
 export default function BecomeAReseller() {
   const [formData, setFormData] = useState({
@@ -36,54 +37,63 @@ export default function BecomeAReseller() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    if (!formData.businessName.trim() || !formData.contactPerson.trim() || !formData.email.trim() || !formData.phone.trim()) {
+      setError('Please fill in all required fields (Business Name, Contact Person, Email, Phone).');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
 
     try {
       // 1. Save to Firestore
-      await addDoc(collection(db, 'reseller_applications'), {
-        ...formData,
-        submittedAt: serverTimestamp(),
-        targetEmail: 'mechafyglobal@gmail.com',
-        status: 'pending'
+      let docId = '';
+      try {
+        const docRef = await addDoc(collection(db, 'reseller_applications'), {
+          ...formData,
+          submittedAt: serverTimestamp(),
+          targetEmail: 'sales@mechafyglobal.com',
+          status: 'pending'
+        });
+        docId = docRef.id;
+      } catch (fsErr) {
+        console.warn('Firestore backup failed, proceeding with direct email delivery:', fsErr);
+      }
+
+      // 2. Submit to Web3Forms routing to sales@mechafyglobal.com
+      const emailResult = await submitToWeb3Forms({
+        subject: `New Reseller Application: ${formData.businessName} (GST: ${formData.gstin || 'Not Provided'})`,
+        fromName: 'Mechafy Reseller Desk',
+        replyTo: formData.email,
+        fields: {
+          business_name: formData.businessName,
+          contact_person: formData.contactPerson,
+          email: formData.email,
+          phone: formData.phone,
+          gstin: formData.gstin || 'Not Provided',
+          business_type: formData.businessType,
+          city: formData.city,
+          state: formData.state,
+          address: formData.address || 'Not Provided',
+          years_in_business: formData.yearsInBusiness,
+          expected_monthly_volume: formData.expectedMonthlyVolume,
+          product_interests: formData.productInterests,
+          notes: formData.message || 'None',
+          application_id: docId || undefined
+        }
       });
 
-      // 2. Prepare mailto fallback to guarantee email delivery to mechafyglobal@gmail.com
-      const mailSubject = encodeURIComponent(`New Reseller Partnership Application: ${formData.businessName}`);
-      const mailBody = encodeURIComponent(
-        `Business Name: ${formData.businessName}\n` +
-        `Contact Person: ${formData.contactPerson}\n` +
-        `Email: ${formData.email}\n` +
-        `Phone: ${formData.phone}\n` +
-        `GSTIN: ${formData.gstin}\n` +
-        `Business Type: ${formData.businessType}\n` +
-        `Location: ${formData.city}, ${formData.state}\n` +
-        `Address: ${formData.address}\n` +
-        `Years in Business: ${formData.yearsInBusiness}\n` +
-        `Expected Monthly Volume: ${formData.expectedMonthlyVolume}\n` +
-        `Product Categories: ${formData.productInterests}\n` +
-        `Additional Notes: ${formData.message}\n`
-      );
+      if (!emailResult.success) {
+        setError(emailResult.message);
+        return;
+      }
 
-      // Open mailto link in background/iframe to prompt user's mail client or save copy
-      const mailtoLink = `mailto:mechafyglobal@gmail.com?subject=${mailSubject}&body=${mailBody}`;
-      
       setSubmitted(true);
-      
-      // Attempt window mailto trigger
-      const link = document.createElement('a');
-      link.href = mailtoLink;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      // Click silently
-      setTimeout(() => {
-        try { link.click(); } catch (_) {}
-      }, 500);
-
     } catch (err: any) {
       console.error('Error submitting reseller application:', err);
-      // Even if Firestore fails, allow successful email backup
-      setSubmitted(true);
+      setError(err.message || 'Failed to submit application. Please try again or contact sales@mechafyglobal.com directly.');
     } finally {
       setIsSubmitting(false);
     }
@@ -154,7 +164,7 @@ export default function BecomeAReseller() {
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2">Application Submitted!</h2>
                 <p className="text-sm text-slate-300 leading-relaxed mb-6">
-                  Thank you for your interest in becoming a Mechafy Global reseller partner. Your application details have been routed directly to our B2B commercial desk (<strong className="text-white">mechafyglobal@gmail.com</strong>).
+                  Thank you for your interest in becoming a Mechafy Global reseller partner. Your application details have been routed directly to our B2B commercial desk (<strong className="text-white">sales@mechafyglobal.com</strong>).
                 </p>
                 <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-xs text-slate-400 mb-6 text-left space-y-1">
                   <div><strong>Registered Business:</strong> {formData.businessName}</div>

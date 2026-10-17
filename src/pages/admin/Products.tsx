@@ -35,10 +35,11 @@ const AdminProducts: React.FC = () => {
   });
 
   const generateDeterministicSKU = (categoryId: string, currentCategoryList: Category[], existingProducts: Product[]): string => {
-    const cat = currentCategoryList.find(c => c.id === categoryId);
+    const cat = currentCategoryList.find(c => c.id === categoryId || c.slug === categoryId);
     const catSlug = (cat?.slug || '').toLowerCase();
     let prefix = 'MFG-GEN';
     if (catSlug.includes('robot')) prefix = 'MFG-ROB';
+    else if (catSlug.includes('spare') || catSlug.includes('part') || catSlug.includes('accessori')) prefix = 'MFG-3DP-PRT';
     else if (catSlug.includes('3d') || catSlug.includes('print')) prefix = 'MFG-3DP';
     else if (catSlug.includes('comput') || catSlug.includes('pc') || catSlug.includes('hardw')) prefix = 'MFG-CMP';
 
@@ -78,6 +79,18 @@ const AdminProducts: React.FC = () => {
   const handleOpenModal = (product?: Product) => {
     if (product) {
       setCurrentProduct(product);
+      // Robust category matching: match by id, by slug, or by name
+      let selectedCatId = product.category_id ? product.category_id.toString() : '';
+      const matchedCategory = categories.find(c => 
+        c.id === selectedCatId || 
+        c.slug === selectedCatId || 
+        (product.category_slug && c.slug === product.category_slug) ||
+        (product.category_name && c.name.toLowerCase() === product.category_name.toLowerCase())
+      );
+      if (matchedCategory && matchedCategory.id) {
+        selectedCatId = matchedCategory.id;
+      }
+
       setFormData({
         name: product.name,
         slug: product.slug,
@@ -92,7 +105,7 @@ const AdminProducts: React.FC = () => {
         unit: product.unit || 'Piece',
         taxText: product.taxText || 'Incl. GST (No Hidden Charges)',
         stock: product.stock.toString(),
-        category_id: product.category_id.toString(),
+        category_id: selectedCatId,
         subcategory_id: product.subcategory_id?.toString() || '',
         subsubcategory_id: product.subsubcategory_id?.toString() || '',
         nested_subcategory_id: product.nested_subcategory_id?.toString() || '',
@@ -141,6 +154,8 @@ const AdminProducts: React.FC = () => {
         return;
       }
 
+      const selectedCategory = categories.find(c => c.id === formData.category_id || c.slug === formData.category_id);
+
       const payload: any = {
         name: formData.name,
         slug: formData.slug,
@@ -155,6 +170,8 @@ const AdminProducts: React.FC = () => {
         taxText: formData.taxText,
         stock: parseInt(formData.stock),
         category_id: formData.category_id,
+        category_name: selectedCategory ? selectedCategory.name : 'General',
+        category_slug: selectedCategory ? selectedCategory.slug : '',
         image_url: formData.image_url
       };
 

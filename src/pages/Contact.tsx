@@ -8,6 +8,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { MECHAFY_WHATSAPP_NUMBER, MECHAFY_WHATSAPP_DISPLAY, getGeneralWhatsAppUrl } from '../services/whatsappService';
 import { SEO } from '../components/SEO';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { submitToWeb3Forms } from '../services/emailService';
 
 export default function Contact() {
   const location = useLocation();
@@ -65,10 +66,16 @@ export default function Contact() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     
     // Validate that at least one of email or phone is provided
     if (!formData.email.trim() && !formData.phone.trim()) {
       setError('Please provide either an email address or a phone number so we can reach you.');
+      return;
+    }
+
+    if (!formData.name.trim() || !formData.subject.trim() || !formData.message.trim()) {
+      setError('Please provide your name, subject, and message.');
       return;
     }
     
@@ -77,37 +84,36 @@ export default function Contact() {
 
     try {
       // 1. Save to Firestore
-      await addDoc(collection(db, 'inquiries'), {
-        ...formData,
-        created_at: new Date().toISOString(),
-        status: 'pending'
+      let docId = '';
+      try {
+        const docRef = await addDoc(collection(db, 'inquiries'), {
+          ...formData,
+          created_at: new Date().toISOString(),
+          status: 'pending'
+        });
+        docId = docRef.id;
+      } catch (fsErr) {
+        console.warn('Firestore backup failed, proceeding with Web3Forms delivery:', fsErr);
+      }
+
+      // 2. Send email via Web3Forms routing to sales@mechafyglobal.com
+      const emailResult = await submitToWeb3Forms({
+        subject: `New Contact Form: ${formData.subject}`,
+        fromName: 'Mechafy Contact Desk',
+        replyTo: formData.email,
+        fields: {
+          customer_name: formData.name,
+          customer_email: formData.email,
+          customer_phone: formData.phone || 'Not provided',
+          subject: formData.subject,
+          message: formData.message,
+          inquiry_id: docId || undefined
+        }
       });
 
-      // 2. Send email via Web3Forms
-      const web3formsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
-      if (web3formsAccessKey) {
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: web3formsAccessKey,
-            subject: `New Contact Form: ${formData.subject}`,
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            message: formData.message,
-          }),
-        });
-        
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || 'Failed to send email via Web3Forms');
-        }
-      } else {
-        throw new Error("VITE_WEB3FORMS_ACCESS_KEY is missing. Please configure it in your environment variables.");
+      if (!emailResult.success) {
+        setError(emailResult.message);
+        return;
       }
 
       setSubmitted(true);

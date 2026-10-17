@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Layout } from '../components/Layout';
 import { Reveal } from '../components/Reveal';
-import { fetchProducts, Product, CURATED_3D_PARTS_AND_ACCESSORIES, getProductPath } from '../services/productService';
+import { fetchProducts, Product, getProductPath } from '../services/productService';
 import { Link } from 'react-router-dom';
 import { Layers, Cuboid, Zap, Settings, ArrowRight, ShieldCheck, Headphones, ShoppingCart, Scan, Wrench } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -439,23 +439,26 @@ export default function ThreeDPrintersFilaments() {
   const filaments = products.filter(isFilamentOrResin);
   const scanners = products.filter(isScannerMachine);
 
-  // Filter ONLY authentic 3D printer & 3D scanner parts & accessories from DB
-  const dbParts = products.filter(p => is3DPrinterPartOrAccessory(p) || is3DScannerPartOrAccessory(p));
+  // Filter ONLY products whose saved category or subcategory matches "3D Printer Spare Parts and Accessories"
+  const isAssignedToSparePartsCategory = (p: Product): boolean => {
+    const normalize = (s?: string) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const catSlug = normalize(p.category_slug);
+    const catName = (p.category_name || '').toLowerCase();
+    const catId = normalize(String(p.category_id || ''));
+    const subcatSlug = normalize(p.subcategory_slug);
+    const subcatName = (p.subcategory_name || '').toLowerCase();
 
-  // Combine DB parts with curated authentic 3D parts ensuring no duplicates
-  const allPartsAndAccessories = [
-    ...dbParts,
-    ...CURATED_3D_PARTS_AND_ACCESSORIES.filter(c => !dbParts.some(d => d.slug === c.slug))
-  ];
+    return (
+      catSlug === '3d-printer-spare-parts-and-accessories' ||
+      catId === '3d-printer-spare-parts-and-accessories' ||
+      catName === '3d printer spare parts and accessories' ||
+      subcatSlug === '3d-printer-spare-parts-and-accessories' ||
+      subcatName === '3d printer spare parts and accessories'
+    );
+  };
 
-  const printerPartsCount = allPartsAndAccessories.filter(is3DPrinterPartOrAccessory).length;
-  const scannerPartsCount = allPartsAndAccessories.filter(is3DScannerPartOrAccessory).length;
-
-  const displayedParts = allPartsAndAccessories.filter(p => {
-    if (partFilter === 'printer') return is3DPrinterPartOrAccessory(p);
-    if (partFilter === 'scanner') return is3DScannerPartOrAccessory(p);
-    return true;
-  });
+  const allPartsAndAccessories = products.filter(isAssignedToSparePartsCategory);
+  const displayedParts = allPartsAndAccessories;
 
   return (
     <Layout>
@@ -823,45 +826,19 @@ export default function ThreeDPrintersFilaments() {
                   <Settings className="h-4 w-4" />
                   3D Hardware Ecosystem
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">3D Printer & Scanner Parts & Accessories</h2>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">3D Printer Spare Parts and Accessories</h2>
                 <p className="text-slate-400 max-w-2xl">
-                  Dedicated accessories and genuine replacements for 3D printers and 3D optical digitizers. No unrelated computer components.
+                  Dedicated accessories, genuine replacement parts, nozzles, hotends, and build plates specifically assigned to this category.
                 </p>
               </div>
 
-              {/* Sub-Category Filter Buttons */}
-              <div className="flex items-center gap-2 p-1.5 bg-navy-950/80 rounded-xl border border-white/10 self-start md:self-auto shrink-0 shadow-lg">
-                <button
-                  onClick={() => setPartFilter('all')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    partFilter === 'all'
-                      ? 'bg-electric-blue text-navy-950 shadow-md font-bold'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  All ({allPartsAndAccessories.length})
-                </button>
-                <button
-                  onClick={() => setPartFilter('printer')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    partFilter === 'printer'
-                      ? 'bg-blue-600 text-white shadow-md font-bold'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  3D Printer Parts ({printerPartsCount})
-                </button>
-                <button
-                  onClick={() => setPartFilter('scanner')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    partFilter === 'scanner'
-                      ? 'bg-cyan-500 text-navy-950 shadow-md font-bold'
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  Scanner Accessories ({scannerPartsCount})
-                </button>
-              </div>
+              {allPartsAndAccessories.length > 0 && (
+                <div className="flex items-center gap-2 p-1.5 bg-navy-950/80 rounded-xl border border-white/10 self-start md:self-auto shrink-0 shadow-lg">
+                  <span className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-electric-blue text-navy-950 shadow-md">
+                    Catalog Products ({allPartsAndAccessories.length})
+                  </span>
+                </div>
+              )}
             </div>
           </Reveal>
 
@@ -935,14 +912,16 @@ export default function ThreeDPrintersFilaments() {
           ) : (
             <div className="text-center py-20 bg-navy-900/50 rounded-2xl border border-dashed border-white/20">
               <Wrench className="mx-auto h-16 w-16 text-slate-500 mb-6" />
-              <h3 className="text-2xl font-bold text-white mb-3">Expanding Our 3D Parts Catalog</h3>
-              <p className="text-slate-400 max-w-md mx-auto">This section exclusively features replacement parts and accessories for 3D printers and 3D scanners.</p>
-              <button 
-                onClick={() => setPartFilter('all')}
-                className="mt-6 px-6 py-2.5 rounded-lg text-sm font-semibold text-electric-blue bg-white/5 border border-white/10 hover:bg-white/10 transition-colors cursor-pointer"
+              <h3 className="text-2xl font-bold text-white mb-3">No products available in this category yet. Please check back soon.</h3>
+              <p className="text-slate-400 max-w-md mx-auto">
+                No products are currently assigned to the <strong>3D Printer Spare Parts and Accessories</strong> category. Once products are assigned to this category in the admin dashboard, they will automatically appear here.
+              </p>
+              <Link 
+                to="/shop"
+                className="inline-block mt-6 px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-white/5 border border-white/10 hover:bg-white/10 transition-colors"
               >
-                Reset Filter
-              </button>
+                Browse All Products
+              </Link>
             </div>
           )}
         </div>

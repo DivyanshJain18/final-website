@@ -4,11 +4,13 @@
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
   
-  --color-navy-950: #060A12;
-  --color-navy-900: #0B1120;
+  --color-navy-950: #060911;
+  --color-navy-900: #0B111E;
+  --color-navy-800: #111A2E;
   --color-slate-800: #1E293B;
-  --color-electric-blue: #3B82F6;
-  --color-brand-blue: #2563EB;
+  --color-electric-blue: #2563EB;
+  --color-brand-blue: #1D4ED8;
+  --color-brand-accent: #EAB308;
 }
 
 html {
@@ -18,14 +20,14 @@ html {
 }
 
 body {
-  @apply min-h-screen text-slate-100 overflow-x-hidden antialiased;
+  @apply min-h-screen text-slate-200 overflow-x-hidden antialiased;
   background-color: #070B14;
   background-attachment: fixed;
   position: relative;
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Subtle, high-precision engineering grid overlay (restrained, non-distracting) */
+/* Restrained engineering baseline grid (discrete hairline) */
 body::before {
   content: '';
   position: fixed;
@@ -34,70 +36,54 @@ body::before {
   width: 100%;
   height: 100%;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 64px 64px;
   pointer-events: none;
   z-index: -2;
 }
 
-/* Very subtle ambient lighting gradient at top of viewport */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1000px;
-  height: 350px;
-  background: radial-gradient(ellipse at top, rgba(37, 99, 235, 0.12) 0%, rgba(37, 99, 235, 0) 70%);
-  pointer-events: none;
-  z-index: -1;
-}
-
 /* ========================================================
-   PREMIUM MECHAFY DESIGN SYSTEM UTILITIES
+   ESTABLISHED TECHNOLOGY ENTERPRISE DESIGN TOKENS
    ======================================================== */
 
-/* Surface Panels */
+/* Structured Surface Panels */
+.surface-panel {
+  @apply bg-navy-900/90 border border-white/10 rounded-lg shadow-sm;
+}
+
+.surface-card {
+  @apply bg-[#0C1322] border border-white/10 rounded-lg transition-all duration-200 hover:border-slate-400/40;
+}
+
+/* Backward-compatible legacy classes styled cleanly */
 .glass-panel {
-  @apply bg-navy-900/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl;
+  @apply bg-navy-900/95 border border-white/10 rounded-lg shadow-sm backdrop-blur-none;
 }
 
 .glass-card {
-  @apply bg-white/[0.04] backdrop-blur-sm border border-white/10 rounded-2xl shadow-md transition-all duration-200 hover:-translate-y-1 hover:border-blue-500/40 hover:shadow-xl hover:shadow-blue-500/5;
+  @apply bg-[#0C1322] border border-white/10 rounded-lg transition-all duration-200 hover:border-blue-500/50;
 }
 
-/* Primary Refined Brand Button */
-.btn-glow {
-  @apply bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 shadow-[0_2px_12px_rgba(37,99,235,0.3)] hover:shadow-[0_4px_20px_rgba(37,99,235,0.45)] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-navy-950 cursor-pointer text-sm;
+/* Corporate Technology Action Buttons */
+.btn-primary {
+  @apply inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-5 py-2.5 rounded-md font-semibold text-sm transition-colors cursor-pointer border border-blue-500/50 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-navy-950;
 }
 
-/* Secondary Button */
 .btn-secondary {
-  @apply bg-white/5 hover:bg-white/10 active:bg-white/15 text-slate-200 hover:text-white border border-white/15 px-5 py-2.5 rounded-xl font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-slate-400 cursor-pointer text-sm;
+  @apply inline-flex items-center justify-center bg-white/5 hover:bg-white/10 active:bg-white/15 text-slate-200 hover:text-white border border-white/15 px-5 py-2.5 rounded-md font-semibold text-sm transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-slate-400;
 }
 
-/* Navigation Links */
-.nav-link {
-  @apply relative text-slate-300 hover:text-white transition-colors py-2 text-xs lg:text-[13px] font-semibold tracking-wide whitespace-nowrap;
+.btn-glow {
+  @apply inline-flex items-center justify-center bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-4 py-2 rounded-md font-semibold text-xs tracking-wider uppercase transition-colors cursor-pointer border border-blue-500/50 shadow-sm;
 }
 
-.nav-link::after {
-  content: '';
-  @apply absolute bottom-0 left-0 w-0 h-0.5 bg-blue-500 transition-all duration-200;
-}
-
-.nav-link:hover::after {
-  @apply w-full;
-}
-
-/* Form Inputs */
+/* Engineering Form Inputs */
 .input-tech {
-  @apply w-full px-4 py-2.5 bg-navy-950/80 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-slate-500 transition-all;
+  @apply w-full px-3.5 py-2 bg-navy-950 border border-white/15 rounded-md text-white text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 placeholder-slate-500 transition-colors;
 }
 
-/* Tabular Numerals for prices & metrics */
+/* Tabular Numerals */
 .tabular-numbers {
   font-variant-numeric: tabular-nums;
 }
@@ -120,3 +106,24 @@ body::after {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+/* Header Navigation Links */
+.nav-link {
+  color: #e2e8f0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: color 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+}
+
+.nav-link:hover,
+.nav-link:focus {
+  color: #ffffff;
+}
+
+.nav-link:visited {
+  color: #e2e8f0;
+}
+

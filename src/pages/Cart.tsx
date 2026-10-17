@@ -8,6 +8,7 @@ import { Reveal } from '../components/Reveal';
 import { StaggerContainer, StaggerItem } from '../components/StaggerContainer';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { submitToWeb3Forms } from '../services/emailService';
 
 export default function Cart() {
   const { items, removeFromCart, updateQuantity, clearCart, total } = useCart();
@@ -36,34 +37,19 @@ export default function Cart() {
           created_at: new Date().toISOString()
         });
 
-        // Send email via Web3Forms
-        const web3formsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
-        if (web3formsAccessKey) {
-          const itemsList = items.map(item => `- ${item.name} ${item.sku ? `[SKU: ${item.sku}]` : ''} (Qty: ${item.quantity})`).join('\n');
-          const response = await fetch('https://api.web3forms.com/submit', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Accept: 'application/json',
-            },
-            body: JSON.stringify({
-              access_key: web3formsAccessKey,
-              subject: `New Quote Request from ${user.name}`,
-              name: user.name,
-              email: user.email,
-              message: `New Quote Request from ${user.name} (${user.email})\n\nItems:\n${itemsList}\n\nTotal Est: ₹${(total * 1.08).toFixed(2)}`,
-            }),
-          });
-          
-          const data = await response.json();
-          if (!response.ok || !data.success) {
-            throw new Error(data.message || 'Failed to send email via Web3Forms');
+        // Send email via Web3Forms routing to sales@mechafyglobal.com
+        const itemsList = items.map(item => `- ${item.name} ${item.sku ? `[SKU: ${item.sku}]` : ''} (Qty: ${item.quantity})`).join('\n');
+        await submitToWeb3Forms({
+          subject: `New Quote Request from ${user.name}`,
+          fromName: 'Mechafy Cart Desk',
+          replyTo: user.email,
+          fields: {
+            customer_name: user.name,
+            customer_email: user.email,
+            items_summary: itemsList,
+            total_estimate: `₹${(total * 1.08).toFixed(2)}`
           }
-        } else {
-          console.warn("VITE_WEB3FORMS_ACCESS_KEY is missing. Email notification was not sent.");
-          // We don't throw error here because the order was already saved to Firestore, 
-          // and we don't want to fail the whole process just because email failed.
-        }
+        });
 
         setSuccessMessage('Your quote request has been submitted successfully.');
         clearCart();

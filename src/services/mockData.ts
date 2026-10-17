@@ -72,7 +72,9 @@ export const MOCK_CATEGORIES = [
   { id: 2, name: 'Microcontrollers', slug: 'microcontrollers', description: 'Arduino, ESP32, Raspberry Pi' },
   { id: 3, name: 'Sensors', slug: 'sensors', description: 'Temperature, distance, and motion sensors' },
   { id: 4, name: 'PC Components', slug: 'pc-components', description: 'GPUs, CPUs, RAM, and Motherboards' },
-  { id: 5, name: 'Tools', slug: 'tools', description: 'Soldering irons, multimeters, and screwdrivers' }
+  { id: 5, name: 'Tools', slug: 'tools', description: 'Soldering irons, multimeters, and screwdrivers' },
+  { id: 6, name: '3D Printers & Filaments', slug: '3d-printers-filaments', description: '3D printers, filaments, and scanners' },
+  { id: 7, name: '3D Printer Spare Parts and Accessories', slug: '3d-printer-spare-parts-and-accessories', description: 'Dedicated spare parts, replacement nozzles, and accessories' }
 ];
 
 export const MOCK_ADMIN_USER = {

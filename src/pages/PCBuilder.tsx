@@ -8,6 +8,7 @@ import { Cpu, HardDrive, Fan, Monitor, Cpu as GpuIcon, Box, Zap, MemoryStick, Se
 import { Reveal } from '../components/Reveal';
 import { SEO } from '../components/SEO';
 import { Breadcrumb } from '../components/Breadcrumb';
+import { submitToWeb3Forms } from '../services/emailService';
 
 interface BuilderCategory {
   id: string;
@@ -223,47 +224,38 @@ export default function PCBuilder() {
         createdAt: serverTimestamp(),
       });
 
-      // Send email via Web3Forms
-      const web3formsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
-      if (web3formsAccessKey) {
-        let emailMessage = `New Custom PC Build Quote Request\n\n`;
-        emailMessage += `Name: ${sanitizedName}\n`;
-        emailMessage += `Email: ${sanitizedEmail}\n`;
-        emailMessage += `Phone: ${sanitizedPhone}\n`;
-        emailMessage += `City: ${sanitizedCity}\n`;
-        emailMessage += `Notes: ${sanitizedNotes || 'None'}\n\n`;
-        emailMessage += `--- SELECTED COMPONENTS ---\n`;
-        
-        BUILDER_CATEGORIES.forEach(cat => {
-          const part = selectedParts[cat.id];
-          if (part) {
-            emailMessage += `${cat.name}: ${part.name} (₹${(part.price || 0).toFixed(2)})\n`;
-          }
-        });
-        
-        emailMessage += `\nTotal Estimated Price: ₹${(totalCost || 0).toFixed(2)}`;
-
-        const response = await fetch('https://api.web3forms.com/submit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-          },
-          body: JSON.stringify({
-            access_key: web3formsAccessKey,
-            subject: `New Custom PC Build Quote Request from ${sanitizedName}`,
-            name: sanitizedName,
-            email: sanitizedEmail,
-            phone: sanitizedPhone,
-            message: emailMessage,
-          }),
-        });
-        
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-          console.error("Web3Forms submission failed:", data);
+      // Send email via Web3Forms routing to sales@mechafyglobal.com
+      let emailMessage = `New Custom PC Build Quote Request\n\n`;
+      emailMessage += `Name: ${sanitizedName}\n`;
+      emailMessage += `Email: ${sanitizedEmail}\n`;
+      emailMessage += `Phone: ${sanitizedPhone}\n`;
+      emailMessage += `City: ${sanitizedCity}\n`;
+      emailMessage += `Notes: ${sanitizedNotes || 'None'}\n\n`;
+      emailMessage += `--- SELECTED COMPONENTS ---\n`;
+      
+      BUILDER_CATEGORIES.forEach(cat => {
+        const part = selectedParts[cat.id];
+        if (part) {
+          emailMessage += `${cat.name}: ${part.name} (₹${(part.price || 0).toFixed(2)})\n`;
         }
-      }
+      });
+      
+      emailMessage += `\nTotal Estimated Price: ₹${(totalCost || 0).toFixed(2)}`;
+
+      await submitToWeb3Forms({
+        subject: `New Custom PC Build Quote Request from ${sanitizedName}`,
+        fromName: 'Mechafy PC Builder Desk',
+        replyTo: sanitizedEmail,
+        fields: {
+          customer_name: sanitizedName,
+          customer_email: sanitizedEmail,
+          customer_phone: sanitizedPhone,
+          city: sanitizedCity,
+          notes: sanitizedNotes || 'None',
+          total_price: `₹${(totalCost || 0).toFixed(2)}`,
+          summary: emailMessage
+        }
+      });
 
       setSubmitSuccess(true);
     } catch (err) {

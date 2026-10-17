@@ -411,17 +411,23 @@ export default function Shop() {
                   <div className="bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
                     <Search className="text-slate-500 h-8 w-8" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">No products found</h3>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    {activeCategory || activeSubcategory 
+                      ? 'No products available in this category yet. Please check back soon.' 
+                      : 'No products found'}
+                  </h3>
                   <p className="text-slate-400 max-w-md mx-auto">
-                    We couldn't find any products matching your search. Try adjusting your filters or search term.
+                    {activeCategory || activeSubcategory
+                      ? `We are currently updating our catalog for ${currentCategoryName || 'this category'}. Only items specifically assigned to this category in the dashboard will appear here.`
+                      : "We couldn't find any products matching your search. Try adjusting your filters or search term."}
                   </p>
                   <button 
                     onClick={() => {
                       setSearchParams({});
                     }}
-                    className="mt-6 text-electric-blue hover:text-blue-400 font-medium"
+                    className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold bg-white/5 border border-white/10 hover:bg-white/10 text-white transition-colors cursor-pointer"
                   >
-                    Clear all filters
+                    View All Products
                   </button>
                 </div>
               </Reveal>

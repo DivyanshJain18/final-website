@@ -2,6 +2,7 @@ import { db, storage } from '../firebase';
 import { collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc, query, where, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { clearProductsCache, executeSearch } from './searchService';
+import { submitToWeb3Forms } from './emailService';
 
 export interface Product {
   id?: string;
@@ -31,6 +32,9 @@ export interface Product {
   sku?: string;
   brand?: string;
   model?: string;
+  condition?: 'New' | 'Open Box' | 'Refurbished' | 'Used';
+  warranty?: string;
+  specifications?: string[];
   keywords?: string[];
 }
 
@@ -324,10 +328,25 @@ export const fetchAllProductsEnriched = async (forceRefresh = false): Promise<Pr
 
   const enriched: Product[] = prodSnap.docs.map(d => {
     const data = d.data();
-    const cat = categories[data.category_id];
+    const rawCatId = data.category_id ? String(data.category_id).trim() : '';
+    const cat = categories[rawCatId] || 
+      Object.values(categories).find(c => c.slug === rawCatId || (data.category_slug && c.slug === data.category_slug));
     const subcat = data.subcategory_id ? subcategories[data.subcategory_id] : undefined;
     const subsubcat = data.subsubcategory_id ? subsubcategories[data.subsubcategory_id] : undefined;
     const nestedSubcat = data.nested_subcategory_id ? nestedSubcategories[data.nested_subcategory_id] : undefined;
+
+    let catName = cat ? cat.name : (data.category_name || 'General');
+    let catSlug = cat ? cat.slug : (data.category_slug || '');
+
+    // Canonical handling for 3D Printer Spare Parts and Accessories
+    if (
+      rawCatId === '3d-printer-spare-parts-and-accessories' ||
+      catSlug === '3d-printer-spare-parts-and-accessories' ||
+      (catName && catName.toLowerCase().includes('spare parts'))
+    ) {
+      catName = '3D Printer Spare Parts and Accessories';
+      catSlug = '3d-printer-spare-parts-and-accessories';
+    }
 
     return {
       id: d.id,
@@ -349,9 +368,12 @@ export const fetchAllProductsEnriched = async (forceRefresh = false): Promise<Pr
       sku: data.sku || data.SKU,
       brand: data.brand,
       model: data.model,
+      condition: data.condition || 'New',
+      warranty: data.warranty || '',
+      specifications: Array.isArray(data.specifications) ? data.specifications : (data.specifications ? [data.specifications] : []),
       keywords: Array.isArray(data.keywords) ? data.keywords : [],
-      category_name: cat ? cat.name : (data.category_name || 'General'),
-      category_slug: cat ? cat.slug : (data.category_slug || ''),
+      category_name: catName,
+      category_slug: catSlug,
       subcategory_name: subcat ? subcat.name : data.subcategory_name,
       subcategory_slug: subcat ? subcat.slug : undefined,
       subsubcategory_name: subsubcat ? subsubcat.name : data.subsubcategory_name,
@@ -380,18 +402,30 @@ export const fetchProducts = async (categorySlug?: string, subcategorySlug?: str
 
   let filtered = allProducts;
 
+  // Filter hierarchically: when a specific level is selected, also enforce its parent category/subcategory filters
+  if (categorySlug) {
+    const norm = normalizeSlug(categorySlug);
+    filtered = filtered.filter(p => {
+      const matchSlug = p.category_slug && normalizeSlug(p.category_slug) === norm;
+      const matchId = p.category_id && normalizeSlug(String(p.category_id)) === norm;
+      const matchName = p.category_name && normalizeSlug(p.category_name) === norm;
+      return matchSlug || matchId || matchName;
+    });
+  }
+
+  if (subcategorySlug) {
+    const norm = normalizeSlug(subcategorySlug);
+    filtered = filtered.filter(p => p.subcategory_slug && normalizeSlug(p.subcategory_slug) === norm);
+  }
+
+  if (subsubcategorySlug) {
+    const norm = normalizeSlug(subsubcategorySlug);
+    filtered = filtered.filter(p => p.subsubcategory_slug && normalizeSlug(p.subsubcategory_slug) === norm);
+  }
+
   if (nestedSubcategorySlug) {
     const norm = normalizeSlug(nestedSubcategorySlug);
     filtered = filtered.filter(p => p.nested_subcategory_slug && normalizeSlug(p.nested_subcategory_slug) === norm);
-  } else if (subsubcategorySlug) {
-    const norm = normalizeSlug(subsubcategorySlug);
-    filtered = filtered.filter(p => p.subsubcategory_slug && normalizeSlug(p.subsubcategory_slug) === norm);
-  } else if (subcategorySlug) {
-    const norm = normalizeSlug(subcategorySlug);
-    filtered = filtered.filter(p => p.subcategory_slug && normalizeSlug(p.subcategory_slug) === norm);
-  } else if (categorySlug) {
-    const norm = normalizeSlug(categorySlug);
-    filtered = filtered.filter(p => p.category_slug && normalizeSlug(p.category_slug) === norm);
   }
 
   if (search && search.trim()) {
@@ -459,9 +493,38 @@ export const fetchProductBySlug = async (slug: string) => {
   return product;
 };
 
-export const fetchCategories = async () => {
+export const STANDARD_SYSTEM_CATEGORIES: Category[] = [
+  {
+    id: '3d-printer-spare-parts-and-accessories',
+    name: '3D Printer Spare Parts and Accessories',
+    slug: '3d-printer-spare-parts-and-accessories',
+    description: 'Dedicated spare parts, replacement nozzles, extruders, build plates, hotends, and accessories for 3D printers and scanners.'
+  },
+  {
+    id: '3d-printers-filaments',
+    name: '3D Printers & Filaments',
+    slug: '3d-printers-filaments',
+    description: '3D printers, scanners, engineering filaments, resins, and 3D accessories.'
+  }
+];
+
+export const fetchCategories = async (): Promise<Category[]> => {
   const snapshot = await getDocs(collection(db, 'categories'));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+  const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
+
+  // Ensure "3D Printer Spare Parts and Accessories" is always available in the category dropdown
+  for (const std of STANDARD_SYSTEM_CATEGORIES) {
+    const exists = list.some(c => 
+      c.id === std.id || 
+      (c.slug && c.slug.toLowerCase() === std.slug.toLowerCase()) ||
+      (c.name && c.name.toLowerCase() === std.name.toLowerCase())
+    );
+    if (!exists) {
+      list.push(std);
+    }
+  }
+
+  return list;
 };
 
 export const fetchSubcategories = async () => {
@@ -581,35 +644,26 @@ export const submitInquiry = async (inquiryData: any) => {
     status: 'pending'
   });
 
-  // Send email via Web3Forms
-  const web3formsAccessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY;
-  if (web3formsAccessKey) {
-    try {
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
-        body: JSON.stringify({
-          access_key: web3formsAccessKey,
-          subject: `New Product Inquiry: ${inquiryData.productName}${inquiryData.productSku ? ` [SKU: ${inquiryData.productSku}]` : ''}`,
-          name: inquiryData.clientName,
-          email: inquiryData.clientEmail,
-          message: `New Product Inquiry for ${inquiryData.productName}\nSKU: ${inquiryData.productSku || 'Not Assigned'}\n\nClient Name: ${inquiryData.clientName}\nClient Email: ${inquiryData.clientEmail}\nClient Phone: ${inquiryData.clientPhone}\nQuantity: ${inquiryData.quantity}\n\nMessage:\n${inquiryData.message}`,
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok || !data.success) {
-        throw new Error(data.message || 'Failed to send email via Web3Forms');
-      }
-    } catch (error) {
-      console.error("Failed to send email notification:", error);
-      throw error;
+  // Send email notification to sales@mechafyglobal.com via Web3Forms
+  const result = await submitToWeb3Forms({
+    subject: `New Product Inquiry: ${inquiryData.productName}${inquiryData.productSku ? ` [SKU: ${inquiryData.productSku}]` : ''}`,
+    fromName: 'Mechafy Product Inquiries',
+    replyTo: inquiryData.clientEmail,
+    fields: {
+      product_name: inquiryData.productName,
+      sku_or_id: inquiryData.productSku || inquiryData.productId || 'Not Assigned',
+      quantity: inquiryData.quantity || 1,
+      customer_name: inquiryData.clientName,
+      customer_email: inquiryData.clientEmail,
+      customer_phone: inquiryData.clientPhone || 'Not provided',
+      message: inquiryData.message || 'No additional message provided',
+      inquiry_id: docRef.id
     }
-  } else {
-    console.warn("VITE_WEB3FORMS_ACCESS_KEY is missing. Email notification was not sent.");
-    throw new Error("VITE_WEB3FORMS_ACCESS_KEY is missing. Please configure it in your environment variables.");
+  });
+
+  if (!result.success) {
+    console.warn('[submitInquiry notification warning]:', result.message);
+    throw new Error(result.message);
   }
 
   return { id: docRef.id, ...inquiryData };
