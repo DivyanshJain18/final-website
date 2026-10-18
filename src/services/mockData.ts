@@ -68,13 +68,16 @@ export const MOCK_PRODUCTS = [
 ];
 
 export const MOCK_CATEGORIES = [
-  { id: 1, name: 'Robotics', slug: 'robotics', description: 'Robot kits, servos, and chassis' },
-  { id: 2, name: 'Microcontrollers', slug: 'microcontrollers', description: 'Arduino, ESP32, Raspberry Pi' },
-  { id: 3, name: 'Sensors', slug: 'sensors', description: 'Temperature, distance, and motion sensors' },
-  { id: 4, name: 'PC Components', slug: 'pc-components', description: 'GPUs, CPUs, RAM, and Motherboards' },
-  { id: 5, name: 'Tools', slug: 'tools', description: 'Soldering irons, multimeters, and screwdrivers' },
-  { id: 6, name: '3D Printers & Filaments', slug: '3d-printers-filaments', description: '3D printers, filaments, and scanners' },
-  { id: 7, name: '3D Printer Spare Parts and Accessories', slug: '3d-printer-spare-parts-and-accessories', description: 'Dedicated spare parts, replacement nozzles, and accessories' }
+  { id: 'computer-components', name: 'Computer Components', slug: 'computer-components', description: 'GPUs, CPUs, RAM, and Motherboards' },
+  { id: 'robotic-components', name: 'Robotic Components', slug: 'robotic-components', description: 'Microcontrollers, sensors, motors, and 3D printer spare parts' }
+];
+
+export const MOCK_SUBCATEGORIES = [
+  { id: 'sub-sensors', category_id: 'robotic-components', name: 'Sensors', slug: 'sensors', description: 'Temperature, distance, and motion sensors' },
+  { id: 'sub-motors', category_id: 'robotic-components', name: 'Motors', slug: 'motors', description: 'Stepper motors, servo motors, and drivers' },
+  { id: 'sub-3d-parts', category_id: 'robotic-components', name: '3D Printer Spare Parts and Accessories', slug: '3d-printer-spare-parts-and-accessories', description: 'Dedicated replacement nozzles, extruders, build plates, and hotends' },
+  { id: 'sub-processors', category_id: 'computer-components', name: 'Processors', slug: 'processors', description: 'Intel and AMD CPUs' },
+  { id: 'sub-memory', category_id: 'computer-components', name: 'Memory', slug: 'memory', description: 'DDR4 and DDR5 RAM' }
 ];
 
 export const MOCK_ADMIN_USER = {

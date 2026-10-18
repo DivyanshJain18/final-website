@@ -81,14 +81,39 @@ const AdminProducts: React.FC = () => {
       setCurrentProduct(product);
       // Robust category matching: match by id, by slug, or by name
       let selectedCatId = product.category_id ? product.category_id.toString() : '';
-      const matchedCategory = categories.find(c => 
-        c.id === selectedCatId || 
-        c.slug === selectedCatId || 
-        (product.category_slug && c.slug === product.category_slug) ||
-        (product.category_name && c.name.toLowerCase() === product.category_name.toLowerCase())
-      );
-      if (matchedCategory && matchedCategory.id) {
-        selectedCatId = matchedCategory.id;
+      let selectedSubcatId = product.subcategory_id?.toString() || '';
+
+      // Remap legacy 3D spare parts category to Robotic Components main category + 3D spare parts subcategory
+      if (
+        selectedCatId === '3d-printer-spare-parts-and-accessories' ||
+        product.category_slug === '3d-printer-spare-parts-and-accessories' ||
+        product.category_name?.toLowerCase().includes('spare parts')
+      ) {
+        const roboticCat = categories.find(c => (c.slug && c.slug === 'robotic-components') || c.name.toLowerCase().includes('robotic'));
+        if (roboticCat) selectedCatId = roboticCat.id;
+
+        const spareSubcat = subcategories.find(s => s.slug === '3d-printer-spare-parts-and-accessories' || s.name.toLowerCase().includes('3d printer spare'));
+        if (spareSubcat) selectedSubcatId = spareSubcat.id;
+      } else {
+        const matchedCategory = categories.find(c => 
+          c.id === selectedCatId || 
+          c.slug === selectedCatId || 
+          (product.category_slug && c.slug === product.category_slug) ||
+          (product.category_name && c.name.toLowerCase() === product.category_name.toLowerCase())
+        );
+        if (matchedCategory && matchedCategory.id) {
+          selectedCatId = matchedCategory.id;
+        }
+
+        const matchedSubcat = subcategories.find(s =>
+          s.id === selectedSubcatId ||
+          s.slug === selectedSubcatId ||
+          (product.subcategory_slug && s.slug === product.subcategory_slug) ||
+          (product.subcategory_name && s.name.toLowerCase() === product.subcategory_name.toLowerCase())
+        );
+        if (matchedSubcat && matchedSubcat.id) {
+          selectedSubcatId = matchedSubcat.id;
+        }
       }
 
       setFormData({
@@ -106,7 +131,7 @@ const AdminProducts: React.FC = () => {
         taxText: product.taxText || 'Incl. GST (No Hidden Charges)',
         stock: product.stock.toString(),
         category_id: selectedCatId,
-        subcategory_id: product.subcategory_id?.toString() || '',
+        subcategory_id: selectedSubcatId,
         subsubcategory_id: product.subsubcategory_id?.toString() || '',
         nested_subcategory_id: product.nested_subcategory_id?.toString() || '',
         image_url: product.image_url || ''
@@ -155,6 +180,7 @@ const AdminProducts: React.FC = () => {
       }
 
       const selectedCategory = categories.find(c => c.id === formData.category_id || c.slug === formData.category_id);
+      const selectedSubcategory = subcategories.find(s => s.id === formData.subcategory_id || s.slug === formData.subcategory_id);
 
       const payload: any = {
         name: formData.name,
@@ -172,6 +198,9 @@ const AdminProducts: React.FC = () => {
         category_id: formData.category_id,
         category_name: selectedCategory ? selectedCategory.name : 'General',
         category_slug: selectedCategory ? selectedCategory.slug : '',
+        subcategory_id: formData.subcategory_id || null,
+        subcategory_name: selectedSubcategory ? selectedSubcategory.name : null,
+        subcategory_slug: selectedSubcategory ? selectedSubcategory.slug : null,
         image_url: formData.image_url
       };
 
@@ -179,11 +208,6 @@ const AdminProducts: React.FC = () => {
         payload.originalPrice = parseFloat(formData.originalPrice);
       } else {
         payload.originalPrice = null;
-      }
-      if (formData.subcategory_id) {
-        payload.subcategory_id = formData.subcategory_id;
-      } else {
-        payload.subcategory_id = null;
       }
       if (formData.subsubcategory_id) {
         payload.subsubcategory_id = formData.subsubcategory_id;

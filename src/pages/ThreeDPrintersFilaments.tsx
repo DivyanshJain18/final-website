@@ -129,75 +129,153 @@ export const isScannerMachine = (p: Product): boolean => {
   );
 };
 
-// Check if product is an actual 3D printer machine (not a part/accessory)
-export const isPrinterMachine = (p: Product): boolean => {
+// Check if product is printing filament, resin, or 3D printing materials
+export const isFilamentOrResin = (p: Product): boolean => {
   if (isComputerComponentOrMotherboard(p)) return false;
-  if (isScannerMachine(p)) return false;
 
   const name = (p.name || '').toLowerCase();
   const desc = (p.description || '').toLowerCase();
   const cat = (p.category_name || '').toLowerCase();
+  const catSlug = (p.category_slug || '').toLowerCase();
   const sub = (p.subcategory_name || '').toLowerCase();
+  const subSlug = (p.subcategory_slug || '').toLowerCase();
 
-  // Exclude parts and accessories
+  // 1. Explicit Category / Subcategory checks: If categorized in filament or resin, it IS a filament!
+  if (
+    sub.includes('filament') ||
+    subSlug.includes('filament') ||
+    sub.includes('resin') ||
+    subSlug.includes('resin') ||
+    cat === 'filaments' ||
+    catSlug === 'filaments' ||
+    cat.includes('filament') ||
+    sub === '3d materials' ||
+    subSlug === '3d-materials'
+  ) {
+    return true;
+  }
+
+  // 2. Name keywords for filament / printing materials / resins
+  const filamentNameKeywords = [
+    'filament',
+    'pla+',
+    'pla ',
+    ' pla',
+    'petg',
+    'abs ',
+    'abs+',
+    'tpu',
+    'nylon filament',
+    'carbon fiber filament',
+    'cf-pla',
+    'pla-cf',
+    'petg-cf',
+    'uv resin',
+    'photopolymer resin',
+    'standard resin',
+    'eco resin',
+    'spool',
+    '1kg',
+    '0.5kg',
+    'filament refill',
+    '3d pen refill'
+  ];
+
+  if (filamentNameKeywords.some(kw => name.includes(kw))) {
+    return true;
+  }
+
+  // 3. Description checks (only if not an actual printer machine by name)
+  if (
+    (desc.includes('3d printing filament') || desc.includes('filament spool') || desc.includes('photopolymer resin')) &&
+    !name.includes('printer')
+  ) {
+    return true;
+  }
+
+  return false;
+};
+
+// Check if product is an actual 3D printer machine (not a part/accessory and NOT a filament)
+export const isPrinterMachine = (p: Product): boolean => {
+  if (isComputerComponentOrMotherboard(p)) return false;
+  if (isScannerMachine(p)) return false;
+
+  // CRITICAL: Filament MUST go in filament, NEVER in printer!
+  if (isFilamentOrResin(p)) return false;
+
+  const name = (p.name || '').toLowerCase();
+  const desc = (p.description || '').toLowerCase();
+  const cat = (p.category_name || '').toLowerCase();
+  const catSlug = (p.category_slug || '').toLowerCase();
+  const sub = (p.subcategory_name || '').toLowerCase();
+  const subSlug = (p.subcategory_slug || '').toLowerCase();
+
+  // If subcategory or category is explicitly filament, resin, or spare parts, it is NOT a printer machine
+  if (
+    sub.includes('filament') ||
+    subSlug.includes('filament') ||
+    sub.includes('resin') ||
+    subSlug.includes('resin') ||
+    sub.includes('part') ||
+    subSlug.includes('part') ||
+    sub.includes('accessories') ||
+    subSlug.includes('accessories') ||
+    catSlug === '3d-printer-spare-parts-and-accessories' ||
+    cat === '3d printer spare parts and accessories'
+  ) {
+    return false;
+  }
+
+  // Exclude parts and accessories by name
   const isPartOrAcc = 
     name.includes('nozzle') ||
     name.includes('hotend') ||
     name.includes('hot end') ||
     name.includes('extruder') ||
     name.includes('build plate') ||
+    name.includes('spring steel') ||
     name.includes('pei') ||
     name.includes('bed level') ||
     name.includes('bltouch') ||
     name.includes('cr touch') ||
     name.includes('thermistor') ||
-    name.includes('ptfe') ||
+    name.includes('heater cartridge') ||
+    name.includes('ptfe tube') ||
     name.includes('timing belt') ||
     name.includes('pulley') ||
     name.includes('silicone sock') ||
-    name.includes('vat') ||
-    name.includes('fep') ||
+    name.includes('resin vat') ||
+    name.includes('fep film') ||
     name.includes('part') ||
     name.includes('accessory') ||
     name.includes('accessories');
 
   if (isPartOrAcc) return false;
 
-  return (
-    name.includes('printer') ||
-    cat.includes('printer') ||
-    sub.includes('printer') ||
-    desc.includes('3d printer') ||
-    desc.includes('fdm printer') ||
-    desc.includes('resin 3d printer')
-  );
-};
+  // If subcategory is explicitly "3D Printers" or "Printers"
+  if (sub === '3d printers' || subSlug === '3d-printers' || sub === 'printers' || subSlug === 'printers') {
+    return true;
+  }
 
-// Check if product is printing filament or resin
-export const isFilamentOrResin = (p: Product): boolean => {
-  if (isComputerComponentOrMotherboard(p)) return false;
-  if (isPrinterMachine(p) || isScannerMachine(p)) return false;
+  // Must have 3D printer keywords in product name
+  const printerNameKeywords = [
+    '3d printer',
+    'printer',
+    'bambu lab a1',
+    'bambu lab p1',
+    'bambu lab x1',
+    'creality k1',
+    'creality ender',
+    'ender-3',
+    'anycubic kobra',
+    'anycubic photon',
+    'elegoo neptune',
+    'elegoo saturn',
+    'prusa'
+  ];
 
-  const name = (p.name || '').toLowerCase();
-  const desc = (p.description || '').toLowerCase();
-  const cat = (p.category_name || '').toLowerCase();
-  const sub = (p.subcategory_name || '').toLowerCase();
-
-  return (
-    name.includes('filament') ||
-    name.includes('pla ') ||
-    name.includes('pla+') ||
-    name.includes('abs ') ||
-    name.includes('petg') ||
-    name.includes('tpu ') ||
-    name.includes('uv resin') ||
-    name.includes('photopolymer resin') ||
-    cat.includes('filament') ||
-    cat.includes('resin') ||
-    sub.includes('filament') ||
-    sub.includes('resin') ||
-    desc.includes('3d printing filament')
-  );
+  return printerNameKeywords.some(kw => name.includes(kw));
 };
 
 // Check if product is specifically a 3D Printer Part or Accessory

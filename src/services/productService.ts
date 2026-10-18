@@ -337,15 +337,21 @@ export const fetchAllProductsEnriched = async (forceRefresh = false): Promise<Pr
 
     let catName = cat ? cat.name : (data.category_name || 'General');
     let catSlug = cat ? cat.slug : (data.category_slug || '');
+    let subName = subcat ? subcat.name : data.subcategory_name;
+    let subSlug = subcat ? subcat.slug : data.subcategory_slug;
 
-    // Canonical handling for 3D Printer Spare Parts and Accessories
+    // Canonical handling: 3D Printer Spare Parts and Accessories is a SUBCATEGORY under Robotic Components
     if (
       rawCatId === '3d-printer-spare-parts-and-accessories' ||
       catSlug === '3d-printer-spare-parts-and-accessories' ||
-      (catName && catName.toLowerCase().includes('spare parts'))
+      (catName && catName.toLowerCase().includes('spare parts')) ||
+      (subName && subName.toLowerCase().includes('3d printer spare')) ||
+      (subSlug && subSlug.includes('3d-printer-spare'))
     ) {
-      catName = '3D Printer Spare Parts and Accessories';
-      catSlug = '3d-printer-spare-parts-and-accessories';
+      catName = 'Robotic Components';
+      catSlug = 'robotic-components';
+      subName = '3D Printer Spare Parts and Accessories';
+      subSlug = '3d-printer-spare-parts-and-accessories';
     }
 
     return {
@@ -374,8 +380,8 @@ export const fetchAllProductsEnriched = async (forceRefresh = false): Promise<Pr
       keywords: Array.isArray(data.keywords) ? data.keywords : [],
       category_name: catName,
       category_slug: catSlug,
-      subcategory_name: subcat ? subcat.name : data.subcategory_name,
-      subcategory_slug: subcat ? subcat.slug : undefined,
+      subcategory_name: subName,
+      subcategory_slug: subSlug,
       subsubcategory_name: subsubcat ? subsubcat.name : data.subsubcategory_name,
       subsubcategory_slug: subsubcat ? subsubcat.slug : undefined,
       nested_subcategory_name: nestedSubcat ? nestedSubcat.name : data.nested_subcategory_name,
@@ -495,16 +501,16 @@ export const fetchProductBySlug = async (slug: string) => {
 
 export const STANDARD_SYSTEM_CATEGORIES: Category[] = [
   {
-    id: '3d-printer-spare-parts-and-accessories',
-    name: '3D Printer Spare Parts and Accessories',
-    slug: '3d-printer-spare-parts-and-accessories',
-    description: 'Dedicated spare parts, replacement nozzles, extruders, build plates, hotends, and accessories for 3D printers and scanners.'
+    id: 'computer-components',
+    name: 'Computer Components',
+    slug: 'computer-components',
+    description: 'High-performance processors, graphics cards, motherboards, RAM, storage, and power supplies.'
   },
   {
-    id: '3d-printers-filaments',
-    name: '3D Printers & Filaments',
-    slug: '3d-printers-filaments',
-    description: '3D printers, scanners, engineering filaments, resins, and 3D accessories.'
+    id: 'robotic-components',
+    name: 'Robotic Components',
+    slug: 'robotic-components',
+    description: 'Microcontrollers, sensors, motor drivers, robotics chassis, and 3D printer spare parts.'
   }
 ];
 
@@ -512,24 +518,73 @@ export const fetchCategories = async (): Promise<Category[]> => {
   const snapshot = await getDocs(collection(db, 'categories'));
   const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Category));
 
-  // Ensure "3D Printer Spare Parts and Accessories" is always available in the category dropdown
+  // In main categories there must be ONLY 2 categories: Computer Components and Robotic Components
+  const filtered = list.filter(c => {
+    const slug = (c.slug || '').toLowerCase();
+    const name = (c.name || '').toLowerCase();
+    const isComputer = slug === 'computer-components' || name.includes('computer');
+    const isRobotic = slug === 'robotic-components' || name.includes('robotic');
+    return isComputer || isRobotic;
+  });
+
+  // Ensure both Computer Components and Robotic Components exist
   for (const std of STANDARD_SYSTEM_CATEGORIES) {
-    const exists = list.some(c => 
+    const exists = filtered.some(c => 
       c.id === std.id || 
       (c.slug && c.slug.toLowerCase() === std.slug.toLowerCase()) ||
       (c.name && c.name.toLowerCase() === std.name.toLowerCase())
     );
     if (!exists) {
-      list.push(std);
+      filtered.push(std);
     }
   }
 
-  return list;
+  // Consistent ordering: Computer Components, Robotic Components
+  return filtered.sort((a, b) => {
+    const aIsComp = (a.slug || a.name).toLowerCase().includes('computer');
+    const bIsComp = (b.slug || b.name).toLowerCase().includes('computer');
+    if (aIsComp && !bIsComp) return -1;
+    if (!aIsComp && bIsComp) return 1;
+    return 0;
+  });
 };
 
-export const fetchSubcategories = async () => {
-  const snapshot = await getDocs(collection(db, 'subcategories'));
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subcategory));
+export const fetchSubcategories = async (): Promise<Subcategory[]> => {
+  const [snapshot, catList] = await Promise.all([
+    getDocs(collection(db, 'subcategories')),
+    fetchCategories()
+  ]);
+
+  const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Subcategory));
+
+  // Find Robotic Components category id
+  const roboticCat = catList.find(c => 
+    (c.slug && c.slug.toLowerCase() === 'robotic-components') ||
+    (c.name && c.name.toLowerCase().includes('robotic'))
+  );
+  const roboticCatId = roboticCat ? roboticCat.id : 'm85eX6RITb30BH84aBtr';
+
+  // Ensure "3D Printer Spare Parts and Accessories" exists under Robotic Components as a subcategory
+  const sparePartsSubcat = list.find(s => 
+    (s.slug && (s.slug === '3d-printer-spare-parts-and-accessories' || s.slug === '3d-printer-spare-parts')) ||
+    (s.name && s.name.toLowerCase().includes('3d printer spare'))
+  );
+
+  if (!sparePartsSubcat) {
+    list.push({
+      id: '3d-printer-spare-parts-and-accessories',
+      category_id: roboticCatId,
+      name: '3D Printer Spare Parts and Accessories',
+      slug: '3d-printer-spare-parts-and-accessories',
+      description: 'Dedicated replacement nozzles, extruders, build plates, hotends, and accessories.'
+    });
+  } else {
+    sparePartsSubcat.category_id = roboticCatId;
+    sparePartsSubcat.name = '3D Printer Spare Parts and Accessories';
+    sparePartsSubcat.slug = '3d-printer-spare-parts-and-accessories';
+  }
+
+  return list;
 };
 
 export const fetchSubsubcategories = async () => {

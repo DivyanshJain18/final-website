@@ -62,7 +62,7 @@ export default function App() {
                 <Route path="/compare" element={<Compare />} />
                 <Route path="/pc-builder" element={<PCBuilder />} />
                 <Route path="/3d-printers-filaments" element={<ThreeDPrintersFilaments />} />
-                <Route path="/3d-printer-spare-parts-and-accessories" element={<Navigate to="/shop?category=3d-printer-spare-parts-and-accessories" replace />} />
+                <Route path="/3d-printer-spare-parts-and-accessories" element={<Navigate to="/shop?category=robotic-components&subcategory=3d-printer-spare-parts-and-accessories" replace />} />
                 <Route path="/3d-printer-spare-parts-and-accessories/:slug" element={<CategoryProductRouter />} />
                 <Route path="/product/:slug" element={<ProductDetails />} />
                 <Route path="/3d-printers/:slug" element={<CategoryProductRouter />} />

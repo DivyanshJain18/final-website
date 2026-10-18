@@ -110,12 +110,13 @@ body::before {
 /* Header Navigation Links */
 .nav-link {
   color: #e2e8f0;
-  padding: 0.5rem 0.75rem;
+  padding: 0.375rem 0.625rem;
   font-size: 0.875rem;
   font-weight: 500;
   transition: color 0.15s ease-in-out;
   display: inline-flex;
   align-items: center;
+  border-radius: 0.375rem;
 }
 
 .nav-link:hover,

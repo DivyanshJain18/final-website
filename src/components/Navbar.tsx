@@ -122,7 +122,7 @@ export function Navbar() {
               MECHAFY<span className="text-white">GLOBAL</span>
             </Link>
             <div className="hidden md:block">
-              <div className="ml-2 md:ml-4 lg:ml-8 flex items-center space-x-2 md:space-x-3 lg:space-x-5 h-full text-xs md:text-[13px] lg:text-sm whitespace-nowrap">
+              <div className="ml-4 lg:ml-8 flex items-center space-x-1 lg:space-x-2 h-full text-sm whitespace-nowrap">
                 <Link to="/" className="nav-link">Home</Link>
                 <Link to="/about" className="nav-link">Company Profile</Link>
                 
@@ -256,8 +256,8 @@ export function Navbar() {
                   )}
                 </div>
 
-                <Link to="/3d-printers-filaments" className="nav-link font-semibold text-blue-400 drop-shadow-[0_0_5px_rgba(59,130,246,0.2)]">MECHAFY 3D</Link>
-                <Link to="/pc-builder" className="nav-link font-bold text-electric-blue drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">PC Builder</Link>
+                <Link to="/3d-printers-filaments" className="nav-link">MECHAFY 3D</Link>
+                <Link to="/pc-builder" className="nav-link">PC Builder</Link>
                 <Link to="/it-services" className="nav-link">IT Services</Link>
                 <Link to="/contact" className="nav-link">Contact Us</Link>
               </div>
